@@ -10,7 +10,7 @@ import java.io.Serializable;
 @IdClass(WordInBook.WordInBookId.class)
 public class WordInBook {
 
-    @Id
+    @Id // 两个字段都标记为@Id，组成复合主键
     @Column(name = "WordID")
     private String wordId;
 

@@ -18,7 +18,7 @@ public class LearningState {
     @Column(name = "WordID")
     private String wordId;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING)    // 将枚举存储为字符串（而不是数字）
     @Column(name = "LearnState")
     private LearnStateEnum learnState;
 
