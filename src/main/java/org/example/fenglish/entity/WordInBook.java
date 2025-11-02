@@ -18,20 +18,17 @@ public class WordInBook {
     @Column(name = "BookID", length = 50)
     private String bookId;
 
+    @Data
+    public static class WordInBookId implements Serializable {
+        private String wordId;
+        private String bookId;
+    }
+
     @ManyToOne
     @JoinColumn(name = "WordID", insertable = false, updatable = false)
-    private EnglishWords englishWord;
+    private EnglishWords englishWords;
 
     @ManyToOne
     @JoinColumn(name = "BookID", insertable = false, updatable = false)
     private VocabularyBook vocabularyBook;
-
-    // 构造方法、getter、setter
-
-    public static class WordInBookId implements Serializable {
-        private String wordId;
-        private String bookId;
-
-
-    }
 }
