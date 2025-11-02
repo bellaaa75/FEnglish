@@ -15,4 +15,20 @@ public class VocabularyBookUpdateReq {
 
     //发布时间（可选：若传递则修改发布时间，不传递则保持原时间）
     private Date publishTime;
+
+    public @NotBlank(message = "单词书名称不能为空（若需修改名称）") String getBookName() {
+        return bookName;
+    }
+
+    public void setBookName(@NotBlank(message = "单词书名称不能为空（若需修改名称）") String bookName) {
+        this.bookName = bookName;
+    }
+
+    public Date getPublishTime() {
+        return publishTime;
+    }
+
+    public void setPublishTime(Date publishTime) {
+        this.publishTime = publishTime;
+    }
 }

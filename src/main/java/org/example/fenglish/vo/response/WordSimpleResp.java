@@ -26,4 +26,36 @@ public class WordSimpleResp {
      * 单词释义（核心含义，供前端快速展示）
      */
     private String wordExplain;
+
+    public String getWordId() {
+        return wordId;
+    }
+
+    public void setWordId(String wordId) {
+        this.wordId = wordId;
+    }
+
+    public String getWordName() {
+        return wordName;
+    }
+
+    public void setWordName(String wordName) {
+        this.wordName = wordName;
+    }
+
+    public String getWordExplain() {
+        return wordExplain;
+    }
+
+    public void setWordExplain(String wordExplain) {
+        this.wordExplain = wordExplain;
+    }
+
+    public String getPartOfSpeech() {
+        return partOfSpeech;
+    }
+
+    public void setPartOfSpeech(String partOfSpeech) {
+        this.partOfSpeech = partOfSpeech;
+    }
 }

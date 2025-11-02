@@ -26,4 +26,36 @@ public class Collect {
     @Column(name = "CollectTime", nullable = false) // 收藏时间非空
     @Temporal(TemporalType.TIMESTAMP)
     private Date collectTime;
+
+    public String getCollectId() {
+        return collectId;
+    }
+
+    public void setCollectId(String collectId) {
+        this.collectId = collectId;
+    }
+
+    public EnglishWords getEnglishWord() {
+        return englishWord;
+    }
+
+    public void setEnglishWord(EnglishWords englishWord) {
+        this.englishWord = englishWord;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Date getCollectTime() {
+        return collectTime;
+    }
+
+    public void setCollectTime(Date collectTime) {
+        this.collectTime = collectTime;
+    }
 }

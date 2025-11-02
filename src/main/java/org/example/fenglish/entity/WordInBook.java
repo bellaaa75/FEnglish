@@ -18,6 +18,38 @@ public class WordInBook {
     @Column(name = "BookID", length = 50)
     private String bookId;
 
+    public String getWordId() {
+        return wordId;
+    }
+
+    public void setWordId(String wordId) {
+        this.wordId = wordId;
+    }
+
+    public String getBookId() {
+        return bookId;
+    }
+
+    public void setBookId(String bookId) {
+        this.bookId = bookId;
+    }
+
+    public VocabularyBook getVocabularyBook() {
+        return vocabularyBook;
+    }
+
+    public void setVocabularyBook(VocabularyBook vocabularyBook) {
+        this.vocabularyBook = vocabularyBook;
+    }
+
+    public EnglishWords getEnglishWords() {
+        return englishWords;
+    }
+
+    public void setEnglishWords(EnglishWords englishWords) {
+        this.englishWords = englishWords;
+    }
+
     @Data
     public static class WordInBookId implements Serializable {
         private String wordId;

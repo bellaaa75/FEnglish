@@ -13,13 +13,18 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class WordInBookService {
 
     private final WordInBookRepository wordInBookRepository;
     private final VocabularyBookRepository vocabularyBookRepository;
     private final EnglishWordsRepository englishWordsRepository;
+
+    public WordInBookService(WordInBookRepository wordInBookRepository, VocabularyBookRepository vocabularyBookRepository, EnglishWordsRepository englishWordsRepository) {
+        this.wordInBookRepository = wordInBookRepository;
+        this.vocabularyBookRepository = vocabularyBookRepository;
+        this.englishWordsRepository = englishWordsRepository;
+    }
 
     // 1. 向单词书添加单词
     public void addWordToBook(String bookId, String wordId, String adminId) {

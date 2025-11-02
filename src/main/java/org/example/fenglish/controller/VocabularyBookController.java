@@ -9,20 +9,26 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-// 跨域配置：允许前端域名（如http://localhost:8080）访问
+// 跨域配置：允许前端域名访问
 @CrossOrigin(origins = "http://localhost:8080", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 @RestController
 @RequestMapping("/api/vocabulary-books")  // 接口前缀
-@RequiredArgsConstructor
 public class VocabularyBookController {
 
+    // 声明为final，lombok会在自动生成的构造器中初始化
     private final VocabularyBookService vocabularyBookService;
     private final WordInBookService wordInBookService;
+
+    public VocabularyBookController(VocabularyBookService vocabularyBookService, WordInBookService wordInBookService) {
+        this.vocabularyBookService = vocabularyBookService;
+        this.wordInBookService = wordInBookService;
+    }
+
 
     // 1. 新增单词书（POST）
     @PostMapping
     public Result<Void> addVocabularyBook(@Valid @RequestBody VocabularyBookAddReq req,
-                                          @RequestHeader("Admin-Id") String adminId) {  // 从请求头获取管理员ID（权限校验）
+                                          @RequestHeader("Admin-Id") String adminId) {
         vocabularyBookService.addVocabularyBook(req, adminId);
         return Result.success();
     }

@@ -10,7 +10,6 @@ import org.example.fenglish.vo.response.VocabularyBookDetailResp;
 import org.example.fenglish.vo.response.WordSimpleResp;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
@@ -19,12 +18,16 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor  // Lombok注解，自动注入依赖
 @Transactional  // 事务管理，所有方法加事务
 public class VocabularyBookServiceImpl implements VocabularyBookService {
 
     private final VocabularyBookRepository vocabularyBookRepository;
     private final WordInBookRepository wordInBookRepository;
+
+    public VocabularyBookServiceImpl(WordInBookRepository wordInBookRepository, VocabularyBookRepository vocabularyBookRepository) {
+        this.wordInBookRepository = wordInBookRepository;
+        this.vocabularyBookRepository = vocabularyBookRepository;
+    }
 
     // 1. 新增单词书
     @Override
@@ -92,7 +95,7 @@ public class VocabularyBookServiceImpl implements VocabularyBookService {
         List<WordSimpleResp> wordList = book.getWordInBooks().stream()
                 .map(wib -> {
                     WordSimpleResp wordResp = new WordSimpleResp();
-                    wordResp.setWordId(wib.getEnglishWords().getWordId());
+                    wordResp.setWordId(wib.getEnglishWords().getWordID());
                     wordResp.setWordName(wib.getEnglishWords().getWordName());
                     wordResp.setPartOfSpeech(wib.getEnglishWords().getPartOfSpeech());
                     wordResp.setWordExplain(wib.getEnglishWords().getWordExplain());

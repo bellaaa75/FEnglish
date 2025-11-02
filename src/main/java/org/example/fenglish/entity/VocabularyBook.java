@@ -27,4 +27,44 @@ public class VocabularyBook {
     // 【关联关系】一个单词书包含多个单词（通过word_in_book关联）
     @OneToMany(mappedBy = "vocabularyBook", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<WordInBook> wordInBooks;
+
+    public String getBookId() {
+        return bookId;
+    }
+
+    public void setBookId(String bookId) {
+        this.bookId = bookId;
+    }
+
+    public String getBookName() {
+        return bookName;
+    }
+
+    public void setBookName(String bookName) {
+        this.bookName = bookName;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public Date getPublishTime() {
+        return publishTime;
+    }
+
+    public void setPublishTime(Date publishTime) {
+        this.publishTime = publishTime;
+    }
+
+    public List<WordInBook> getWordInBooks() {
+        return wordInBooks;
+    }
+
+    public void setWordInBooks(List<WordInBook> wordInBooks) {
+        this.wordInBooks = wordInBooks;
+    }
 }

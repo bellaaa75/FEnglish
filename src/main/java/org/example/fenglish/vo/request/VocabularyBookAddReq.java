@@ -12,4 +12,28 @@ public class VocabularyBookAddReq {
     private String bookName;
 
     private Date publishTime;  // 可选（默认当前时间）
+
+    public String getBookId() {
+        return bookId;
+    }
+
+    public void setBookId(String bookId) {
+        this.bookId = bookId;
+    }
+
+    public @NotBlank(message = "单词书名称不能为空") String getBookName() {
+        return bookName;
+    }
+
+    public void setBookName(@NotBlank(message = "单词书名称不能为空") String bookName) {
+        this.bookName = bookName;
+    }
+
+    public Date getPublishTime() {
+        return publishTime;
+    }
+
+    public void setPublishTime(Date publishTime) {
+        this.publishTime = publishTime;
+    }
 }
