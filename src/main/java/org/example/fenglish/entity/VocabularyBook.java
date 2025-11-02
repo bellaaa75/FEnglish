@@ -12,7 +12,6 @@ public class VocabularyBook {
 
     @Id
     @Column(name = "BookID", length = 50)
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // 自增主键
     private String bookId;
 
     @Column(name = "BookName", nullable = false, length = 100) // 词书名非空
