@@ -13,8 +13,10 @@ public interface EnglishWordsRepository extends JpaRepository<EnglishWords, Stri
     EnglishWords findByWordName(String wordName);
 
     // 模糊搜索单词
-    List<EnglishWords> findByWordNameContaining(String keyword);
+    List<EnglishWords> findByWordNameContainingIgnoreCase(String wordName);
 
-    // 根据词性查找
-    List<EnglishWords> findByPartOfSpeech(String partOfSpeech);
+    // 检查单词是否存在
+    boolean existsByWordId(String wordId);
+
+
 }
