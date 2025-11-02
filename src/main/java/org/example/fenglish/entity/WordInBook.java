@@ -10,18 +10,28 @@ import java.io.Serializable;
 @IdClass(WordInBook.WordInBookId.class)
 public class WordInBook {
 
-    @Id // 两个字段都标记为@Id，组成复合主键
-    @Column(name = "WordID")
+    @Id
+    @Column(name = "WordID", length = 50)
     private String wordId;
 
     @Id
-    @Column(name = "BookID")
+    @Column(name = "BookID", length = 50)
     private String bookId;
 
-    // 复合主键类
-    @Data
+    @ManyToOne
+    @JoinColumn(name = "WordID", insertable = false, updatable = false)
+    private EnglishWords englishWord;
+
+    @ManyToOne
+    @JoinColumn(name = "BookID", insertable = false, updatable = false)
+    private VocabularyBook vocabularyBook;
+
+    // 构造方法、getter、setter
+
     public static class WordInBookId implements Serializable {
         private String wordId;
         private String bookId;
+
+
     }
 }

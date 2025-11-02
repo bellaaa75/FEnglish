@@ -17,10 +17,13 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+      naming:
+        # 强制使用@Table指定的表名，不做自动转换
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     show-sql: true
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
+        dialect: org.hibernate.dialect.MySQLDialect  # 替换过时方言
         format_sql: true
         jdbc:
           time-zone: Asia/Shanghai

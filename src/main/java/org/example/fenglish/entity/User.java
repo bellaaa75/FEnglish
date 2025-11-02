@@ -4,15 +4,16 @@ import lombok.Data;
 import jakarta.persistence.*;
 
 @Data
-@Entity // 标记这个类是一个JPA实体，对应数据库中的一张表
-@Table(name = "User") // 指定对应的数据库表名
-@Inheritance(strategy = InheritanceType.JOINED)  // 继承策略：每个类一张表
+@Entity
+@Table(name = "User")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class User {
 
-    @Id    // 标记这个字段是表的主键
-    @Column(name = "userID")  // 指定对应的数据库列名
+    @Id
+    @Column(name = "userID", length = 50)
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // 自增主键策略
     private String userId;
 
-    @Column(name = "userPassword", nullable = false)  // nullable=false表示不能为null
+    @Column(name = "userPassword", nullable = false)
     private String userPassword;
 }

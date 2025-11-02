@@ -10,16 +10,19 @@ import java.util.Date;
 public class StudyRecord {
 
     @Id
-    @Column(name = "StudyRecordID")
+    @Column(name = "StudyRecordID", length = 50)
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // 自增主键
     private String studyRecordId;
 
-    @Column(name = "UserID")
-    private String userId;
+    @ManyToOne
+    @JoinColumn(name = "UserID", referencedColumnName = "userID")
+    private User user;
 
-    @Column(name = "EnglishwordID")  // 注意字段名
-    private String englishwordId;
+    @ManyToOne
+    @JoinColumn(name = "EnglishwordID", referencedColumnName = "WordID") // 关联单词表主键
+    private EnglishWords englishWord;
 
-    @Column(name = "StudyTime")
+    @Column(name = "StudyTime", nullable = false) // 学习时间非空
     @Temporal(TemporalType.TIMESTAMP)
     private Date studyTime;
 }

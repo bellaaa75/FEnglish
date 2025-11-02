@@ -10,16 +10,17 @@ import java.util.Date;
 public class VocabularyBook {
 
     @Id
-    @Column(name = "BookID")
+    @Column(name = "BookID", length = 50)
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // 自增主键
     private String bookId;
 
-    @Column(name = "BookName", nullable = false)
+    @Column(name = "BookName", nullable = false, length = 100) // 词书名非空
     private String bookName;
 
-    @Column(name = "Content", columnDefinition = "TEXT")
+    @Column(name = "Content", columnDefinition = "TEXT") // 词书描述
     private String content;
 
-    @Column(name = "PublishTime")
+    @Column(name = "PublishTime", nullable = false) // 发布时间非空
     @Temporal(TemporalType.TIMESTAMP)
     private Date publishTime;
 }
