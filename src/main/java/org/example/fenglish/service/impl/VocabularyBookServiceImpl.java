@@ -95,7 +95,7 @@ public class VocabularyBookServiceImpl implements VocabularyBookService {
         List<WordSimpleResp> wordList = book.getWordInBooks().stream()
                 .map(wib -> {
                     WordSimpleResp wordResp = new WordSimpleResp();
-                    wordResp.setWordId(wib.getEnglishWords().getWordID());
+                    wordResp.setWordId(wib.getEnglishWords().getWordId());
                     wordResp.setWordName(wib.getEnglishWords().getWordName());
                     wordResp.setPartOfSpeech(wib.getEnglishWords().getPartOfSpeech());
                     wordResp.setWordExplain(wib.getEnglishWords().getWordExplain());

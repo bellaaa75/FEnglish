@@ -4,7 +4,7 @@ import org.example.fenglish.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-public interface UserRepository {
+public interface UserRepository extends JpaRepository<User, String> {
     // 根据用户ID查找用户
     User findByUserId(String userId);
 

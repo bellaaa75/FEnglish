@@ -37,6 +37,10 @@ public class EnglishWords {
     private String exampleSentence;
 
     // 按照需求报告添加的业务方法
+    public String getWordId() {
+        return this.wordId;
+    }
+
     public String getWordID() {
         return this.wordId;
     }
