@@ -7,17 +7,23 @@ import org.example.fenglish.repository.EnglishWordsRepository;
 import org.example.fenglish.repository.StudyRecordRepository;
 import org.example.fenglish.repository.UserRepository;
 import org.example.fenglish.service.StudyRecordService;
+import org.example.fenglish.vo.response.StudyStatisticVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -181,4 +187,27 @@ public class StudyRecordServiceImpl implements StudyRecordService {
         return word != null ? word.getWordID() : null;
     }
 
+    @Override
+    public StudyStatisticVO getMonthlyStudyStats(String userId) {
+        LocalDate today = LocalDate.now();
+        // 本月第一天 00:00:00（转换为Date类型）
+        LocalDateTime firstDayOfMonth = today.with(TemporalAdjusters.firstDayOfMonth()).atStartOfDay();
+        Date firstDay = Date.from(firstDayOfMonth.atZone(ZoneId.systemDefault()).toInstant());
+
+        // 下月第一天 00:00:00（转换为Date类型）
+        LocalDateTime firstDayOfNextMonth = today.with(TemporalAdjusters.firstDayOfNextMonth()).atStartOfDay();
+        Date nextFirstDay = Date.from(firstDayOfNextMonth.atZone(ZoneId.systemDefault()).toInstant());
+
+        // 调用Repository方法（参数已改为Date）
+        long monthlyWordCount = studyRecordRepository.countMonthlyDistinctWords(userId, firstDay, nextFirstDay);
+        long monthlyStudyDays = studyRecordRepository.countMonthlyStudyDays(userId, firstDay, nextFirstDay);
+        List<Map<String, Object>> dailyWordCounts = studyRecordRepository.countDailyWordsInMonth(userId, firstDay, nextFirstDay);
+
+        // 封装结果
+        StudyStatisticVO vo = new StudyStatisticVO();
+        vo.setMonthlyWordCount(monthlyWordCount);
+        vo.setMonthlyStudyDays(monthlyStudyDays);
+        vo.setDailyWordCounts(dailyWordCounts);
+        return vo;
+    }
 }

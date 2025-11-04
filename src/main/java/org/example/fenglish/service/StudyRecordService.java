@@ -1,6 +1,7 @@
 package org.example.fenglish.service;
 
 import org.example.fenglish.entity.StudyRecord;
+import org.example.fenglish.vo.response.StudyStatisticVO;
 
 import java.util.Date;
 import java.util.List;
@@ -33,4 +34,5 @@ public interface StudyRecordService {
     // 返回单词ID
     String getEnglishWordID(StudyRecord studyRecord);
 
+    StudyStatisticVO getMonthlyStudyStats(String userId);
 }
