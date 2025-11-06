@@ -12,7 +12,7 @@ public class Collect {
 
     @Id
     @Column(name = "CollectID", length = 50)
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // 自增主键
+//    @GeneratedValue(strategy = GenerationType.IDENTITY) // 自增主键
     private String collectId;
 
     @ManyToOne // 多对一：多个收藏对应一个单词
