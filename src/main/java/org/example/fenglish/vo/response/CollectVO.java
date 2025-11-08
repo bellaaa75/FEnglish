@@ -1,5 +1,6 @@
 package org.example.fenglish.vo.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import java.util.Date;
 import java.util.List;
@@ -22,6 +23,7 @@ public class CollectVO {
         /** 单词释义 */
         private String wordExplain;
         /** 收藏时间 */
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
         private Date collectTime;
     }
 }
