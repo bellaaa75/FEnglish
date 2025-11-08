@@ -77,19 +77,9 @@ public class UserController {
     // 注销账户
     @DeleteMapping("/account")
     public Map<String, Object> deleteAccount(@RequestBody Map<String, String> deleteRequest,
-                                             HttpServletRequest request) {
-        String token = request.getHeader("Authorization");
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7);
-            String userID = jwtUtil.getUserIDFromToken(token);
+                                             @RequestAttribute String userID) {
             String password = deleteRequest.get("password");
             return userService.deleteAccount(userID, password);
-        }
-
-        Map<String, Object> result = new java.util.HashMap<>();
-        result.put("success", false);
-        result.put("message", "未授权访问");
-        return result;
     }
 
 }

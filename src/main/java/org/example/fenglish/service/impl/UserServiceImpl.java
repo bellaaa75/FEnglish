@@ -381,11 +381,11 @@ public class UserServiceImpl implements UserService {
             }
 
             // 根据用户类型删除相应的记录
-            if ("ORDINARY".equals(user.getUserType())) {
+            /*if ("ORDINARY".equals(user.getUserType())) {
                 ordinaryUserRepository.deleteById(userID);
             } else {
                 administratorRepository.deleteById(userID);
-            }
+            }*/
 
             // 删除基表记录
             userRepository.deleteById(userID);
