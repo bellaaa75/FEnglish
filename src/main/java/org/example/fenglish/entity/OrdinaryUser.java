@@ -2,12 +2,14 @@ package org.example.fenglish.entity;
 
 import lombok.Data;
 import jakarta.persistence.*;
-import java.util.Date;
+
+import java.time.LocalDateTime;
+
 
 @Data
 @Entity
-@Table(name = "OrdinaryUser")
-@PrimaryKeyJoinColumn(name = "userID") // 与父表User的userID关联
+@Table(name = "ordinaryuser")
+@PrimaryKeyJoinColumn(name = "userId") // 与父表User的userID关联
 public class OrdinaryUser extends User {
 
     @Column(name = "PhoneNumber", length = 20) // 限制手机号长度
@@ -22,9 +24,22 @@ public class OrdinaryUser extends User {
     @Column(name = "Gender", length = 2) // 性别通常为"男"/"女"
     private String gender;
 
-    @Column(name = "RegisterTime", nullable = false) // 注册时间非空
+    @Column(name = "RegisterTime")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date registerTime;
+    private LocalDateTime registerTime;
+
+
+    public OrdinaryUser() { }
+
+    public OrdinaryUser(String userId, String userPassword, String phoneNumber, String userMailbox,
+                        String userName, String gender, LocalDateTime registerTime) {
+        super(userId, userPassword, "ORDINARY");
+        this.phoneNumber = phoneNumber;
+        this.userMailbox = userMailbox;
+        this.userName = userName;
+        this.gender = gender;
+        this.registerTime = LocalDateTime.now();
+    }
 
     public String getPhoneNumber() {
         return phoneNumber;
@@ -58,11 +73,11 @@ public class OrdinaryUser extends User {
         this.gender = gender;
     }
 
-    public Date getRegisterTime() {
+    public LocalDateTime getRegisterTime() {
         return registerTime;
     }
 
-    public void setRegisterTime(Date registerTime) {
+    public void setRegisterTime(LocalDateTime registerTime) {
         this.registerTime = registerTime;
     }
 }

@@ -5,8 +5,15 @@ import jakarta.persistence.*;
 
 @Data
 @Entity
-@Table(name = "Administrator")
-@PrimaryKeyJoinColumn(name = "userID") // 与父表User的userID关联
+@Table(name = "administrator")
+@PrimaryKeyJoinColumn(name = "userId") // 与父表User的userID关联
 public class Administrator extends User {
-    // 继承父类属性，无额外字段
+    public Administrator(String userId, String userPassword) {
+        super(userId, userPassword, "ADMIN");
+    }
+
+    public Administrator() {
+    }
+
+
 }
