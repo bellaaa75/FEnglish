@@ -6,7 +6,7 @@ import java.util.Date;
 
 @Data
 @Entity
-@Table(name = "Collect",
+@Table(name = "collect",
         uniqueConstraints = @UniqueConstraint(columnNames = {"WordID", "userID"})) // 联合唯一（同一用户不能重复收藏同一单词）
 public class Collect {
 
