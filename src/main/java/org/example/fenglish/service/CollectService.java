@@ -1,5 +1,7 @@
 package org.example.fenglish.service;
 
+import org.example.fenglish.repository.CollectBookProjection;
+import org.example.fenglish.repository.CollectWordProjection;
 import org.example.fenglish.vo.dto.WordDTO;
 import org.example.fenglish.vo.response.CollectVO;
 import org.springframework.data.domain.Page;
@@ -11,14 +13,17 @@ import org.springframework.data.domain.Pageable;
 public interface CollectService {
 
 
-    /** 收藏单词；失败抛 BusinessException */
-    void collectWord(String userId, String wordId);
+    /** 收藏：type=1 单词，2 单词书 */
+    void collect(String userId, String targetId, Byte  targetType);
 
-    /** 取消收藏；找不到记录抛 BusinessException */
-    void unCollectWord(String userId, String wordId);
+    /** 取消收藏 */
+    void unCollect(String userId, String targetId, Byte  targetType);
 
-    /** 我的收藏列表；不可能为空直接返回 Page */
-    CollectVO myCollects(String userId, Pageable pageable);
+    /** 我的收藏（单词） */
+    Page<CollectWordProjection> myWordCollects(String userId, Pageable p);
+
+    /** 我的收藏（单词书） */
+    Page<CollectBookProjection> myBookCollects(String userId, Pageable p);
 
     /**
      * 收藏单词

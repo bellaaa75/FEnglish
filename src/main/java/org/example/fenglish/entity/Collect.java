@@ -7,55 +7,25 @@ import java.util.Date;
 @Data
 @Entity
 @Table(name = "collect",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"WordID", "userID"})) // 联合唯一（同一用户不能重复收藏同一单词）
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"userID", "targetID", "targetType"}))
 public class Collect {
 
     @Id
-    @Column(name = "CollectID", length = 50)
-//    @GeneratedValue(strategy = GenerationType.IDENTITY) // 自增主键
-    private String collectId;
+    @Column(name = "collectID", length = 50, nullable = false)
+    private String collectId;              // 不再用 Long
 
-    @ManyToOne // 多对一：多个收藏对应一个单词
-    @JoinColumn(name = "WordID", referencedColumnName = "WordID")
-    private EnglishWords englishWord;
+    @Column(name = "userID", length = 50, nullable = false)
+    private String userId;
 
-    @ManyToOne // 多对一：多个收藏对应一个用户
-    @JoinColumn(name = "userID", referencedColumnName = "userID")
-    private User user;
+    @Column(name = "targetID", length = 50, nullable = false)
+    private String targetId;
 
-    @Column(name = "CollectTime", nullable = false) // 收藏时间非空
+    @Column(name = "targetType", nullable = false)
+    private Byte targetType;   // 1 单词  2 单词书
+
+    @Column(name = "collectTime", nullable = false, updatable = false,
+            columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
     @Temporal(TemporalType.TIMESTAMP)
     private Date collectTime;
-
-    public String getCollectId() {
-        return collectId;
-    }
-
-    public void setCollectId(String collectId) {
-        this.collectId = collectId;
-    }
-
-    public EnglishWords getEnglishWord() {
-        return englishWord;
-    }
-
-    public void setEnglishWord(EnglishWords englishWord) {
-        this.englishWord = englishWord;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Date getCollectTime() {
-        return collectTime;
-    }
-
-    public void setCollectTime(Date collectTime) {
-        this.collectTime = collectTime;
-    }
 }

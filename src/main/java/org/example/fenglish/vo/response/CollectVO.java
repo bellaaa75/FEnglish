@@ -16,14 +16,21 @@ public class CollectVO {
 
     @Data
     public static class CollectItem {
-        /** 单词ID */
-        private String wordId;
-        /** 单词名称 */
-        private String wordName;
-        /** 单词释义 */
-        private String wordExplain;
-        /** 收藏时间 */
+
+        /*=== 公共字段 ===*/
+        private Long collectId;     // 收藏主键
+        private String targetId;    // 单词ID 或 单词书ID
+        private Short targetType;   // 1 单词  2 单词书
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
         private Date collectTime;
+
+        /*=== 仅当 targetType=1 时填充 ===*/
+        private String wordName;
+        private String wordExplain;
+
+        /*=== 仅当 targetType=2 时填充 ===*/
+        private String bookName;
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
+        private Date publishTime;
     }
 }

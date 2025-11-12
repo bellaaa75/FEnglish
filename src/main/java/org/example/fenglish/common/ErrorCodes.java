@@ -39,8 +39,9 @@ public enum ErrorCodes {
 
     COLLECT_NOT_FOUND(1005, "收藏记录不存在"),
     ALREADY_COLLECTED(1040, "已收藏，无需重复收藏"),
-    COLLECT_LIMIT_REACHED(1041, "个人收藏数量已达上限");
-
+    COLLECT_LIMIT_REACHED(1041, "个人收藏数量已达上限"),
+    /*---- 新增：收藏对象类型非法 ----*/
+    INVALID_TARGET_TYPE(1042, "收藏对象类型只能是 1-单词 或 2-单词书");
     private final int code;
     private final String msg;
 }
