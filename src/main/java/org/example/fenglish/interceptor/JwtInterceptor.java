@@ -25,10 +25,10 @@ public class JwtInterceptor implements HandlerInterceptor {
         
         // 放行登录和注册接口
         String requestURI = request.getRequestURI();
-        if (requestURI.contains("/api/user/ordinary/login") ||
-                requestURI.contains("/api/user/admin/login") ||
-                requestURI.contains("/api/user/ordinary/register") ||
-                requestURI.contains("/api/user/admin/register")) {
+        if (requestURI.contains("/api/user/login") ||
+                requestURI.contains("/api/admin/login") ||
+                requestURI.contains("/api/user/register") ||
+                requestURI.contains("/api/admin/register")) {
             return true;
         }
 

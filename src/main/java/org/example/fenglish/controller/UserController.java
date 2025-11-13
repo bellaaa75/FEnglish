@@ -12,7 +12,7 @@ import java.util.Map;
 
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api")
 //@CrossOrigin(origins = "*")
 public class UserController {
 
@@ -24,7 +24,7 @@ public class UserController {
 
 
     // 普通用户注册
-    @PostMapping("/ordinary/register")
+    @PostMapping("/user/register")
     public Map<String, Object> registerOrdinaryUser(@RequestBody OrdinaryUser user) {
         return userService.registerOrdinaryUser(user);
     }
@@ -36,7 +36,7 @@ public class UserController {
     }
 
     // 普通用户登录
-    @PostMapping("/ordinary/login")
+    @PostMapping("/user/login")
     public Map<String, Object> loginOrdinaryUser(@RequestBody Map<String, String> loginRequest) {
         String identifier = loginRequest.get("identifier");
         String password = loginRequest.get("password");
@@ -52,21 +52,21 @@ public class UserController {
     }
 
     // 获取用户信息
-    @GetMapping("/info")
+    @GetMapping("/user/info")
     public Map<String, Object> getUserInfo(@RequestAttribute String userID) {
         System.out.println("从拦截器获取userID: " + userID);
         return userService.getUserInfo(userID);
     }
 
     // 修改用户信息（仅普通用户）
-    @PutMapping("/info")
+    @PutMapping("/user/info")
     public Map<String, Object> updateUserInfo(@RequestBody Map<String, String> userInfo,
                                               @RequestAttribute String userID) {
         return userService.updateUserInfo(userID, userInfo);
     }
 
     // 修改密码
-    @PutMapping("/password")
+    @PutMapping("/user/password")
     public Map<String, Object> changePassword(@RequestBody Map<String, String> passwordRequest,
                                               @RequestAttribute String userID) {
         String oldPassword = passwordRequest.get("oldPassword");
@@ -75,7 +75,7 @@ public class UserController {
     }
 
     // 注销账户
-    @DeleteMapping("/account")
+    @DeleteMapping("/user/account")
     public Map<String, Object> deleteAccount(@RequestBody Map<String, String> deleteRequest,
                                              @RequestAttribute String userID) {
             String password = deleteRequest.get("password");
