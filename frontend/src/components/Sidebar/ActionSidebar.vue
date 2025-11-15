@@ -4,9 +4,9 @@
     <div class="user-avatar">{{ usernameInitial }}</div>
     <el-menu class="action-menu" router>
       <el-menu-item index="/profile/userinfo">个人信息</el-menu-item>
-      <el-menu-item index="/profile/edit">编辑信息</el-menu-item>
-      <el-menu-item index="/profile/password">修改密码</el-menu-item>
-      <el-menu-item index="/profile/delete">注销账号</el-menu-item>
+      <el-menu-item index="/profile/infoedit">编辑信息</el-menu-item>
+      <el-menu-item index="/profile/changepassword">修改密码</el-menu-item>
+      <el-menu-item index="/profile/deleteuser">注销账号</el-menu-item>
       <el-menu-item @click="handleLogout">退出登录</el-menu-item>
     </el-menu>
   </el-aside>
@@ -22,10 +22,10 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 const router = useRouter()
 const store = useStore()
 
-// 计算用户名首字母
+// 计算用户名首字母,这里貌似出错了？
 const usernameInitial = ref('A')
 const getUsernameInitial = () => {
-  const username = store.getters['user/userInfo?.username']
+  const username = store.getters['user/userInfo?.userName']
   if (username) {
     usernameInitial.value = username.charAt(0).toUpperCase()
   }

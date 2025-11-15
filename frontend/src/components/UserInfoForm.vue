@@ -41,7 +41,7 @@
       <el-col :span="12">
         <div class="info-item">
           <label class="info-label">注册时间</label>
-          <div class="info-value">{{userInfo?.registerTime}}</div>
+          <div class="info-value">{{ formatRegisterTime(userInfo?.registerTime) }}</div>
         </div>
       </el-col>
     </el-row>
@@ -54,6 +54,11 @@ import { useStore } from 'vuex'
 
 const store = useStore()
 const userInfo = computed(() => store.getters['user/userInfo'])
+const formatRegisterTime = (time) => {
+  if (!time) return ''
+  const date = new Date(time)
+  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+}
 </script>
 
 <style scoped>

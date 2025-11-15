@@ -167,6 +167,35 @@ const actions = {
       throw new Error(errorMsg) // 抛出错误，供组件捕获处理
     }
   },
+  //修改用户信息
+  async updateUserInfo({ commit, state }, userData) {
+    try {
+      commit('AUTH_REQUEST')
+
+      // 检查用户是否已登录
+      if (!state.isAuthenticated) {
+        throw new Error('用户未登录，无法更新信息')
+      }
+
+      // 发送 PUT 请求到后端接口
+      const res = await request.put('/api/user/info', userData)
+      console.log('更新用户信息响应:', res)
+
+      if (res.success) {
+        const userInfo = await this.dispatch('user/fetchUserInfo')
+        console.log('用户信息响应:', userInfo) 
+        return userInfo // 返回更新后的用户信息
+      } else {
+        // 如果后端返回错误信息，抛出异常
+        throw new Error(res.message || '更新用户信息失败')
+      }
+    } catch (error) {
+      // 处理错误，调用 mutation 保存错误信息
+      const errorMsg = error.message || '网络错误，更新失败'
+      commit('AUTH_FAILURE', errorMsg)
+      throw error // 将错误向上抛出，以便组件捕获
+    }
+  },
 
   // 登出
   logout({ commit }) {
