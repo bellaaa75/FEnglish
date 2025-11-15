@@ -18,11 +18,13 @@ const mutations = {
   },
   AUTH_SUCCESS(state, { userId, token, isAdmin, userInfo }) {
     state.loading = false
-    state.isAuthenticated = true
+    state.isAuthenticated = !!token
     state.userId = userId
     state.token = token
     localStorage.setItem('userId', JSON.stringify(userId))
-    localStorage.setItem('token', token)
+    if (token) {
+      localStorage.setItem('token', token);
+    }
     localStorage.setItem('isAdmin', isAdmin) // 标记是否为管理员
     localStorage.setItem('userInfo', JSON.stringify(userInfo)) // 新增：本地存储用户信息
   },
@@ -32,7 +34,11 @@ const mutations = {
   },
   AUTH_FAILURE(state, error) {
     state.loading = false
+    state.isAuthenticated = false;
+    state.userId = null;
+    state.token = null;
     state.error = error
+/*     localStorage.removeItem('token'); */
   },
   LOGOUT(state) {
     state.user = null
@@ -51,6 +57,7 @@ const actions = {
   //普通用户登录
   async userLogin({ commit }, credentials) {
     try {
+      localStorage.removeItem('token'); 
       commit('AUTH_REQUEST')
       console.log('发送登录请求:', credentials)
       const res = await request.post('/api/user/login', credentials)
@@ -74,15 +81,19 @@ const actions = {
     }
   },
 
-  // 普通用户注册,思考一下用户信息是否要返回
+  // 普通用户注册
   async userRegister({ commit }, userData) {
     try {
+      localStorage.removeItem('token'); 
       commit('AUTH_REQUEST')
+      console.log('发送注册请求:', userData)
       const res = await request.post('/api/user/register', userData)
+      console.log('注册响应:', res)
       commit('AUTH_SUCCESS', { 
         userId: res.userId, 
-        token: res.token, 
-        isAdmin: false 
+        token: null, 
+        isAdmin: false,
+        userInfo: null
       })
       return res.userId
     } catch (error) {
@@ -94,6 +105,7 @@ const actions = {
   // 管理员登录
   async adminLogin({ commit }, credentials) {
     try {
+      localStorage.removeItem('token'); 
       commit('AUTH_REQUEST')
       const res = await request.post('/api/admin/login', credentials)
       commit('AUTH_SUCCESS', { 
@@ -112,12 +124,14 @@ const actions = {
   // 管理员注册
   async adminRegister({ commit }, userData) {
     try {
+      localStorage.removeItem('token'); 
       commit('AUTH_REQUEST')
       const res = await request.post('/api/admin/register', userData)
       commit('AUTH_SUCCESS', { 
         userId: res.userId, 
-        token: res.token, 
-        isAdmin: true 
+        token: res.token || null, 
+        isAdmin: true,
+        userInfo: res.userInfo || null
       })
       return res.userId
     } catch (error) {

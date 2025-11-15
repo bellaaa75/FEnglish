@@ -71,11 +71,6 @@ public class UserServiceImpl implements UserService {
             newUser.setUserMailbox(user.getUserMailbox());
             newUser.setGender(user.getGender());
 
-           /* User baseUser = new User();
-            baseUser.setUserId(userId);
-            baseUser.setUserPassword(user.getUserPassword()); // 父表密码
-            baseUser.setUserType("ORDINARY");
-            userRepository.save(baseUser);*/
 
             ordinaryUserRepository.save(newUser);
 

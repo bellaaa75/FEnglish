@@ -14,12 +14,17 @@ request.interceptors.request.use(
     const uid = localStorage.getItem('userId')
     if (uid) config.headers['userId'] = uid
     
-    const token = localStorage.getItem('token')
-    if (token) {
+    const token = localStorage.getItem('token');
+
+    // 定义不需要 token 的接口路径
+    const noAuthPaths = ['/user/register', '/admin/register'];
+    
+    // 如果 token 存在，并且请求的 URL 不在不需要 token 的列表中，才添加 token
+    if (token && !noAuthPaths.some(path => config.url.includes(path))) {
       config.headers.Authorization = `Bearer ${token}`
     }
     
-    return config
+    return config;
   },
   error => Promise.reject(error)
 )

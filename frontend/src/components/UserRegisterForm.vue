@@ -105,6 +105,7 @@ const handleRegister = async () => {
   try {
     await store.dispatch('user/userRegister', form)
     ElMessage.success('注册成功')
+
     router.push('/user/login')
   } catch (error) {
     ElMessage.error(store.getters['user/authError'] || '注册失败')

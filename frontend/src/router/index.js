@@ -53,7 +53,7 @@ const routes = [
         path: 'userinfo', //相对路径
         name: 'UserInfo',
         component: UserInfo,
-        meta: { title: '我的账号' } // 子页面标题，用于Profile布局中显示
+        meta: {requiresAuth: true, title: '我的账号' } // 子页面标题，用于Profile布局中显示
       }
     ]
   },
@@ -93,7 +93,7 @@ router.beforeEach((to, from, next) => {
   
   // 如果路由需要访客权限但用户已登录，跳转到首页
   if (to.meta.guest && isAuthenticated) {
-    next('/home') // 跳转到已登录用户的首页
+    router.push({ name: 'IndexProfile' }) // 跳转到已登录用户的首页
   } 
   // 如果路由需要认证但用户未登录，跳转到登录页
   else if (to.meta.requiresAuth && !isAuthenticated) {
