@@ -82,7 +82,7 @@ public class UserServiceImpl implements UserService {
 
             result.put("success", true);
             result.put("message", "注册成功");
-            result.put("userID", userId);
+            result.put("userId", userId);
 
 
         } catch (Exception e) {
@@ -120,7 +120,7 @@ public class UserServiceImpl implements UserService {
 
             result.put("success", true);
             result.put("message", "管理员注册成功");
-            result.put("userID", adminID);
+            result.put("userId", adminID);
 
         } catch (Exception e) {
             result.put("success", false);
@@ -130,7 +130,7 @@ public class UserServiceImpl implements UserService {
         return result;
     }
 
-    // 用户登录
+    //登录
     @Override
     public Map<String, Object> login(String identifier, String password, String userType) {
         Map<String, Object> result = new HashMap<>();
@@ -174,7 +174,7 @@ public class UserServiceImpl implements UserService {
             result.put("success", true);
             result.put("message", "登录成功");
             result.put("token", token);
-            result.put("userID", user.getUserId());
+            result.put("userId", user.getUserId());
             result.put("userType", userType);
 
         } catch (Exception e) {

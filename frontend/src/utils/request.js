@@ -11,8 +11,14 @@ const request = axios.create({
 // 2. 请求拦截器：统一携带 user-id（后端 @RequestHeader("user-id")）
 request.interceptors.request.use(
   config => {
-    const uid = localStorage.getItem('user-id')
-    if (uid) config.headers['user-id'] = uid
+    const uid = localStorage.getItem('userId')
+    if (uid) config.headers['userId'] = uid
+    
+    const token = localStorage.getItem('token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    
     return config
   },
   error => Promise.reject(error)
@@ -22,9 +28,8 @@ request.interceptors.request.use(
 request.interceptors.response.use(
   response => {
     const res = response.data
-    // 后端约定：code === 200 才是业务成功
-    if (res.code === 200) {
-      return res.data // 只返回 data 部分，调用处不再 .data.data
+    if (res.success === true) {
+      return res // 业务成功，返回数据
     } else {
       // 其它业务错误码：使用后端返回的 message 提示
       ElMessage.error(res.message || '业务异常')
@@ -35,7 +40,15 @@ request.interceptors.response.use(
     }
   },
   error => {
-    // HTTP 网络/超时/500 等
+    // 处理认证失败情况
+    if (error.response?.status === 401) {
+      ElMessage.error('登录已过期，请重新登录')
+      // 可以在这里跳转到登录页
+      /* router.push('/login') */
+      // 清除本地存储的认证信息
+      localStorage.removeItem('token')
+      localStorage.removeItem('userId')
+    }
     const msg = error.response?.data?.message || error.message || '网络异常'
     ElMessage.error(msg)
     throw error

@@ -71,7 +71,7 @@ const handleLogin = async () => {
     await store.dispatch('user/userLogin', form)
     console.log('登录成功:', store.getters['user/currentUser'])
     
-    router.push('/home') // 替换为实际首页路由
+    router.push({ name: 'IndexProfile' }) // 替换为实际首页路由
   } catch (error) {
     console.log('错误对象:', error) // 打印完整错误对象
     console.log('Vuex 错误信息:', store.getters['user/authError']) 

@@ -5,6 +5,10 @@ const UserLogin = () => import('../views/UserLogin.vue')
 const UserRegister = () => import('../views/UserRegister.vue')
 const AdminLogin = () => import('../views/AdminLogin.vue')
 const AdminRegister = () => import('../views/AdminRegister.vue')
+const IndexProfile = () => import('../views/IndexProfile.vue')
+const UserInfo = () => import('../views/IndexProfile/UserInfo.vue')
+const AdminProfile = () => import('../views/AdminProfile.vue')
+const AdminUserByAdmin = () => import('../views/AdminProfile/UserByAdmin.vue')
 
 
 const routes = [
@@ -36,6 +40,40 @@ const routes = [
     component: AdminRegister,
     meta: { guest: true }
   },
+  // 新增：Profile布局路由（父路由）
+  {
+    path: '/profile',
+    name: 'IndexProfile',
+    component: IndexProfile,
+    meta: { requiresAuth: true }, // 需要登录才能访问
+    redirect: '/profile/userinfo', // 默认重定向到第一个子路由
+    children: [
+      // 子路由
+      {
+        path: 'userinfo', //相对路径
+        name: 'UserInfo',
+        component: UserInfo,
+        meta: { title: '我的账号' } // 子页面标题，用于Profile布局中显示
+      }
+    ]
+  },
+  // 管理员
+  {
+    path: '/admin/profile',
+    name: 'AdminProfile',
+    component: AdminProfile,
+    meta: { requiresAuth: true }, // 需要登录才能访问
+    redirect: '/profile/userbyadmin', // 默认重定向到第一个子路由
+    children: [
+      // 子路由
+      {
+        path: 'userbyadmin', //相对路径
+        name: 'AdminUserByAdmin',
+        component: AdminUserByAdmin,
+        meta: { title: '管理用户' } // 子页面标题，用于Profile布局中显示
+      }
+    ]
+  },
   // 404 路由（避免路由不匹配导致空白）
   {
     path: '/:pathMatch(.*)*',
@@ -48,7 +86,7 @@ const router = createRouter({
   routes
 })
 
-// 路由守卫不要写错（之前的代码没问题，但再检查一次）
+// 路由守卫
 router.beforeEach((to, from, next) => {
   const isAuthenticated = !!localStorage.getItem('token')
   console.log('路由守卫:', to.path, '已认证:', isAuthenticated)

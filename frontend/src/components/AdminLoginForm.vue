@@ -61,7 +61,8 @@ const handleLogin = async () => {
   loading.value = true
   try {
     await store.dispatch('user/adminLogin', form)
-    router.push('/admin/dashboard') // 替换为管理员首页路由
+    console.log('登录成功:', store.getters['user/currentUser'])
+    router.push('/admin/profile') 
   } catch (error) {
     ElMessage.error(store.getters['user/authError'] || '管理员登录失败')
   } finally {
