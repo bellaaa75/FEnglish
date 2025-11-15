@@ -1,8 +1,8 @@
 <template>
   <div class="profile-container">
     <el-container class="main-content">
-      <el-header class="page-header">管理系统</el-header>
-      
+      <!-- <el-header class="page-header">管理系统</el-header> -->
+      <UserByAdmin />
     </el-container>
     <!-- 右侧操作栏（组件） -->
     <ActionSidebar />
@@ -10,7 +10,8 @@
 </template>
 
 <script setup>
-import ActionSidebar from '@/components/Sidebar/ActionSidebar.vue'
+import ActionSidebar from '@/components/Sidebar/AdminActionSidebar.vue'
+import UserByAdmin from '@/components/UserByAdminForm.vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { computed } from 'vue'

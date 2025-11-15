@@ -59,18 +59,18 @@ const routes = [
   },
   // 管理员
   {
-    path: '/admin/profile',
+    path: '/profile/admin',
     name: 'AdminProfile',
     component: AdminProfile,
     meta: { requiresAuth: true }, // 需要登录才能访问
-    redirect: '/profile/userbyadmin', // 默认重定向到第一个子路由
+    redirect: '/profile/admin/userbyadmin', // 默认重定向到第一个子路由
     children: [
       // 子路由
       {
         path: 'userbyadmin', //相对路径
         name: 'AdminUserByAdmin',
         component: AdminUserByAdmin,
-        meta: { title: '管理用户' } // 子页面标题，用于Profile布局中显示
+        meta: { title: '用户信息' } // 子页面标题，用于Profile布局中显示
       }
     ]
   },

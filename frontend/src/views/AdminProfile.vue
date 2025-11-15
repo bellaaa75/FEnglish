@@ -2,12 +2,8 @@
   <div class="profile-container">
     <!-- 左侧导航栏（组件） -->
     <Sidebar />
-    <!-- 中间内容区：用 <router-view> 渲染子页面（如UserInfo） -->
     <el-container class="main-content">
-      <el-header class="page-header">
-        <!-- 动态显示子页面标题（可通过路由meta配置） -->
-        {{ $route.meta.title || '我的个人资料' }}
-      </el-header>
+      <el-header class="page-header">管理系统</el-header>
       <!-- 子页面渲染出口：点击不同菜单，这里显示对应的页面 -->
       <router-view />
     </el-container>
@@ -15,7 +11,7 @@
 </template>
 
 <script setup>
-import Sidebar from '@/components/Sidebar/SearchIndex.vue'
+import Sidebar from '@/components/Sidebar/AdminSearchIndex.vue'
 import { useStore } from 'vuex'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'

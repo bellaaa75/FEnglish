@@ -91,7 +91,7 @@ const actions = {
       console.log('注册响应:', res)
       commit('AUTH_SUCCESS', { 
         userId: res.userId, 
-        token: null, 
+        token: res.token || null, 
         isAdmin: false,
         userInfo: null
       })

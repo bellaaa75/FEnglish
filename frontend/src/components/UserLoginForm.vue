@@ -3,7 +3,7 @@
     <el-form-item prop="identifier">
       <el-input 
         v-model="form.identifier" 
-        placeholder="用户名/手机号/邮箱" 
+        placeholder="手机号/邮箱" 
         prefix-icon="User"
       ></el-input>
     </el-form-item>
