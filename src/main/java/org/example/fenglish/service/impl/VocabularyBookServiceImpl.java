@@ -38,8 +38,9 @@ public class VocabularyBookServiceImpl implements VocabularyBookService {
         }
         // 构建单词书实体
         VocabularyBook book = new VocabularyBook();
-        // 处理bookId：若前端未输入则自动生成UUID，否则用前端输入
-        book.setBookId(req.getBookId() == null ? UUID.randomUUID().toString().replace("-", "") : req.getBookId());
+        // 处理bookId：若前端未输入则自动生成"BOOK_随机字符串"，否则用前端输入
+        String generatedId = "BOOK_" + UUID.randomUUID().toString().replace("-", "");
+        book.setBookId(req.getBookId() == null ? generatedId : req.getBookId());
         book.setBookName(req.getBookName());
         // 处理发布时间：若前端未选择则默认当前时间
         book.setPublishTime(req.getPublishTime() == null ? new Date() : req.getPublishTime());
