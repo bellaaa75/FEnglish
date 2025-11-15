@@ -3,7 +3,7 @@
     <el-container class="main-content">
       <el-header class="page-header">个人信息管理</el-header>
       <!-- 个人信息展示（组件） -->
-      <UserInfo />
+      <DeleteUser />
     </el-container>
     <!-- 右侧操作栏（组件） -->
     <ActionSidebar />
@@ -12,7 +12,7 @@
 
 <script setup>
 import ActionSidebar from '@/components/Sidebar/ActionSidebar.vue'
-import UserInfo from '@/components/UserInfoForm.vue'
+import DeleteUser from '@/components/DeleteUserForm.vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { computed } from 'vue'

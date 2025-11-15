@@ -1,3 +1,4 @@
+/* import { pa } from 'element-plus/es/locale' */
 import { createRouter, createWebHistory } from 'vue-router'
 
 // 用 "懒加载" 方式引入组件（推荐，避免空白）
@@ -9,7 +10,9 @@ const IndexProfile = () => import('../views/IndexProfile.vue')
 const UserInfo = () => import('../views/IndexProfile/UserInfo.vue')
 const AdminProfile = () => import('../views/AdminProfile.vue')
 const AdminUserByAdmin = () => import('../views/AdminProfile/UserByAdmin.vue')
-
+const InfoEdit = () => import('../views/IndexProfile/InfoEdit.vue')
+const ChangePassword = () => import('../views/IndexProfile/ChangePassword.vue')
+const DeleteUser = () => import('../views/IndexProfile/DeleteUser.vue')
 
 const routes = [
   {
@@ -54,7 +57,26 @@ const routes = [
         name: 'UserInfo',
         component: UserInfo,
         meta: {requiresAuth: true, title: '我的账号' } // 子页面标题，用于Profile布局中显示
+      },
+      {
+        path: 'infoedit', //相对路径
+        name: 'InfoEdit',
+        component: InfoEdit,
+        meta: {requiresAuth: true, title: '编辑资料' } // 子页面标题，用于Profile布局中显示
+      },
+      {
+        path: 'changepassword', //相对路径
+        name: 'ChangePassword',
+        component: ChangePassword,
+        meta: {requiresAuth: true, title: '修改密码' } // 子页面标题，用于Profile布局中显示
+      },
+      {
+        path: 'deleteuser', //相对路径
+        name: 'DeleteUser',
+        component: DeleteUser,
+        meta: {requiresAuth: true, title: '注销账号' } // 子页面标题，用于Profile布局中显示
       }
+
     ]
   },
   // 管理员
