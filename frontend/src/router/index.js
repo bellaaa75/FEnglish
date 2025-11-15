@@ -10,6 +10,8 @@ const UserInfo = () => import('../views/IndexProfile/UserInfo.vue')
 const AdminProfile = () => import('../views/AdminProfile.vue')
 const AdminUserByAdmin = () => import('../views/AdminProfile/UserByAdmin.vue')
 
+const WordAdd = () => import('../views/WordAdd.vue')
+const WordList = () => import('../views/WordList.vue') 
 
 const routes = [
   {
@@ -40,7 +42,8 @@ const routes = [
     component: AdminRegister,
     meta: { guest: true }
   },
-  // 新增：Profile布局路由（父路由）
+
+   // 新增：Profile布局路由（父路由）
   {
     path: '/profile',
     name: 'IndexProfile',
@@ -74,6 +77,22 @@ const routes = [
       }
     ]
   },
+
+  {
+    path: '/word/add',
+    name: 'WordAdd',
+    component: WordAdd,
+    meta: { requiresAuth: true, isAdmin: true } // 假设只有管理员可添加
+  },
+  // 管理员
+  {
+    path: '/word/list',
+    name: 'WordList',
+    component: WordList,
+    meta: { requiresAuth: true }
+  },
+
+
   // 404 路由（避免路由不匹配导致空白）
   {
     path: '/:pathMatch(.*)*',
