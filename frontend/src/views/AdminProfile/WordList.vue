@@ -56,14 +56,13 @@
         </el-table-column>
       </el-table>
 
-      <!-- 分页控件 -->
+      <!-- 分页控件（删除废弃的 total-pages 属性，解决警告） -->
       <el-pagination
         background
         :current-page="pageInfo.currentPage"
         :page-sizes="[5, 10, 15, 20]"
         :page-size="pageInfo.pageSize"
         :total="pageInfo.total"
-        :total-pages="pageInfo.totalPages"
         layout="sizes, prev, pager, next, jumper, total"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -75,7 +74,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { ElMessage, ElMessageBox } from 'element-plus'; // 删掉了 ElLoading 导入
+import { ElMessage, ElMessageBox } from 'element-plus';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 const router = useRouter();
@@ -85,7 +84,7 @@ const searchWord = ref('');
 // 加载状态
 const loading = ref(false);
 
-// 分页信息（与后端响应字段完全对应）
+// 分页信息
 const pageInfo = ref({
   currentPage: 1,
   pageSize: 10,
@@ -93,8 +92,10 @@ const pageInfo = ref({
   totalPages: 0
 });
 
-// 单词列表数据
+// 单词列表数据（当前页展示数据）
 const wordList = ref([]);
+// 存储全部搜索结果（用于本地分页）
+const allSearchResults = ref([]);
 
 // 初始化加载单词列表
 onMounted(() => {
@@ -116,12 +117,9 @@ const fetchWordList = async () => {
   loading.value = true;
   const token = getToken();
   
-  // 未登录则跳转登录页
   if (!token) {
-    ElMessage.error('请先登录管理员账号');
-    setTimeout(() => {
-      window.location.href = '/admin/login';
-    }, 1000);
+    ElMessage.error('请先登录');
+    router.push('/admin/login');
     loading.value = false;
     return;
   }
@@ -132,41 +130,54 @@ const fetchWordList = async () => {
       pageSize: pageInfo.value.pageSize
     };
 
-    // 添加搜索参数（后端支持按wordName模糊搜索）
-    if (searchWord.value.trim()) {
-      params.wordName = searchWord.value.trim();
+    let requestUrl = '/api/words';
+    const searchKey = searchWord.value.trim();
+    let isSearchRequest = false; // 标记是否是搜索请求
+
+    if (searchKey) {
+      requestUrl = `/api/words/name/fuzzy/${encodeURIComponent(searchKey)}`;
+      isSearchRequest = true; // 搜索请求：后端返回数组
     }
 
-    // 单个请求添加Token到Authorization头
-    const response = await axios.get('/api/words', {
+    const response = await axios.get(requestUrl, {
       params,
       headers: {
-        Authorization: `Bearer ${token}` // 适配后端Token认证格式
+        Authorization: `Bearer ${token}`
       }
     });
 
-    // 解析后端响应（关键：数据在response.data.data中）
-    const resData = response.data;
-    if (resData.success) {
-      wordList.value = resData.data; // 单词列表数组
-      pageInfo.value.total = resData.total; // 总条数（30）
-      pageInfo.value.totalPages = resData.totalPages; // 总页数（3）
-      pageInfo.value.currentPage = resData.currentPage; // 当前页
-      pageInfo.value.pageSize = resData.pageSize; // 每页条数
+    // 核心修复：根据请求类型解析响应 + 本地分页
+    if (isSearchRequest) {
+      // 搜索接口：后端返回全部结果，前端本地分页
+      allSearchResults.value = response.data || []; // 存储全部搜索结果
+      pageInfo.value.total = allSearchResults.value.length; // 总条数
+      
+      // 按当前页码和每页条数切割数据
+      const startIndex = (pageInfo.value.currentPage - 1) * pageInfo.value.pageSize;
+      const endIndex = startIndex + pageInfo.value.pageSize;
+      wordList.value = allSearchResults.value.slice(startIndex, endIndex);
     } else {
-      ElMessage.error('获取单词列表失败：' + (resData.message || '接口返回失败'));
+      // 分页接口：后端返回分页数据，直接使用
+      wordList.value = response.data.data || [];
+      pageInfo.value.total = response.data.total || 0;
     }
+
+    // 重新计算总页数
+    pageInfo.value.totalPages = Math.ceil(pageInfo.value.total / pageInfo.value.pageSize);
   } catch (error) {
-    // 错误处理（401代表Token过期/无效）
-    if (error.response?.status === 401) {
+    console.error('请求失败：', error);
+    if (error.response?.status === 404) {
+      ElMessage.error(`接口不存在：${error.config.url}`);
+    } else if (error.response?.status === 401) {
       ElMessage.error('登录已过期，请重新登录');
-      localStorage.removeItem('token'); // 清除无效Token
-      setTimeout(() => {
-        window.location.href = '/admin/login';
-      }, 1000);
+      localStorage.removeItem('token');
+      router.push('/admin/login');
     } else {
-      ElMessage.error('获取单词列表失败：' + (error.message || '网络异常'));
+      ElMessage.error('获取单词失败：' + (error.message || '网络异常'));
     }
+    wordList.value = [];
+    allSearchResults.value = []; // 清空搜索结果
+    pageInfo.value.total = 0;
   } finally {
     loading.value = false;
   }
@@ -181,32 +192,50 @@ const handleSearch = () => {
 // 重置搜索
 const resetSearch = () => {
   searchWord.value = '';
+  allSearchResults.value = []; // 清空搜索结果缓存
   pageInfo.value.currentPage = 1;
   fetchWordList();
 };
 
-// 每页条数改变
+// 每页条数改变（适配搜索结果本地分页）
 const handleSizeChange = (size) => {
   pageInfo.value.pageSize = size;
-  pageInfo.value.currentPage = 1;
-  fetchWordList();
+  pageInfo.value.currentPage = 1; // 切换条数后回到第1页
+  
+  if (searchWord.value.trim()) {
+    // 搜索状态：本地分页，无需请求后端
+    const startIndex = 0;
+    const endIndex = size;
+    wordList.value = allSearchResults.value.slice(startIndex, endIndex);
+    pageInfo.value.totalPages = Math.ceil(allSearchResults.value.length / size);
+  } else {
+    // 非搜索状态：请求后端分页
+    fetchWordList();
+  }
 };
 
-// 当前页改变
+// 当前页改变（适配搜索结果本地分页）
 const handleCurrentChange = (page) => {
   pageInfo.value.currentPage = page;
-  fetchWordList();
+  
+  if (searchWord.value.trim()) {
+    // 搜索状态：本地分页，无需请求后端
+    const startIndex = (page - 1) * pageInfo.value.pageSize;
+    const endIndex = startIndex + pageInfo.value.pageSize;
+    wordList.value = allSearchResults.value.slice(startIndex, endIndex);
+  } else {
+    // 非搜索状态：请求后端分页
+    fetchWordList();
+  }
 };
 
-// WordList.vue 中
+// 编辑单词跳转
 const handleEdit = (word) => {
-    // 打印 word 对象，确认 wordId 存在（关键排查）
-  console.log('要编辑的单词ID：', word.wordId); 
+  console.log('要编辑的单词ID：', word.wordId);
   if (!word.wordId) {
     ElMessage.error('单词ID不存在');
     return;
   }
-  // 携带单词ID跳转，路由名称需与router/index.js中配置的一致
   router.push({ name: 'AdminWordEdit', params: { wordId: word.wordId } });
 };
 

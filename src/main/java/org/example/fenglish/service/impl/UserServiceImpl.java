@@ -10,6 +10,8 @@ import org.example.fenglish.repository.UserRepository;
 import org.example.fenglish.service.UserService;
 import org.example.fenglish.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -396,5 +398,21 @@ public class UserServiceImpl implements UserService {
         }
 
         return result;
+    }
+
+    // 管理员分页查询普通用户（支持关键词搜索）
+    @Override
+    public Page<OrdinaryUser> getOrdinaryUsers(String keyword, Pageable pageable) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return ordinaryUserRepository.findAll(pageable);
+        }
+        // 自定义SQL：按用户名或用户ID模糊查询
+        return ordinaryUserRepository.findByKeyword(keyword, pageable);
+    }
+
+    // 管理员查询特定普通用户
+    @Override
+    public OrdinaryUser getOrdinaryUserByUserId(String userId) {
+        return ordinaryUserRepository.findByUserId(userId);
     }
 }
