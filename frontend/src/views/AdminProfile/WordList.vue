@@ -77,6 +77,8 @@
 import { ref, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus'; // 删掉了 ElLoading 导入
 import axios from 'axios';
+import { useRouter } from 'vue-router';
+const router = useRouter();
 
 // 搜索关键词
 const searchWord = ref('');
@@ -196,10 +198,16 @@ const handleCurrentChange = (page) => {
   fetchWordList();
 };
 
-// 编辑单词（跳转至编辑页面，需后续创建WordEdit.vue）
+// WordList.vue 中
 const handleEdit = (word) => {
-  // 携带单词ID跳转，编辑页路径与路由配置一致
-  window.location.href = `/profile/admin/wordedit/${word.wordId}`;
+    // 打印 word 对象，确认 wordId 存在（关键排查）
+  console.log('要编辑的单词ID：', word.wordId); 
+  if (!word.wordId) {
+    ElMessage.error('单词ID不存在');
+    return;
+  }
+  // 携带单词ID跳转，路由名称需与router/index.js中配置的一致
+  router.push({ name: 'AdminWordEdit', params: { wordId: word.wordId } });
 };
 
 // 删除单词（单个请求添加Token）
