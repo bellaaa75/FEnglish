@@ -23,7 +23,7 @@ const router = useRouter()
 // 路由守卫：未登录则跳转登录页
 const isAuthenticated = computed(() => store.getters['user/isAuthenticated'])
 if (!isAuthenticated.value) {
-  router.push('/user/login')
+  router.push('/admin/login')
 }
 </script>
 

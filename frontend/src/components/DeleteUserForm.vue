@@ -75,7 +75,14 @@ const handleCancelAccount = async () => {
     // 调用Vuex中注销账号的action（需在user.js中定义）
     await store.dispatch('user/cancelAccount', form.password)
     ElMessage.success('账号注销成功')
-    router.push('/user/login') // 跳转到登录页
+
+    // 判断是否为管理员并跳转到对应登录页,这里貌似不行
+    const isAdmin = store.getters['user/isAdmin']
+    if (isAdmin) {
+      router.push('/admin/login') // 管理员跳转到管理员登录页
+    } else {
+      router.push('/user/login') // 普通用户跳转到普通登录页
+    }
   } catch (error) {
     if (error === 'cancel') {
       ElMessage.info('已取消注销')
