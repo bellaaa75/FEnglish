@@ -16,16 +16,16 @@
       <!-- <el-menu-item index="/plaza">
         <el-icon><Grid /></el-icon>
         <span>学习广场</span>
-      </el-menu-item>
-      <el-menu-item index="/favorites">
+      </el-menu-item> -->
+      <el-menu-item index="/profile/collect-word">
         <el-icon><Star /></el-icon>
         <span>收藏单词</span>
       </el-menu-item>
-      <el-menu-item index="/wordbook">
+      <el-menu-item index="/profile/collect-book">
         <el-icon><Book /></el-icon>
         <span>我的单词书</span>
       </el-menu-item>
-      <el-menu-item index="/record">
+      <!-- <el-menu-item index="/record">
         <el-icon><EditPen /></el-icon>
         <span>学习记录</span>
       </el-menu-item> -->

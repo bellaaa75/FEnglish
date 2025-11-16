@@ -13,7 +13,8 @@ const AdminUserByAdmin = () => import('../views/AdminProfile/UserByAdmin.vue')
 const InfoEdit = () => import('../views/IndexProfile/InfoEdit.vue')
 const ChangePassword = () => import('../views/IndexProfile/ChangePassword.vue')
 const DeleteUser = () => import('../views/IndexProfile/DeleteUser.vue')
-
+const CollectWord = () => import('@/views/collect/CollectWord.vue');
+const CollectBook = () => import('@/views/collect/CollectBook.vue');
 const WordAdd = () => import('../views/WordAdd.vue')
 const WordList = () => import('../views/WordList.vue')
 
@@ -80,6 +81,18 @@ const routes = [
         name: 'DeleteUser',
         component: DeleteUser,
         meta: {requiresAuth: true, title: '注销账号' } // 子页面标题，用于Profile布局中显示
+      },
+      {
+        path: 'collect-word', // 添加 collect-word 子路径
+        name: 'CollectWord',
+        component: CollectWord,
+        meta: { title: '收藏单词' } // 子页面标题，用于Profile布局中显示
+      },
+      {
+        path: 'collect-book', // 添加 collect-word 子路径
+        name: 'CollectBook',
+        component: CollectBook,
+        meta: { title: '我的单词书' } // 子页面标题，用于Profile布局中显示
       }
 
     ]
