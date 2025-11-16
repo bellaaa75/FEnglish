@@ -2,6 +2,9 @@ package org.example.fenglish.service;
 
 import org.example.fenglish.entity.Administrator;
 import org.example.fenglish.entity.OrdinaryUser;
+import org.example.fenglish.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 
 import java.util.Map;
@@ -30,4 +33,11 @@ public interface UserService {
 
     // 注销账户
     Map<String, Object> deleteAccount(String userID, String password);
+
+    // 管理员专属：分页查询所有普通用户
+    Page<OrdinaryUser> getOrdinaryUsers(String keyword, Pageable pageable);
+
+    // 管理员专属：查询特定普通用户
+    OrdinaryUser getOrdinaryUserByUserId(String userId);
+
 }
