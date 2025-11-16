@@ -3,6 +3,7 @@ package org.example.fenglish.controller;
 import org.example.fenglish.entity.EnglishWords;
 import org.example.fenglish.service.EnglishWordsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
@@ -69,5 +70,24 @@ public class EnglishWordsController {
         List<EnglishWords> words = englishWordsService.getWordsByFuzzyName(wordName);
         // 若查询结果为空，仍返回200+空列表（更友好，前端可提示“无匹配单词”）
         return ResponseEntity.ok(words);
+    }
+
+    // 新增单词列表查询接口（带分页）
+    @GetMapping
+    public ResponseEntity<Map<String, Object>> getWordList(
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize) {
+
+        Page<EnglishWords> wordPage = englishWordsService.getWordList(pageNum, pageSize);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("data", wordPage.getContent());
+        response.put("total", wordPage.getTotalElements());
+        response.put("totalPages", wordPage.getTotalPages());
+        response.put("currentPage", pageNum);
+        response.put("pageSize", pageSize);
+
+        return ResponseEntity.ok(response);
     }
 }

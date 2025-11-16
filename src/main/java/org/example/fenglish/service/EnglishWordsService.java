@@ -1,6 +1,8 @@
 package org.example.fenglish.service;
 
 import org.example.fenglish.entity.EnglishWords;
+import org.springframework.data.domain.Page;
+
 import java.util.List;
 
 public interface EnglishWordsService {
@@ -13,4 +15,5 @@ public interface EnglishWordsService {
     EnglishWords getWordById(String wordId);      // 通过ID获取单词（用于实现getWordID等方法）
     EnglishWords getWordByName(String wordName);  // 通过名称获取单词
     List<EnglishWords> getWordsByFuzzyName(String wordName);
+    Page<EnglishWords> getWordList(int pageNum, int pageSize);
 }

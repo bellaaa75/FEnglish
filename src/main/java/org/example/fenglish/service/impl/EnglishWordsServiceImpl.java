@@ -4,6 +4,10 @@ import org.example.fenglish.entity.EnglishWords;
 import org.example.fenglish.repository.EnglishWordsRepository;
 import org.example.fenglish.service.EnglishWordsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -79,5 +83,12 @@ public class EnglishWordsServiceImpl implements EnglishWordsService {
     @Override
     public List<EnglishWords> getWordsByFuzzyName(String wordName) {
         return englishWordsRepository.findByWordNameContainingIgnoreCase(wordName);
+    }
+
+    @Override
+    public Page<EnglishWords> getWordList(int pageNum, int pageSize) {
+        // 注意：Spring Data JPA的页码是从0开始的
+        Pageable pageable = PageRequest.of(pageNum - 1, pageSize, Sort.by("wordName").ascending());
+        return englishWordsRepository.findAll(pageable);
     }
 }
