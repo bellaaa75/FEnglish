@@ -2,7 +2,8 @@ package org.example.fenglish.entity;
 
 import lombok.Data;
 import jakarta.persistence.*;
-import java.util.Date;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -20,9 +21,9 @@ public class VocabularyBook {
     @Column(name = "Content", columnDefinition = "TEXT") // 词书描述
     private String content;
 
-    @Column(name = "PublishTime", nullable = false) // 发布时间非空
+    @Column(name = "PublishTime", columnDefinition = "TIMESTAMP", nullable = false) // 发布时间非空
     @Temporal(TemporalType.TIMESTAMP)
-    private Date publishTime;
+    private LocalDateTime publishTime;
 
     // 【关联关系】一个单词书包含多个单词（通过word_in_book关联）
     @OneToMany(mappedBy = "vocabularyBook", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -52,11 +53,11 @@ public class VocabularyBook {
         this.content = content;
     }
 
-    public Date getPublishTime() {
+    public LocalDateTime getPublishTime() {
         return publishTime;
     }
 
-    public void setPublishTime(Date publishTime) {
+    public void setPublishTime(LocalDateTime publishTime) {
         this.publishTime = publishTime;
     }
 

@@ -1,5 +1,6 @@
 package org.example.fenglish.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import jakarta.persistence.*;
 import java.io.Serializable;
@@ -56,11 +57,14 @@ public class WordInBook {
         private String bookId;
     }
 
-    @ManyToOne
+    // 关联单词表（单向或双向均可，保留）
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "WordID", insertable = false, updatable = false)
     private EnglishWords englishWords;
 
-    @ManyToOne
+    // 关键修改：添加@JsonIgnore，忽略反向关联的单词书，避免序列化循环
+    @JsonIgnore // 核心注解：序列化时不包含该字段
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "BookID", insertable = false, updatable = false)
     private VocabularyBook vocabularyBook;
 }

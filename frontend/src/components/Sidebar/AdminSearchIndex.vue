@@ -13,6 +13,10 @@
         <!-- <el-icon><User /></el-icon> -->
         <span>用户账号管理</span>
       </el-menu-item>
+      <!-- 新增单词管理菜单 -->
+      <el-menu-item index="/profile/admin/wordlist">
+        <span>单词管理</span>
+      </el-menu-item>
       <!-- <el-menu-item index="/plaza">
         <el-icon><Grid /></el-icon>
         <span>学习广场</span>

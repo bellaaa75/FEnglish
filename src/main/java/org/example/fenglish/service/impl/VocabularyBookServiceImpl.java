@@ -1,21 +1,22 @@
 package org.example.fenglish.service.impl;  // 统一放在service.impl包下
 
 import org.example.fenglish.entity.VocabularyBook;
+import org.example.fenglish.entity.WordInBook;
 import org.example.fenglish.repository.VocabularyBookRepository;
 import org.example.fenglish.repository.WordInBookRepository;
 import org.example.fenglish.service.VocabularyBookService;
 import org.example.fenglish.vo.request.VocabularyBookAddReq;
 import org.example.fenglish.vo.request.VocabularyBookUpdateReq;
 import org.example.fenglish.vo.response.VocabularyBookDetailResp;
+import org.example.fenglish.vo.response.VocabularyBookSimpleResp;
 import org.example.fenglish.vo.response.WordSimpleResp;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import org.springframework.util.CollectionUtils;
+
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 @Transactional  // 事务管理，所有方法加事务
@@ -43,7 +44,7 @@ public class VocabularyBookServiceImpl implements VocabularyBookService {
         book.setBookId(req.getBookId() == null ? generatedId : req.getBookId());
         book.setBookName(req.getBookName());
         // 处理发布时间：若前端未选择则默认当前时间
-        book.setPublishTime(req.getPublishTime() == null ? new Date() : req.getPublishTime());
+        book.setPublishTime(req.getPublishTime() == null ? LocalDateTime.now() : req.getPublishTime());
         // 保存到数据库
         vocabularyBookRepository.save(book);
     }
@@ -84,26 +85,63 @@ public class VocabularyBookServiceImpl implements VocabularyBookService {
     // 4. 查看单词书详情（含关联的单词列表）
     @Override
     public VocabularyBookDetailResp getVocabularyBookDetail(String bookId) {
-        // 关联查询单词书及单词
-        VocabularyBook book = vocabularyBookRepository.findByBookIdWithWords(bookId)
-                .orElseThrow(() -> new EntityNotFoundException("单词书不存在"));
-        // 转换为VO（避免返回冗余字段，前端仅需必要数据）
+        // 关联查询单词书及包含的单词（使用之前的fetch查询）
+        Optional<VocabularyBook> bookOptional = vocabularyBookRepository.findByBookIdWithWords(bookId);
+        if (bookOptional.isEmpty()) {
+            throw new EntityNotFoundException("单词书不存在");
+        }
+        VocabularyBook book = bookOptional.get();
+
+        // 实体转VO：手动映射字段，避免关联循环
         VocabularyBookDetailResp resp = new VocabularyBookDetailResp();
         resp.setBookId(book.getBookId());
         resp.setBookName(book.getBookName());
         resp.setPublishTime(book.getPublishTime());
-        // 转换单词列表（仅返回单词ID、名称、词性、释义）
-        List<WordSimpleResp> wordList = book.getWordInBooks().stream()
-                .map(wib -> {
-                    WordSimpleResp wordResp = new WordSimpleResp();
-                    wordResp.setWordId(wib.getEnglishWords().getWordId());
-                    wordResp.setWordName(wib.getEnglishWords().getWordName());
-                    wordResp.setPartOfSpeech(wib.getEnglishWords().getPartOfSpeech());
-                    wordResp.setWordExplain(wib.getEnglishWords().getWordExplain());
-                    return wordResp;
-                })
-                .collect(Collectors.toList());
-        resp.setWordList(wordList);
-        return resp;
+
+        // 处理单词列表：WordInBook -> WordSimpleResp
+        List<WordSimpleResp> wordRespList = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(book.getWordInBooks())) {
+            for (WordInBook wordInBook : book.getWordInBooks()) {
+                WordSimpleResp wordResp = new WordSimpleResp();
+                // 从WordInBook关联的EnglishWords中获取单词信息
+                wordResp.setWordId(wordInBook.getEnglishWords().getWordId());
+                wordResp.setWordName(wordInBook.getEnglishWords().getWordName());
+                wordResp.setPartOfSpeech(wordInBook.getEnglishWords().getPartOfSpeech());
+                wordResp.setWordExplain(wordInBook.getEnglishWords().getWordExplain());
+
+                wordRespList.add(wordResp);
+            }
+        }
+        resp.setWordList(wordRespList);
+
+        return resp; // 返回VO，而非实体
     }
+
+    @Override
+    public List<VocabularyBookSimpleResp> getAllVocabularyBooks() {
+        // 1. 查询所有实体类
+        List<VocabularyBook> bookEntityList = vocabularyBookRepository.findAll();
+
+        // 2. 新建 VO 列表，用于存储映射后的结果
+        List<VocabularyBookSimpleResp> bookVoList = new ArrayList<>();
+
+        // 3. 循环映射：逐个将实体类转换为 VO
+        if (!CollectionUtils.isEmpty(bookEntityList)) {
+            for (VocabularyBook bookEntity : bookEntityList) {
+                VocabularyBookSimpleResp bookVo = new VocabularyBookSimpleResp();
+                // 映射字段（实体字段 → VO 字段，一一对应）
+                bookVo.setBookId(bookEntity.getBookId());
+                bookVo.setBookName(bookEntity.getBookName());
+                bookVo.setPublishTime(bookEntity.getPublishTime());
+                // 若 VO 有 content 字段，也需映射：bookVo.setContent(bookEntity.getContent());
+
+                // 添加到 VO 列表
+                bookVoList.add(bookVo);
+            }
+        }
+
+        // 4. 返回 VO 列表（而非实体列表）
+        return bookVoList;
+    }
+
 }

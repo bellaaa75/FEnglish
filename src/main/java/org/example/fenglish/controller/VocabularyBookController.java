@@ -1,5 +1,6 @@
 package org.example.fenglish.controller;
 
+import org.example.fenglish.entity.VocabularyBook;
 import org.example.fenglish.service.VocabularyBookService;
 import org.example.fenglish.service.WordInBookService;
 import org.example.fenglish.vo.request.VocabularyBookAddReq;
@@ -7,7 +8,10 @@ import org.example.fenglish.vo.request.VocabularyBookUpdateReq;
 import org.example.fenglish.vo.response.Result;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.fenglish.vo.response.VocabularyBookSimpleResp;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 // 跨域配置：允许前端域名访问
 @CrossOrigin(origins = "http://localhost:8080", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
@@ -56,7 +60,15 @@ public class VocabularyBookController {
         return Result.success(vocabularyBookService.getVocabularyBookDetail(bookId));
     }
 
-    // 5. 向单词书添加单词（POST）
+    // 5. 查询所有单词书（GET）
+    @GetMapping
+    public Result<List<VocabularyBookSimpleResp>> getAllBooks() {
+        // VocabularyBookSimpleResp：只包含单词书基础信息（bookId、bookName、publishTime）
+        List<VocabularyBookSimpleResp> bookList = vocabularyBookService.getAllVocabularyBooks();
+        return Result.success(bookList);
+    }
+
+    // 6. 向单词书添加单词（POST）
     @PostMapping("/{bookId}/words/{wordId}")
     public Result<Void> addWordToBook(@PathVariable String bookId,
                                       @PathVariable String wordId,
@@ -65,7 +77,7 @@ public class VocabularyBookController {
         return Result.success();
     }
 
-    // 6. 从单词书删除单词（DELETE）
+    // 7. 从单词书删除单词（DELETE）
     @DeleteMapping("/{bookId}/words/{wordId}")
     public Result<Void> deleteWordFromBook(@PathVariable String bookId,
                                            @PathVariable String wordId,

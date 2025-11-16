@@ -2,7 +2,8 @@ package org.example.fenglish.vo.request;  // 统一放在vo.request包下
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import java.util.Date;
+
+import java.time.LocalDateTime;
 
 @Data
 public class VocabularyBookAddReq {
@@ -11,7 +12,7 @@ public class VocabularyBookAddReq {
     @NotBlank(message = "单词书名称不能为空")  // 参数校验：名称必传
     private String bookName;
 
-    private Date publishTime;  // 可选（默认当前时间）
+    private LocalDateTime publishTime;  // 可选（默认当前时间）
 
     public String getBookId() {
         return bookId;
@@ -29,11 +30,11 @@ public class VocabularyBookAddReq {
         this.bookName = bookName;
     }
 
-    public Date getPublishTime() {
+    public LocalDateTime getPublishTime() {
         return publishTime;
     }
 
-    public void setPublishTime(Date publishTime) {
+    public void setPublishTime(LocalDateTime publishTime) {
         this.publishTime = publishTime;
     }
 }

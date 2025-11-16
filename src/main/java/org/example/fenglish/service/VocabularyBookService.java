@@ -1,9 +1,10 @@
 package org.example.fenglish.service;
 
-import org.example.fenglish.entity.VocabularyBook;
 import org.example.fenglish.vo.request.VocabularyBookAddReq;
 import org.example.fenglish.vo.request.VocabularyBookUpdateReq;
 import org.example.fenglish.vo.response.VocabularyBookDetailResp;
+import org.example.fenglish.vo.response.VocabularyBookSimpleResp;
+
 import java.util.List;
 
 public interface VocabularyBookService {
@@ -19,4 +20,6 @@ public interface VocabularyBookService {
     // 4. 查看单个单词书详情（含关联单词）
     VocabularyBookDetailResp getVocabularyBookDetail(String bookId);
 
+    // 5. 查询所有单词书（用于列表展示）
+    List<VocabularyBookSimpleResp> getAllVocabularyBooks();
 }
