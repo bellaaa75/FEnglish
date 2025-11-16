@@ -5,7 +5,7 @@ const state = {
   userId: JSON.parse(localStorage.getItem('userId')) || null,
   token: localStorage.getItem('token') || null,
   isAuthenticated: !!localStorage.getItem('token'),
-  isAdmin: localStorage.getItem('isAdmin') === 'true',
+  isAdmin: false,
   loading: false,
   error: null,
   userInfo: JSON.parse(localStorage.getItem('userInfo')) || null 
@@ -34,17 +34,18 @@ const mutations = {
   },
   AUTH_FAILURE(state, error) {
     state.loading = false
-    state.isAuthenticated = false;
+    /* state.isAuthenticated = false;
     state.userId = null;
-    state.token = null;
+    state.token = null; */
     state.error = error
 /*     localStorage.removeItem('token'); */
   },
   LOGOUT(state) {
-    state.user = null
+    state.userId = null
     state.token = null
     state.isAuthenticated = false
     state.userInfo = null
+    state.isAdmin = false
     localStorage.removeItem('userId')
     localStorage.removeItem('token')
     localStorage.removeItem('isAdmin')
@@ -266,7 +267,7 @@ const actions = {
 const getters = {
   isAuthenticated: state => state.isAuthenticated,
   currentUser: state => state.userId,
-  isAdmin: () => localStorage.getItem('isAdmin') === 'true',
+  isAdmin: state => state.isAdmin,
   authLoading: state => state.loading,
   authError: state => state.error,
   userInfo: state => state.userInfo

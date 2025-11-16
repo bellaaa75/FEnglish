@@ -74,18 +74,35 @@ const form = reactive({
 })
 
 const rules = {
-  userPassword: [{ required: true, message: '请设置密码', trigger: 'blur' }],
+  userPassword: [{ required: true, message: '请输入原密码', trigger: 'blur' },
+    { min: 6, max: 20, message: '密码长度在6-20个字符之间', trigger: 'blur' }
+  ],
   confirmPwd: [
-    { required: true, message: '请确认密码', trigger: 'blur' },
+    { required: true, message: '请输入新密码', trigger: 'blur' },
     { 
-      validator: (rule, value) => value === form.userPassword || '两次密码不一致',
-      trigger: 'blur'
+      validator: (rule, value, callback) => {
+        if (!value) {
+          callback(new Error('请确认新密码'))
+        } else if (value !== form.userPassword) {
+          callback(new Error('两次密码输入不一致，请重新输入'))
+        } else {
+          callback()
+        }
+      },
+      trigger: ['blur', 'change'] // 添加change触发
     }
   ]
 }
 
+
 const handleRegister = async () => {
-  await registerForm.value.validate()
+  try{
+    await registerForm.value.validate()
+  }catch(validateError){
+    const errorMsg = validateError.message || '表单填写有误'
+    ElMessage.error(errorMsg)
+    return
+  }
   loading.value = true
   try {
     const reUserId = await store.dispatch('user/adminRegister', form)
