@@ -128,6 +128,12 @@ const routes = [
         name: 'AdminWordList',
         component: () => import('../views/AdminProfile/WordList.vue'),  // 直接在这里写路径
         meta: { title: '单词管理' }  // 显示在页面标题
+      },
+      {
+      path: 'wordedit/:wordId', // 动态路由参数
+      name: 'AdminWordEdit',
+      component: () => import('@/views/AdminProfile/WordEdit.vue'),
+      meta: { title: '编辑单词' }
       }
     ]
   },
