@@ -15,9 +15,6 @@ const ChangePassword = () => import('../views/IndexProfile/ChangePassword.vue')
 const DeleteUser = () => import('../views/IndexProfile/DeleteUser.vue')
 const CollectWord = () => import('@/views/collect/CollectWord.vue');
 const CollectBook = () => import('@/views/collect/CollectBook.vue');
-const WordAdd = () => import('../views/WordAdd.vue')
-const WordList = () => import('../views/WordList.vue')
-
 
 const routes = [
   {
@@ -111,24 +108,16 @@ const routes = [
         name: 'AdminUserByAdmin',
         component: AdminUserByAdmin,
         meta: { title: '用户信息' } // 子页面标题，用于Profile布局中显示
+      },
+
+      {
+        path: 'wordlist',  // 管理员下的单词列表路径
+        name: 'AdminWordList',
+        component: () => import('../views/AdminProfile/WordList.vue'),  // 直接在这里写路径
+        meta: { title: '单词管理' }  // 显示在页面标题
       }
     ]
   },
-
-  {
-    path: '/word/add',
-    name: 'WordAdd',
-    component: WordAdd,
-    meta: { requiresAuth: true, isAdmin: true } // 假设只有管理员可添加
-  },
-  // 管理员
-  {
-    path: '/word/list',
-    name: 'WordList',
-    component: WordList,
-    meta: { requiresAuth: true }
-  },
-
 
   // 404 路由（避免路由不匹配导致空白）
   {
