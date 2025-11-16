@@ -7,5 +7,5 @@ export default {
   getWordList: () => request.get('/api/words'),
   getWordById: (id) => request.get(`/api/words/${id}`),
   updateWord: (id, wordData) => request.put(`/api/words/${id}`, wordData),
-  deleteWord: (id) => request.delete(`/api/words/${id}`)
+  deleteWord: (id) => request.delete(`/api/words/${id}`),
 }

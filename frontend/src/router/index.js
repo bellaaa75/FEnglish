@@ -16,6 +16,7 @@ const CollectWord = () => import('@/views/collect/CollectWord.vue');
 const CollectBook = () => import('@/views/collect/CollectBook.vue');
 const AdminChangePassword = () => import('../views/AdminProfile/AdminChangePassword.vue')
 const DeleteAdmin = () => import('../views/AdminProfile/DeleteAdmin.vue')
+const VocabularyBookManage = () => import('../views/admin/VocabularyBookManage.vue')
 
 
 const routes = [
@@ -142,6 +143,32 @@ const routes = [
   {
     path: '/:pathMatch(.*)*',
     redirect: '/user/login'
+  },
+
+  //单词书相关路由
+  {
+    path: '/admin',
+    component: AdminProfile, // 包含侧边栏的布局组件
+    children: [
+      {
+        path: 'vocabulary-books',
+        name: 'VocabularyBookManage',
+        component: VocabularyBookManage,
+        meta: { title: '单词书管理' }
+      },
+      {
+        path: 'vocabulary-books/add',
+        name: 'VocabularyBookAdd',
+        component: () => import('../views/admin/VocabularyBookAdd.vue'),
+        meta: { title: '新增单词书' }
+      },
+      {
+        path: 'vocabulary-books/edit/:bookId',
+        name: 'VocabularyBookEdit',
+        component: () => import('../views/admin/VocabularyBookEdit.vue'),
+        meta: { title: '编辑单词书' }
+      }
+    ]
   }
 ]
 

@@ -13,6 +13,12 @@
         <!-- <el-icon><User /></el-icon> -->
         <span>用户账号管理</span>
       </el-menu-item>
+
+      <!-- 新增单词书管理 -->
+      <el-menu-item index="/admin/vocabulary-books">
+        <span>单词书管理</span>
+      </el-menu-item>
+
       <!-- 新增单词管理菜单 -->
       <el-menu-item index="/profile/admin/wordlist">
         <span>单词管理</span>
