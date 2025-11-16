@@ -1,6 +1,8 @@
 package org.example.fenglish.vo.response;
 
 import lombok.Data;
+
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -8,7 +10,7 @@ import java.util.List;
 public class VocabularyBookDetailResp {
     private String bookId;
     private String bookName;
-    private Date publishTime;
+    private LocalDateTime publishTime;
     private List<WordSimpleResp> wordList;  // 关联的单词列表
 
     public String getBookId() {
@@ -27,11 +29,11 @@ public class VocabularyBookDetailResp {
         this.wordList = wordList;
     }
 
-    public Date getPublishTime() {
+    public LocalDateTime getPublishTime() {
         return publishTime;
     }
 
-    public void setPublishTime(Date publishTime) {
+    public void setPublishTime(LocalDateTime publishTime) {
         this.publishTime = publishTime;
     }
 
