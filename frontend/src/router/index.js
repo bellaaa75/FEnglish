@@ -1,4 +1,3 @@
-/* import { pa } from 'element-plus/es/locale' */
 import { createRouter, createWebHistory } from 'vue-router'
 
 // 用 "懒加载" 方式引入组件（推荐，避免空白）
@@ -15,6 +14,9 @@ const ChangePassword = () => import('../views/IndexProfile/ChangePassword.vue')
 const DeleteUser = () => import('../views/IndexProfile/DeleteUser.vue')
 const CollectWord = () => import('@/views/collect/CollectWord.vue');
 const CollectBook = () => import('@/views/collect/CollectBook.vue');
+const AdminChangePassword = () => import('../views/AdminProfile/AdminChangePassword.vue')
+const DeleteAdmin = () => import('../views/AdminProfile/DeleteAdmin.vue')
+
 
 const routes = [
   {
@@ -109,7 +111,18 @@ const routes = [
         component: AdminUserByAdmin,
         meta: { title: '用户信息' } // 子页面标题，用于Profile布局中显示
       },
-
+      {
+        path: 'changepassword', //相对路径
+        name: 'AdminChangePassword',
+        component: AdminChangePassword,
+        meta: { title: '修改密码' } // 子页面标题，用于Profile布局中显示
+      },
+      {
+        path: 'deleteadmin', //相对路径
+        name: 'DeleteAdmin',
+        component: DeleteAdmin,
+        meta: { title: '注销账号' } // 子页面标题，用于Profile布局中显示
+      },
       {
         path: 'wordlist',  // 管理员下的单词列表路径
         name: 'AdminWordList',

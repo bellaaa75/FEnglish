@@ -1,12 +1,12 @@
 <!-- 右侧操作栏组件 -->
  <template>
   <el-aside width="150px" class="action-sidebar">
-    <div class="user-avatar">ADMIN</div>
+    <div class="user-avatar">A</div>
    <!--  个人信息直接改为显示用户ID -->
     <el-menu class="action-menu" router>
-      <el-menu-item >{{ userId }}</el-menu-item>
-      <el-menu-item index="/profile/admin/password">修改密码</el-menu-item>
-      <el-menu-item index="/profile/admin/delete">注销账号</el-menu-item>
+      <el-menu-item index="/profile/admin/userbyadmin">{{ userId }}</el-menu-item>
+      <el-menu-item index="/profile/admin/changepassword">修改密码</el-menu-item>
+      <el-menu-item index="/profile/admin/deleteadmin">注销账号</el-menu-item>
       <el-menu-item @click="handleLogout">退出登录</el-menu-item>
     </el-menu>
   </el-aside>
