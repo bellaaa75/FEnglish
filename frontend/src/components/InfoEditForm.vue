@@ -1,6 +1,6 @@
 <template>
   <div class="profile-info">
-    <h3 class="section-title">修改个人信息</h3>
+    <h3 class="section-title">编辑个人信息</h3>
     <el-row :gutter="30" class="info-row">
       <!-- 用户ID（不可修改） -->
       <el-col :span="12">

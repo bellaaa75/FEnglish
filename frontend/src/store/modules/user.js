@@ -97,8 +97,9 @@ const actions = {
       })
       return res.userId
     } catch (error) {
-      commit('AUTH_FAILURE', error.message || '注册失败')
-      throw error
+      const errorMsg = error.message || '注册失败'
+      commit('AUTH_FAILURE', errorMsg)
+      throw new Error(errorMsg);
     }
   },
 
@@ -116,8 +117,9 @@ const actions = {
       })
       return res.userId
     } catch (error) {
-      commit('AUTH_FAILURE', error.message || '管理员登录失败')
-      throw error
+      const errorMsg = error.message || '管理员登录失败'
+      commit('AUTH_FAILURE', errorMsg)
+      throw new Error(errorMsg);
     }
   },
 
@@ -135,8 +137,9 @@ const actions = {
       })
       return res.userId
     } catch (error) {
-      commit('AUTH_FAILURE', error.message || '管理员注册失败')
-      throw error
+      const errorMsg = error.message || '管理员注册失败'
+      commit('AUTH_FAILURE', errorMsg)
+      throw new Error(errorMsg);
     }
   },
   //获取用户信息
@@ -193,10 +196,67 @@ const actions = {
       // 处理错误，调用 mutation 保存错误信息
       const errorMsg = error.message || '网络错误，更新失败'
       commit('AUTH_FAILURE', errorMsg)
-      throw error // 将错误向上抛出，以便组件捕获
+      throw new Error(errorMsg); // 将错误向上抛出，以便组件捕获
     }
   },
+  //修改密码
+  async changePassword({ commit }, { oldPassword, newPassword }) {
+    try {
+      commit('AUTH_REQUEST')
+      // 调用后端修改密码接口
+      const res = await request.put('/api/user/password', { oldPassword, newPassword })
+      if (res.success) {
+        console.log('密码修改成功')
+        return res
+      } else {
+        throw new Error(res.message || '密码修改失败')
+      }
+    } catch (error) {
+      const errorMsg = error.message || '密码修改异常'
+      commit('AUTH_FAILURE', errorMsg)
+      throw new Error(errorMsg);
+    }
+  },
+  // 注销账号
+  async cancelAccount({ commit, state }, password) {
+    try {
+      commit('AUTH_REQUEST');
 
+      if (!state.token) {
+        throw new Error('用户未登录');
+      }
+
+      // 构造要发送给后端的数据
+      const requestData = {
+        password: password
+      };
+
+      // 关键修正：使用 config.data 来传递请求体
+      const res = await request.delete('/api/user/account', {
+        data: requestData // 将数据放在 config.data 中
+      });
+
+      if (res.success) {
+        commit('LOGOUT');
+        return res;
+      } else {
+        throw new Error(res.message || '注销失败');
+      }
+    } catch (error) {
+      console.error('注销账号错误:', error);
+      
+      // 错误处理逻辑
+      let errorMsg = error.message || '注销异常';
+      if (error.response && error.response.status === 400) {
+        errorMsg = '密码错误或参数无效';
+      } else if (error.response && error.response.status === 500) {
+        errorMsg = '服务器内部错误，请稍后重试';
+      }
+
+      commit('AUTH_FAILURE', errorMsg);
+      throw new Error(errorMsg);
+    }
+  },
   // 登出
   logout({ commit }) {
     commit('LOGOUT')

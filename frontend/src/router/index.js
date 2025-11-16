@@ -68,19 +68,19 @@ const routes = [
         path: 'infoedit', //相对路径
         name: 'InfoEdit',
         component: InfoEdit,
-        meta: {requiresAuth: true, title: '编辑资料' } // 子页面标题，用于Profile布局中显示
+        meta: {requiresAuth: true, title: '我的账号' } // 子页面标题，用于Profile布局中显示
       },
       {
         path: 'changepassword', //相对路径
         name: 'ChangePassword',
         component: ChangePassword,
-        meta: {requiresAuth: true, title: '修改密码' } // 子页面标题，用于Profile布局中显示
+        meta: {requiresAuth: true, title: '我的账号' } // 子页面标题，用于Profile布局中显示
       },
       {
         path: 'deleteuser', //相对路径
         name: 'DeleteUser',
         component: DeleteUser,
-        meta: {requiresAuth: true, title: '注销账号' } // 子页面标题，用于Profile布局中显示
+        meta: {requiresAuth: true, title: '我的账号' } // 子页面标题，用于Profile布局中显示
       },
       {
         path: 'collect-word', // 添加 collect-word 子路径

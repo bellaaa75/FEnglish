@@ -1,7 +1,7 @@
 <template>
   <div class="profile-container">
     <el-container class="main-content">
-      <el-header class="page-header">个人信息管理</el-header>
+      <!-- <el-header class="page-header">修改密码</el-header> -->
       <!-- 个人信息展示（组件） -->
       <ChangePassword />
     </el-container>

@@ -2,12 +2,13 @@
   <div class="profile-container">
     <!-- 中间内容区 -->
     <el-container class="main-content">
-      <el-header class="page-header">注销账号</el-header>
+      <el-row :gutter="30" class="info-row"></el-row>
+      <el-header class="section-title">注销账号</el-header>
       <el-main class="cancel-account">
         <div class="verify-form">
           <div class="verify-title">
             <span>请输入密码以验证身份</span>
-            <el-button type="text" class="verify-switch">手机/邮箱验证</el-button>
+            <el-button type="text" class="verify-switch"></el-button>
           </div>
           <el-form ref="passwordForm" :model="form" :rules="rules" class="password-form">
             <el-form-item prop="password">
@@ -88,6 +89,16 @@ const handleCancelAccount = async () => {
 </script>
 
 <style scoped>
+.info-row {
+  margin-bottom: 25px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 20px;
+  color: #409eff;
+}
 .cancel-account {
   padding: 40px;
   display: flex;

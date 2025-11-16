@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
+/* import { th } from 'element-plus/es/locale' */
 
 // 1. 创建实例
 const request = axios.create({
@@ -42,10 +43,12 @@ request.interceptors.response.use(
       const err = new Error(res.message)
       err.code = res.code // 携带后端错误码，可做特殊处理
       throw err
+      /* return Promise.reject(new Error(res.message || '请求失败')); */
     }
   },
   error => {
     // 处理认证失败情况
+    console.error('err' + error); 
     if (error.response?.status === 401) {
       ElMessage.error('登录已过期，请重新登录')
       // 可以在这里跳转到登录页
@@ -56,7 +59,7 @@ request.interceptors.response.use(
     }
     const msg = error.response?.data?.message || error.message || '网络异常'
     ElMessage.error(msg)
-    throw error
+    return Promise.reject(new Error(msg)); 
   }
 )
 

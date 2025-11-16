@@ -1,7 +1,8 @@
 <template>
   <div class="profile-container">
     <el-container class="main-content">
-        <el-header class="page-header">修改密码</el-header>
+      <el-row :gutter="30" class="info-row"></el-row>
+        <el-header class="section-title">修改密码</el-header>
         <el-main class="change-password">
         <el-form ref="passwordForm" :model="form" :rules="rules" class="password-form">
           <!-- 原密码 -->
@@ -37,11 +38,11 @@
               @click:suffix="showConfirmPwd = !showConfirmPwd"
             ></el-input>
           </el-form-item>
-          <!-- 验证方式切换 -->
+          <!-- 验证方式切换,这里先省略 -->
           <el-form-item>
             <div class="verify-switch">
-              <span>请输入原密码</span>
-              <el-button type="text" @click="toggleVerify">手机/邮箱验证</el-button>
+              <span>请牢记新密码，谨慎修改</span>
+              <el-button type="text" @click="toggleVerify"></el-button>
             </div>
           </el-form-item>
           <!-- 确认按钮 -->
@@ -64,12 +65,12 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
+/* import { useRouter } from 'vue-router' */
 import { ElMessage } from 'element-plus'
 
 
 const store = useStore()
-const router = useRouter()
+/* const router = useRouter() */
 const passwordForm = ref(null)
 const showOldPwd = ref(false)
 const showNewPwd = ref(false)
@@ -92,34 +93,81 @@ const rules = {
   confirmNewPassword: [
     { required: true, message: '请确认新密码', trigger: 'blur' },
     { 
-      validator: (rule, value) => value === form.newPassword || '两次密码不一致',
-      trigger: 'blur'
+      validator: (rule, value, callback) => {
+        if (!value) {
+          callback(new Error('请确认新密码'))
+        } else if (value !== form.newPassword) {
+          callback(new Error('两次密码不一致'))
+        } else {
+          callback()
+        }
+      },
+      trigger: ['blur', 'change'] // 添加change触发
     }
   ]
 }
 
-// 切换验证方式（密码/手机邮箱）
+// 切换验证方式
 const toggleVerify = () => {
   isPwdVerify.value = !isPwdVerify.value
-  // 切换时重置表单（可选）
-  passwordForm.value?.resetFields()
+  // 重置表单
+  Object.assign(form, {
+    oldPassword: '',
+    newPassword: '',
+    confirmNewPassword: ''
+  })
+  if (passwordForm.value) {
+    passwordForm.value.clearValidate()
+  }
 }
 
 // 处理修改密码逻辑
 const handleChangePassword = async () => {
-  await passwordForm.value.validate()
-  loading.value = true
   try {
-    // 调用Vuex中修改密码的action（需在user.js中定义）
+    // 先验证表单
+    const valid = await passwordForm.value.validate()
+    if (!valid) return
+    
+    loading.value = true
+    
+    // 调用Vuex中修改密码的action
     await store.dispatch('user/changePassword', {
       oldPassword: form.oldPassword,
       newPassword: form.newPassword
     })
-    ElMessage.success('密码修改成功，请重新登录')
-    store.dispatch('user/logout') // 登出并跳转登录页
-    router.push('/user/login')
+    
+    ElMessage.success('密码修改成功')
+    
+    // 重置表单
+    Object.assign(form, {
+      oldPassword: '',
+      newPassword: '',
+      confirmNewPassword: ''
+    })
+    passwordForm.value.clearValidate()
+    
+    /* // 如果需要登出并跳转登录页
+    store.dispatch('user/logout')
+    router.push('/user/login') */
+    
   } catch (error) {
-    ElMessage.error(store.getters['user/authError'] || '密码修改失败')
+    console.log('密码修改错误：', error)
+    
+    // 更健壮的错误处理
+    let errorMessage = '密码修改失败'
+    
+    if (error && error.response) {
+      // HTTP 错误
+      errorMessage = error.response.data?.message || errorMessage
+    } else if (error && error.message) {
+      // JavaScript 错误
+      errorMessage = error.message
+    } else if (typeof error === 'string') {
+      // 字符串错误
+      errorMessage = error
+    }
+    
+    ElMessage.error(errorMessage)
   } finally {
     loading.value = false
   }
@@ -127,11 +175,20 @@ const handleChangePassword = async () => {
 </script>
 
 <style scoped>
+.info-row {
+  margin-bottom: 25px;
+}
 .change-password {
   padding: 40px;
   display: flex;
   justify-content: center;
   align-items: flex-start;
+}
+.section-title {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 20px;
+  color: #409eff;
 }
 .password-form {
   max-width: 400px;

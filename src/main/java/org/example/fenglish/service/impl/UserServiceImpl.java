@@ -260,7 +260,9 @@ public class UserServiceImpl implements UserService {
 
             if (userInfo.containsKey("phoneNumber")) {
                 String newPhone = userInfo.get("phoneNumber");
-                if (!newPhone.equals(user.getPhoneNumber()) &&
+                if(newPhone == null || newPhone.isEmpty()) {
+                    
+                }else if (!newPhone.equals(user.getPhoneNumber()) &&
                         ordinaryUserRepository.existsByPhoneExcludingUser(newPhone, userID)) {
                     result.put("success", false);
                     result.put("message", "手机号已被使用");
