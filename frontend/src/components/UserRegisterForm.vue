@@ -113,7 +113,7 @@ const handleRegister = async () => {
   try{
     await registerForm.value.validate()
   }catch(validateError){
-    const errorMsg = validateError.message || '填写有误'
+    const errorMsg = validateError.message || '注册失败'
     ElMessage.error(errorMsg)
     return
   }
