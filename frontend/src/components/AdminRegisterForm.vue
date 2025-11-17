@@ -53,7 +53,16 @@
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="dialogVisible = false">关闭</el-button>
-        <el-button type="primary" @click="dialogVisible = false; $router.push('/admin/login')">
+        <el-button type="primary" @click="dialogVisible = false; $router.push('/admin/login')"
+        style="
+      background-color: #9332c7; 
+      border-color: #9332c7;
+    "
+    :style="{
+      '--el-button-hover-bg-color': '#7a28a8',
+      '--el-button-active-bg-color': '#6b2296'
+    }"
+        >
           确认并登录
         </el-button>
       </div>
