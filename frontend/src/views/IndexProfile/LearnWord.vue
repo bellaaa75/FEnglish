@@ -1,5 +1,4 @@
 <template>
-  <!-- 模板部分不变 -->
   <el-container class="learn-word-container">
     <el-main class="learn-content">
       <div class="word-display">
@@ -32,6 +31,12 @@
         >
           直接查看释义
         </el-button>
+        <!-- 新增：熟练掌握复选框 -->
+        <div style="margin-top:12px;">
+          <el-checkbox v-model="mastered" @change="onMasteredChange">
+            熟练掌握
+          </el-checkbox>
+        </div>
       </div>
     </el-main>
   </el-container>
@@ -42,15 +47,34 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import axios from 'axios';
+import learningStateService from '@/services/learningStateService'
 
 // 路由相关
 const route = useRoute();
 const router = useRouter();
 
+// 获取并规范化 userId（处理可能误存为带引号的字符串）
+const getUserId = () => {
+  const raw = localStorage.getItem('userId');
+  if (!raw) return null;
+  try {
+    // 如果是被 JSON.stringify 的字符串（如 "OU_xxx"），JSON.parse 会还原
+    const parsed = JSON.parse(raw);
+    if (typeof parsed === 'string') return parsed;
+  } catch (e) {
+    // ignore
+  }
+  // 兜底：去掉首尾双引号
+  return raw.replace(/^"|"$/g, '');
+}
+
 // 数据状态
 const currentWord = ref({});
 const options = ref([]);
 const selectedIndex = ref(null);
+const mastered = ref(false);                // 复选框绑定
+const learningStateExists = ref(false);     // 是否存在后端记录
+let currentLearningState = null;            // 存放后端 LearningStateDTO
 
 // 修复：直接使用固定基础路径（去掉环境变量）
 const BACKEND_BASE_URL = 'http://localhost:8080/api';
@@ -122,6 +146,8 @@ const initData = async () => {
       optionList.push({ explain: `选项 ${optionList.length + 1}（默认）`, isCorrect: false });
     }
     options.value = optionList.sort(() => 0.5 - Math.random());
+    // 加载当前用户该单词的学习状态（若用户已登录）
+    await loadLearningState();
 
   } catch (error) {
     console.error('初始化失败:', error);
@@ -152,10 +178,147 @@ const goToDetail = () => {
 };
 
 onMounted(initData);
+
+/**
+ * 加载用户对当前单词的学习状态
+ */
+const loadLearningState = async () => {
+  const userId = getUserId();
+  const wordId = currentWord.value.wordId;
+  console.log('[LearnWord] loadLearningState: userId =', userId, ', wordId =', wordId);
+  if (!userId || !wordId) {
+    console.warn('[LearnWord] userId or wordId missing, skipping loadLearningState');
+    learningStateExists.value = false;
+    mastered.value = false;
+    return;
+  }
+
+  try {
+    const res = await learningStateService.getLearningState(userId, wordId);
+    console.log('[LearnWord] loadLearningState raw response:', res);
+    // request 拦截器返回的是 { success: true, data: {...} }，需要访问 .data
+    const dto = res?.data || null;
+    if (dto) {
+      learningStateExists.value = true;
+      currentLearningState = dto;
+      console.log('[LearnWord] loadLearningState: learnState =', dto.learnState, ', mastered =', dto.learnState === '熟练掌握');
+      mastered.value = (dto.learnState === '熟练掌握');
+    } else {
+      console.log('[LearnWord] loadLearningState: no learning state found');
+      learningStateExists.value = false;
+      mastered.value = false;
+    }
+  } catch (err) {
+    console.error('[LearnWord] 加载学习状态失败:', err.message || err);
+    learningStateExists.value = false;
+    mastered.value = false;
+  }
+};
+
+/**
+ * 勾选/取消勾选回调
+ */
+const onMasteredChange = async (checked) => {
+  const userId = getUserId();
+  const wordId = currentWord.value.wordId;
+  console.log('[LearnWord] onMasteredChange: checked =', checked, ', userId =', userId, ', wordId =', wordId);
+  if (!userId || !wordId) {
+    ElMessage.warning('请先登录后再修改学习状态');
+    mastered.value = !!(currentLearningState && currentLearningState.learnState === '熟练掌握');
+    return;
+  }
+
+  try {
+    if (checked) {
+      // 勾选"熟练掌握"
+      console.log('[LearnWord] onMasteredChange: 勾选操作，learningStateExists =', learningStateExists.value);
+      if (learningStateExists.value && currentLearningState) {
+        // 情况1：记录存在 → 直接更新为"熟练掌握"
+        console.log('[LearnWord] 记录存在，直接更新为熟练掌握');
+        const updateRes = await learningStateService.updateLearningState(userId, wordId, '熟练掌握');
+        console.log('[LearnWord] updateLearningState result:', updateRes);
+        if (updateRes?.data === false) {
+          // 如果更新失败，可能记录已被删除，尝试新增
+          console.log('[LearnWord] 更新失败，尝试新增记录');
+          const addRes = await learningStateService.addLearningState(userId, wordId);
+          if (addRes?.data === false) {
+            throw new Error('无法创建学习记录');
+          }
+          const updateRes2 = await learningStateService.updateLearningState(userId, wordId, '熟练掌握');
+          if (updateRes2?.data === false) {
+            throw new Error('无法更新学习状态为熟练掌握');
+          }
+        }
+        currentLearningState.learnState = '熟练掌握';
+        learningStateExists.value = true;
+        ElMessage.success('已标记为熟练掌握');
+      } else {
+        // 情况2：记录不存在 → 先新增，再更新为"熟练掌握"
+        console.log('[LearnWord] 记录不存在，先新增后更新为熟练掌握');
+        const addRes = await learningStateService.addLearningState(userId, wordId);
+        console.log('[LearnWord] addLearningState result:', addRes);
+        if (addRes?.data === false) {
+          throw new Error('后端新增失败，用户或单词可能不存在');
+        }
+        const updateRes = await learningStateService.updateLearningState(userId, wordId, '熟练掌握');
+        console.log('[LearnWord] updateLearningState result:', updateRes);
+        if (updateRes?.data === false) {
+          throw new Error('后端更新为熟练掌握失败');
+        }
+        learningStateExists.value = true;
+        currentLearningState = { userId, wordId, learnState: '熟练掌握' };
+        ElMessage.success('已创建学习记录并标记为熟练掌握');
+      }
+    } else {
+      // 取消勾选"熟练掌握" → 更新为"已学"
+      console.log('[LearnWord] onMasteredChange: 取消勾选操作，learningStateExists =', learningStateExists.value);
+      if (learningStateExists.value && currentLearningState) {
+        // 情况1：记录存在 → 直接更新为"已学"
+        console.log('[LearnWord] 记录存在，直接更新为已学');
+        const updateRes = await learningStateService.updateLearningState(userId, wordId, '已学');
+        console.log('[LearnWord] updateLearningState result:', updateRes);
+        if (updateRes?.data === false) {
+          // 如果更新失败，可能记录已被删除，尝试新增
+          console.log('[LearnWord] 更新失败，尝试新增记录');
+          const addRes = await learningStateService.addLearningState(userId, wordId);
+          if (addRes?.data === false) {
+            throw new Error('无法创建学习记录');
+          }
+          const updateRes2 = await learningStateService.updateLearningState(userId, wordId, '已学');
+          if (updateRes2?.data === false) {
+            throw new Error('无法更新学习状态为已学');
+          }
+        }
+        currentLearningState.learnState = '已学';
+        learningStateExists.value = true;
+        ElMessage.success('已更新为已学');
+      } else {
+        // 情况2：记录不存在 → 先新增，再更新为"已学"
+        console.log('[LearnWord] 记录不存在，先新增后更新为已学');
+        const addRes = await learningStateService.addLearningState(userId, wordId);
+        console.log('[LearnWord] addLearningState result:', addRes);
+        if (addRes?.data === false) {
+          throw new Error('后端新增失败，用户或单词可能不存在');
+        }
+        const updateRes = await learningStateService.updateLearningState(userId, wordId, '已学');
+        console.log('[LearnWord] updateLearningState result:', updateRes);
+        if (updateRes?.data === false) {
+          throw new Error('后端更新为已学失败');
+        }
+        learningStateExists.value = true;
+        currentLearningState = { userId, wordId, learnState: '已学' };
+        ElMessage.success('已创建学习记录并标记为已学');
+      }
+    }
+  } catch (err) {
+    console.error('[LearnWord] 修改学习状态失败:', err.message || err);
+    ElMessage.error('修改学习状态失败：' + (err.message || err));
+    mastered.value = !!(currentLearningState && currentLearningState.learnState === '熟练掌握');
+  }
+};
 </script>
 
 <style scoped>
-/* 样式部分不变 */
 .learn-word-container {
   height: 100vh;
   background-color: #f5f7fa;

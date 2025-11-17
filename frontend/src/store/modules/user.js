@@ -2,7 +2,7 @@
 import request from '@/utils/request' 
 
 const state = {
-  userId: JSON.parse(localStorage.getItem('userId')) || null,
+  userId: localStorage.getItem('userId') || null,
   token: localStorage.getItem('token') || null,
   isAuthenticated: !!localStorage.getItem('token'),
   isAdmin: false,
@@ -21,7 +21,7 @@ const mutations = {
     state.isAuthenticated = !!token
     state.userId = userId
     state.token = token
-    localStorage.setItem('userId', JSON.stringify(userId))
+    localStorage.setItem('userId', userId)
     if (token) {
       localStorage.setItem('token', token);
     }
