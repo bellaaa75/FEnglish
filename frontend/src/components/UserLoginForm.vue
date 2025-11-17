@@ -28,9 +28,23 @@
       </el-button>
     </el-form-item>
     <div class="text-center mt-2">
-      <span>还没有账号? <el-link @click="$router.push('/user/register')">去注册</el-link></span>
-      <el-link @click="$router.push('/admin/login')" type="info" class="ml-4">管理员入口</el-link>
+    <el-link 
+      @click="$router.push('/user/register')"
+      style="color:#409EFF; font-size: inherit; vertical-align: middle; --el-link-hover-color: var(--el-color-primary); text-decoration: none;"
+    >
+      去注册
+    </el-link>
     </div>
+<!-- 第二行：管理员入口（独占一行，居中） -->
+<div class="text-center mt-1">
+  <el-link 
+    @click="$router.push('/admin/login')" 
+    style="color: #9332c7;"
+    type="info"
+  >
+    管理员入口
+  </el-link>
+</div>
   </el-form>
 </template>
 
