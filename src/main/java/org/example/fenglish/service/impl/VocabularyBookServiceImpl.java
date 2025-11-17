@@ -32,7 +32,7 @@ public class VocabularyBookServiceImpl implements VocabularyBookService {
 
     // 1. 新增单词书
     @Override
-    public void addVocabularyBook(VocabularyBookAddReq req, String adminId) {
+    public void addVocabularyBook(VocabularyBookAddReq req) {
         // 校验1：单词书名称是否已存在
         if (vocabularyBookRepository.existsByBookName(req.getBookName())) {
             throw new IllegalArgumentException("单词书名称已存在，请更换名称");
@@ -51,7 +51,7 @@ public class VocabularyBookServiceImpl implements VocabularyBookService {
 
     // 2. 删除单词书（同步删除关联的单词记录）
     @Override
-    public void deleteVocabularyBook(String bookId, String adminId) {
+    public void deleteVocabularyBook(String bookId) {
         // 校验：单词书是否存在
         VocabularyBook book = vocabularyBookRepository.findById(bookId)
                 .orElseThrow(() -> new EntityNotFoundException("单词书不存在，无法删除"));
@@ -63,7 +63,7 @@ public class VocabularyBookServiceImpl implements VocabularyBookService {
 
     // 3. 修改单词书
     @Override
-    public void updateVocabularyBook(String bookId, VocabularyBookUpdateReq req, String adminId) {
+    public void updateVocabularyBook(String bookId, VocabularyBookUpdateReq req) {
         // 校验1：单词书是否存在
         VocabularyBook book = vocabularyBookRepository.findById(bookId)
                 .orElseThrow(() -> new EntityNotFoundException("单词书不存在，无法修改"));

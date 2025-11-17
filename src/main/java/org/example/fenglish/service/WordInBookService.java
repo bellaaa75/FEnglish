@@ -1,13 +1,11 @@
 package org.example.fenglish.service;
 
-import org.example.fenglish.entity.EnglishWords;
 import org.example.fenglish.entity.VocabularyBook;
 import org.example.fenglish.entity.WordInBook;
 import org.example.fenglish.repository.EnglishWordsRepository;
 import org.example.fenglish.repository.VocabularyBookRepository;
 import org.example.fenglish.repository.WordInBookRepository;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -27,7 +25,7 @@ public class WordInBookService {
     }
 
     // 1. 向单词书添加单词
-    public void addWordToBook(String bookId, String wordId, String adminId) {
+    public void addWordToBook(String bookId, String wordId) {
         // 校验1：单词书是否存在
         VocabularyBook book = vocabularyBookRepository.findById(bookId)
                 .orElseThrow(() -> new EntityNotFoundException("单词书不存在"));
@@ -48,7 +46,7 @@ public class WordInBookService {
     }
 
     // 2. 从单词书删除单词
-    public void deleteWordFromBook(String bookId, String wordId, String adminId) {
+    public void deleteWordFromBook(String bookId, String wordId) {
         // 校验1：单词书是否存在且有权操作
         VocabularyBook book = vocabularyBookRepository.findById(bookId)
                 .orElseThrow(() -> new EntityNotFoundException("单词书不存在"));
