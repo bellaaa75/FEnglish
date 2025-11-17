@@ -93,8 +93,19 @@ const routes = [
         name: 'CollectBook',
         component: CollectBook,
         meta: { title: '我的单词书' } // 子页面标题，用于Profile布局中显示
+      },
+      // 学习广场路由
+      {
+        path: 'plaza',
+        name: 'LearningPlaza',  // 同步修改名称
+        component: () => import('../views/IndexProfile/LearningPlaza.vue')  // 修正路径
+      },
+      // 学习记录路由
+      {
+        path: 'record',
+        name: 'StudyRecord',  // 同步修改名称
+        component: () => import('../views/IndexProfile/StudyRecord.vue')  // 修正路径
       }
-
     ]
   },
   // 管理员

@@ -13,10 +13,10 @@
         <!-- <el-icon><User /></el-icon> -->
         <span>我的账号</span>
       </el-menu-item>
-      <!-- <el-menu-item index="/plaza">
+      <el-menu-item index="/profile/plaza">
         <el-icon><Grid /></el-icon>
         <span>学习广场</span>
-      </el-menu-item> -->
+      </el-menu-item>
       <el-menu-item index="/profile/collect-word">
         <el-icon><Star /></el-icon>
         <span>收藏单词</span>
@@ -25,10 +25,10 @@
         <el-icon><Book /></el-icon>
         <span>我的单词书</span>
       </el-menu-item>
-      <!-- <el-menu-item index="/record">
+      <el-menu-item index="/profile/record">
         <el-icon><EditPen /></el-icon>
         <span>学习记录</span>
-      </el-menu-item> -->
+      </el-menu-item>
     </el-menu>
   </el-aside>
 </template>
