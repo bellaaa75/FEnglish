@@ -32,7 +32,7 @@
           直接查看释义
         </el-button>
         <!-- 开发用：手动触发新增学习记录（仅在调试时可用） -->
-        <el-button v-if="process.env.NODE_ENV === 'development'" type="info" @click="testAddStudyRecord" style="margin-left:12px;">测试：新增学习记录</el-button>
+        <el-button v-if="isDev" type="info" @click="testAddStudyRecord" style="margin-left:12px;">测试：新增学习记录</el-button>
         <!-- 新增：熟练掌握复选框 -->
         <div style="margin-top:12px;">
           <el-checkbox v-model="mastered" @change="onMasteredChange">
@@ -55,6 +55,9 @@ import studyRecordService from '@/services/studyRecordService'
 // 路由相关
 const route = useRoute();
 const router = useRouter();
+
+// 环境检测（避免在模板里直接访问 process.env，防止 runtime 报错）
+const isDev = (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'development') || (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.MODE === 'development');
 
 // 获取并规范化 userId（处理可能误存为带引号的字符串）
 const getUserId = () => {
