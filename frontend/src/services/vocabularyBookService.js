@@ -6,9 +6,13 @@ export default {
   // 无关键词时，传递空字符串触发全量分页查询
     return request.get(`/api/vocabulary-books/search?name=&page=${page}&size=${size}`);
   },
-  searchBooks: (keyword, page = 1, size = 10) => {
-    return request.get(`/api/vocabulary-books/search?name=${keyword}&page=${page}&size=${size}`);
-  },
+searchBooks: (keyword = '', page = 1, size = 10) => request.get('/api/vocabulary-books/search', {
+  params: {
+    name: keyword,  // 对应后端@RequestParam("name")
+    page: page,     // 对应后端@RequestParam("page")
+    size: size      // 对应后端@RequestParam("size")
+  }
+}),
   // 删除单词书
   deleteBook: (bookId) => request.delete(`/api/vocabulary-books/${bookId}`),
   // 新增单词书

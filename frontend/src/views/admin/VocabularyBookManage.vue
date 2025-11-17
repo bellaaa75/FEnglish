@@ -60,13 +60,36 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
+// 日期格式化函数（兼容iOS解析bug）
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    dateString = dateString.replace(/-/g, '/');
+    return new Date(dateString).toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+  return date.toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
 // 搜索关键词
 const searchKeyword = ref('')
 // 单词书列表数据
 const bookList = ref([])
 // 加载状态
 const loading = ref(false)
-//声明pageInfo
+// 分页信息
 const pageInfo = ref({
   currentPage: 1,
   pageSize: 10,
@@ -78,60 +101,46 @@ onMounted(() => {
   fetchBookList()
 })
 
-// 获取单词书列表
+// 获取单词书列表（空关键词查询全部）
 const fetchBookList = async () => {
   try {
     loading.value = true
-    console.log('请求参数：', {
-      keyword: '',
-      page: pageInfo.value.currentPage,
-      size: pageInfo.value.pageSize
-    })
-    // 调用搜索接口（空关键词查全部）
     const response = await vocabularyBookService.searchBooks(
       '', 
       pageInfo.value.currentPage, 
       pageInfo.value.pageSize
     )
-    console.log('接口返回数据：', response) // 确认拿到data.list和data.total
-    
-    // 直接解析后端返回的data字段（完全匹配你的响应格式）
-    bookList.value = response.data.list || [] // 后端data.list
-    pageInfo.value.total = response.data.total || 0 // 后端data.total
-    
-    console.log('解析后列表：', bookList.value)
-    console.log('总条数：', pageInfo.value.total)
+    bookList.value = response.data.list || []
+    pageInfo.value.total = response.data.total || 0
   } catch (error) {
-    console.error('获取单词书列表失败详情：', error)
     ElMessage.error('获取单词书列表失败：' + (error.message || '未知错误'))
   } finally {
     loading.value = false
   }
 }
 
-// 修复：定义searchBooks函数（之前未定义）
+// 搜索单词书（带关键词）
 const searchBooks = async () => {
   try {
     loading.value = true
     const response = await vocabularyBookService.searchBooks(
-      searchKeyword.value,
+      searchKeyword.value.trim(),
       pageInfo.value.currentPage,
       pageInfo.value.pageSize
-    )
+    );
     bookList.value = response.data.list || []
     pageInfo.value.total = response.data.total || 0
   } catch (error) {
-    console.error('搜索单词书失败：', error)
     ElMessage.error('搜索失败：' + (error.message || '未知错误'))
   } finally {
     loading.value = false
   }
 }
 
-// 搜索单词书
+// 搜索触发（重置到第一页）
 const handleSearch = () => {
-  pageInfo.value.currentPage = 1 // 搜索重置到第一页
-  searchBooks() // 调用上面定义的searchBooks
+  pageInfo.value.currentPage = 1
+  searchBooks()
 }
 
 // 新增单词书
@@ -161,8 +170,7 @@ const handleDelete = async (bookId) => {
     ElMessage.success('删除成功')
     fetchBookList() // 重新加载列表
   } catch (error) {
-    if (error === 'cancel') return // 用户取消操作
-    console.error('删除失败:', error)
+    if (error === 'cancel') return // 忽略用户取消操作
     ElMessage.error('删除失败')
   }
 }
@@ -170,13 +178,13 @@ const handleDelete = async (bookId) => {
 // 分页大小改变
 const handleSizeChange = (size) => {
   pageInfo.value.pageSize = size
-  searchBooks() // 调用定义好的searchBooks
+  searchBooks()
 }
 
 // 当前页改变
 const handleCurrentChange = (page) => {
   pageInfo.value.currentPage = page
-  searchBooks() // 调用定义好的searchBooks
+  searchBooks()
 }
 
 </script>
