@@ -2,9 +2,13 @@ import request from '@/utils/request'
 
 export default {
   // 获取单词书列表
-  getBookList: () => request.get('/api/vocabulary-books'),
-  // 搜索单词书
-  searchBooks: (keyword) => request.get(`/api/vocabulary-books/search?name=${keyword}`),
+  getBookList: (page = 1, size = 10) => {
+  // 无关键词时，传递空字符串触发全量分页查询
+    return request.get(`/api/vocabulary-books/search?name=&page=${page}&size=${size}`);
+  },
+  searchBooks: (keyword, page = 1, size = 10) => {
+    return request.get(`/api/vocabulary-books/search?name=${keyword}&page=${page}&size=${size}`);
+  },
   // 删除单词书
   deleteBook: (bookId) => request.delete(`/api/vocabulary-books/${bookId}`),
   // 新增单词书
@@ -16,5 +20,6 @@ export default {
   // 获取单词书详情
   getBookDetail: (bookId) => request.get(`/api/vocabulary-books/${bookId}`),
   // 更新单词书
-  updateBook: (bookId, bookData) => request.put(`/api/vocabulary-books/${bookId}`, bookData)
+  updateBook: (bookId, bookData) => {
+  return request.put(`/api/vocabulary-books/${bookId}`, bookData)}
 }
