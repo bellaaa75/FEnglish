@@ -1,6 +1,6 @@
 <template>
   <div class="plaza-container">
-    <h3>学习广场</h3>
+    <h3>学习记录</h3>
     <!-- 后续内容将在这里添加 -->
   </div>
 </template>

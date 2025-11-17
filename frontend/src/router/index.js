@@ -105,6 +105,19 @@ const routes = [
         path: 'record',
         name: 'StudyRecord',  // 同步修改名称
         component: () => import('../views/IndexProfile/StudyRecord.vue')  // 修正路径
+      },
+      {
+        path: 'learn-word/:wordId',
+        name: 'LearnWord',
+        component: () => import('../views/IndexProfile/LearnWord.vue'),
+        meta: { title: '学习单词', requiresAuth: true }
+      },
+      // 单词详情页（复用或新建）
+      {
+        path: 'word-detail/:wordId',
+        name: 'WordDetail',
+        component: () => import('../views/IndexProfile/WordDetail.vue'), // 需创建
+        meta: { title: '单词详情', requiresAuth: true }
       }
     ]
   },
