@@ -12,8 +12,8 @@ const AdminUserByAdmin = () => import('../views/AdminProfile/UserByAdmin.vue')
 const InfoEdit = () => import('../views/IndexProfile/InfoEdit.vue')
 const ChangePassword = () => import('../views/IndexProfile/ChangePassword.vue')
 const DeleteUser = () => import('../views/IndexProfile/DeleteUser.vue')
-const CollectWord = () => import('@/views/collect/CollectWord.vue');
-const CollectBook = () => import('@/views/collect/CollectBook.vue');
+const CollectWord = () => import('@/views/IndexProfile/CollectWord.vue');
+const CollectBook = () => import('@/views/IndexProfile/CollectBook.vue');
 const AdminChangePassword = () => import('../views/AdminProfile/AdminChangePassword.vue')
 const DeleteAdmin = () => import('../views/AdminProfile/DeleteAdmin.vue')
 const VocabularyBookManage = () => import('../views/admin/VocabularyBookManage.vue')

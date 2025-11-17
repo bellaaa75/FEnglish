@@ -432,5 +432,33 @@ public class UserServiceImpl implements UserService {
         }
         return result;
     }
-    
+
+    // 管理员删除普通用户
+    @Override
+    public Map<String, Object> deleteOrdinaryUser(String userId){
+        Map<String, Object> result = new HashMap<>();
+        try {
+            // 1. 校验用户是否存在
+            if (!ordinaryUserRepository.existsByUserId(userId)) {
+                result.put("success", false);
+                result.put("message", "用户不存在，删除失败");
+                return result;
+            }
+
+            // 2. 执行删除（按 userId 删除）
+            userRepository.deleteById(userId);
+
+            // 3. 返回成功结果
+            result.put("success", true);
+            result.put("message", "用户删除成功");
+        } catch (Exception e) {
+            // 4. 异常处理
+            result.put("success", false);
+            result.put("message", "删除失败：" + e.getMessage());
+            e.printStackTrace();
+        }
+        return result;
+    }
 }
+    
+

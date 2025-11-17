@@ -23,13 +23,28 @@
         class="w-full" 
         @click="handleLogin"
         :loading="loading"
+        style="
+      background-color: #9332c7; 
+      border-color: #9332c7;
+    "
+    :style="{
+      '--el-button-hover-bg-color': '#7a28a8',
+      '--el-button-active-bg-color': '#6b2296'
+    }"
       >
         管理员登录
       </el-button>
     </el-form-item>
     <div class="text-center mt-2">
-      <el-link @click="$router.push('/admin/register')">管理员注册</el-link>
-      <el-link @click="$router.push('/user/login')" type="info" class="ml-4">用户入口</el-link>
+      <el-link @click="$router.push('/admin/register')"
+      style="color:#9332c7; font-size: inherit; vertical-align: middle; --el-link-hover-color: var(--el-color-primary); text-decoration: none;"
+      >
+      管理员注册</el-link>
+    </div>
+    <div class="text-center mt-1">
+    <el-link @click="$router.push('/user/login')" 
+    style="color: #409EFF;"
+    type="info" class="ml-4">用户入口</el-link>
     </div>
   </el-form>
 </template>
@@ -57,14 +72,20 @@ const rules = {
 }
 
 const handleLogin = async () => {
-  await loginForm.value.validate()
+  try{
+    await loginForm.value.validate()
+  }catch(validateError){
+    const errorMsg = validateError.message || '登录失败'
+    ElMessage.error(errorMsg)
+    return
+  }
   loading.value = true
   try {
     await store.dispatch('user/adminLogin', form)
     console.log('登录成功:', store.getters['user/currentUser'])
     router.push('/profile/admin') 
   } catch (error) {
-    ElMessage.error(store.getters['user/authError'] || '管理员登录失败')
+    ElMessage.error('管理员登录失败')
   } finally {
     loading.value = false
   }

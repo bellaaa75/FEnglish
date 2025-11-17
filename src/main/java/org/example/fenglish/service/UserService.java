@@ -40,4 +40,7 @@ public interface UserService {
     // 管理员专属：查询特定普通用户
     Map<String, Object> getOrdinaryUserByUserId(String userId);
 
+    // 新增：管理员删除普通用户
+    Map<String, Object> deleteOrdinaryUser(String userId);
+
 }

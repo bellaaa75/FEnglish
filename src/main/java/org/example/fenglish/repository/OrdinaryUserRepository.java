@@ -19,6 +19,9 @@ public interface OrdinaryUserRepository extends JpaRepository<OrdinaryUser, Stri
     // 根据手机号查找普通用户
     Optional<OrdinaryUser> findByPhoneNumber(String phoneNumber);
 
+    // 检查用户ID是否存在
+    boolean existsByUserId(String userId);
+
     // 检查邮箱是否存在（排除当前用户）
     @Query("SELECT COUNT(ou) > 0 FROM OrdinaryUser ou WHERE ou.userMailbox = :email AND ou.userId != :userId")
     boolean existsByEmailExcludingUser(@Param("email") String email, @Param("userId") String userId);

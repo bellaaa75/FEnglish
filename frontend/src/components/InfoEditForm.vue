@@ -168,7 +168,7 @@ const submitEditForm = async () => {
         editDialogVisible.value = false // 关闭对话框
     } catch (error) {
         console.error('修改失败：', error)
-        ElMessage.error(error.message || '修改失败，请重试')
+        ElMessage.error('修改失败，请重试')
     }
 }
 </script>

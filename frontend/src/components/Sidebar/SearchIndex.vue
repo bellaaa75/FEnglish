@@ -11,6 +11,7 @@
     >
       <el-menu-item index="/profile/userinfo">
         <!-- <el-icon><User /></el-icon> -->
+         <el-icon><Grid /></el-icon>
         <span>我的账号</span>
       </el-menu-item>
       <el-menu-item index="/profile/plaza">

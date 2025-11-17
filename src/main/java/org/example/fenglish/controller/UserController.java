@@ -119,4 +119,12 @@ public class UserController {
         result = userService.getOrdinaryUserByUserId(userId);      
         return ResponseEntity.ok(result);
     }
+
+    //  删除普通用户接口：DELETE /api/admin/delete/{userId}
+    @DeleteMapping("/admin/delete/{userId}")
+    /* @PreAuthorize("hasRole('ADMIN')") */ // 仅管理员可访问（需启用 Spring Security）
+    public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable String userId) {
+        Map<String, Object> result = userService.deleteOrdinaryUser(userId);
+        return ResponseEntity.ok(result);
+    }
 }

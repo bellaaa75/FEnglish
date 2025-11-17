@@ -59,22 +59,14 @@ const bookFormRef = ref(null)
 // 提交表单
 const handleSubmit = async () => {
   try {
-    // 表单验证
-    await bookFormRef.value.validate()
-    
-    // 调用新增接口（假设AdminId从全局状态获取，这里简化处理）
-    const adminId = 'admin123' // 实际应从登录信息中获取
-    await vocabularyBookService.addBook(bookForm, adminId)
-    
-    ElMessage.success('新增单词书成功')
-    router.push('/profile/admin/vocabulary-books') // 跳转回列表页
+    await bookFormRef.value.validate();
+    await vocabularyBookService.addBook(bookForm);
+    ElMessage.success('新增成功');
+    router.push('/profile/admin/vocabulary-books');
   } catch (error) {
-    if (error.name === 'Error') {
-      ElMessage.error(error.message || '新增失败')
+    ElMessage.error('新增失败')
     }
-    // 表单验证失败不处理，会自动提示
-  }
-}
+};
 
 // 返回列表页
 const handleBack = () => {
