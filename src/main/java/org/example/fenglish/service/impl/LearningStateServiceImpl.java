@@ -28,8 +28,6 @@ public class LearningStateServiceImpl implements LearningStateService {
 
     @Autowired
     private EnglishWordsRepository englishWordsRepository;
-    @Autowired
-    private org.example.fenglish.service.StudyRecordService studyRecordService;
 
     @Override
     public boolean addLearningState(String userId, String wordId) {
@@ -69,25 +67,6 @@ public class LearningStateServiceImpl implements LearningStateService {
             LearningState learningState = optionalState.get();
             learningState.setLearnState(state);
             learningStateRepository.save(learningState);
-
-            // 如果状态被更新为 已学，则新增一条学习记录（StudyRecord）
-            try {
-                if (state == LearningState.LearnStateEnum.已学) {
-                    System.out.println("[LearningStateService] State is 已学, creating StudyRecord for userId=" + userId + ", wordId=" + wordId);
-                    // 构造 StudyRecord 并调用 StudyRecordService 保存
-                    org.example.fenglish.entity.StudyRecord sr = new org.example.fenglish.entity.StudyRecord();
-                    org.example.fenglish.entity.User user = userRepository.findByUserId(userId);
-                    org.example.fenglish.entity.EnglishWords word = englishWordsRepository.findById(wordId).orElse(null);
-                    sr.setUser(user);
-                    sr.setEnglishWord(word);
-                    sr.setStudyTime(new java.util.Date());
-                    boolean added = studyRecordService.addStudyRecord(sr);
-                    System.out.println("[LearningStateService] StudyRecord add result: " + added);
-                }
-            } catch (Exception e) {
-                System.out.println("[LearningStateService] Failed to add StudyRecord: " + e.getMessage());
-            }
-
             return true;
         }
         return false;

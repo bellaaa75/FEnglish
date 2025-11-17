@@ -219,8 +219,9 @@ const loadLearningState = async () => {
         console.log('[LearnWord] updateLearningState(result):', updateRes);
         // 新增学习记录（与学习状态更新无关，前端单独调用 StudyRecord 接口）
         try {
+          let srRes = null;
           if (!studyRecordCreated.value) {
-            const srRes = await studyRecordService.addStudyRecord(userId, wordId, new Date());
+            srRes = await studyRecordService.addStudyRecord(userId, wordId, new Date());
             studyRecordCreated.value = true;
             console.log('[LearnWord] studyRecord add result:', srRes);
           } else {
@@ -275,8 +276,9 @@ const loadLearningState = async () => {
           currentLearningState = { userId, wordId, learnState: '已学' };
           // 新增对应的 StudyRecord（与 learningState 的新增/更新无强耦合）
           try {
+            let srRes = null;
             if (!studyRecordCreated.value) {
-              const srRes = await studyRecordService.addStudyRecord(userId, wordId, new Date());
+              srRes = await studyRecordService.addStudyRecord(userId, wordId, new Date());
               studyRecordCreated.value = true;
               console.log('[LearnWord] studyRecord add result after addLearningState:', srRes);
             } else {
