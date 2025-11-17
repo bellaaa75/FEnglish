@@ -11,6 +11,8 @@
     "axios": "^1.13.2",
     "core-js": "^3.8.3",
     "element-plus": "^2.11.7",
+    "echarts": "^5.4.2",
+    "date-fns": "^2.30.0",
     "vue": "^3.2.13",
     "vue-router": "^4.0.3",
     "vuex": "^4.0.0"
