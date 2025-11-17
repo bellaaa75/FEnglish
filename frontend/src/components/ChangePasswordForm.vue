@@ -123,13 +123,15 @@ const toggleVerify = () => {
 
 // 处理修改密码逻辑
 const handleChangePassword = async () => {
+  try{
+    await passwordForm.value.validate()
+  }catch(validateError){
+    const errorMsg = validateError.message || '填写有误'
+    ElMessage.error(errorMsg)
+    return
+  }
+  loading.value = true
   try {
-    // 先验证表单
-    const valid = await passwordForm.value.validate()
-    if (!valid) return
-    
-    loading.value = true
-    
     // 调用Vuex中修改密码的action
     await store.dispatch('user/changePassword', {
       oldPassword: form.oldPassword,

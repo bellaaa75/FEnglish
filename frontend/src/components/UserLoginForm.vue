@@ -75,7 +75,8 @@ const handleLogin = async () => {
   } catch (error) {
     console.log('错误对象:', error) // 打印完整错误对象
     console.log('Vuex 错误信息:', store.getters['user/authError']) 
-    ElMessage.error(store.getters['user/authError'] || '登录失败')
+    /* ElMessage.error(store.getters['user/authError'] || '登录失败') */
+    ElMessage.error('登录失败')
   } finally {
     loading.value = false
   }

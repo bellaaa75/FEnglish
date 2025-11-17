@@ -64,7 +64,7 @@ const handleLogin = async () => {
     console.log('登录成功:', store.getters['user/currentUser'])
     router.push('/profile/admin') 
   } catch (error) {
-    ElMessage.error(store.getters['user/authError'] || '管理员登录失败')
+    ElMessage.error('管理员登录失败')
   } finally {
     loading.value = false
   }

@@ -20,8 +20,8 @@
           <el-avatar :size="40" icon="User" class="user-avatar" />
           <span class="user-name">{{ user.userName }}</span>
           <span class="user-id">ID:{{ user.userId }}</span>
-          <span class="user-type">{{ user.userType === 'ORDINARY' ? '普通用户' : '管理员' }}</span>
-          <el-button type="text" class="btn-modify" @click="handleModify(user.userId)">详细信息</el-button>
+          <!-- <span class="user-type">{{ user.userType === 'ORDINARY' ? '普通用户' : '管理员' }}</span> -->
+          <el-button type="text" class="btn-modify" @click="handleView(user.userId)">详细信息</el-button>
           <el-button type="primary" class="btn-delete" @click="handleDelete(user.userId)">删除用户</el-button>
         </el-card>
         <!-- 分页 -->
@@ -41,10 +41,50 @@
         />
       </el-main>
     </el-container>
+    <el-dialog
+      v-model="detailDialogVisible"
+      title="用户详细信息"
+      width="500px"
+      :close-on-click-modal="false"
+    >
+      <el-form :model="userDetail" label-width="120px" class="detail-form">
+        <el-form-item label="用户ID">
+          <el-input v-model="userDetail.userId" disabled /> <!-- 禁用编辑 -->
+        </el-form-item>
+        <el-form-item label="用户名">
+          <el-input v-model="userDetail.userName" disabled /> <!-- 禁用编辑 -->
+        </el-form-item>
+        <el-form-item label="用户类型">
+          <el-select v-model="userDetail.userType" disabled>
+            <el-option label="普通用户" value="ORDINARY"></el-option>
+            <el-option label="管理员" value="ADMIN"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="手机号">
+          <el-input v-model="userDetail.phoneNumber" disabled /> <!-- 禁用编辑 -->
+        </el-form-item>
+        <el-form-item label="邮箱">
+          <el-input v-model="userDetail.userMailbox" type="email" disabled /> <!-- 禁用编辑 -->
+        </el-form-item>
+        <el-form-item label="性别">
+          <el-select v-model="userDetail.gender" disabled> <!-- 禁用编辑 -->
+            <el-option label="男" value="男"></el-option>
+            <el-option label="女" value="女"></el-option>
+            <el-option label="未知" value="未知"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="注册时间">
+          <el-input v-model="userDetail.registerTime" disabled /> <!-- 禁用编辑 -->
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="detailDialogVisible = false">关闭</el-button> <!-- 仅保留关闭按钮 -->
+      </template>
+    </el-dialog>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, reactive } from 'vue';
 import request from '@/utils/request' 
 import { ElMessage, ElMessageBox } from 'element-plus';
 // import { useRouter } from 'vue-router'; // 如需跳转可解开注释
@@ -57,6 +97,17 @@ const pageSize = ref(4); // 每页条数（默认4条，和后端一致）
 const userList = ref([]); // 后端返回的用户列表
 const totalCount = ref(0); // 总用户数
 const loading = ref(false); // 加载状态（可选）
+
+const detailDialogVisible = ref(false); // 对话框显示状态
+const userDetail = reactive({ // 存储用户详细信息
+  userId: '',
+  userName: '',
+  userType: '',
+  phoneNumber: '',
+  userMailbox: '',
+  gender: '',
+  registerTime: ''
+});
 
 // 2. 核心：调用后端 GET 接口查询用户
 const fetchUserList = async () => {
@@ -90,25 +141,44 @@ const handleCurrentChange = (val) => {
   fetchUserList(); // 重新查询
 };
 
-// 5. 修改信息（跳转或弹窗，根据你的需求扩展）
-const handleModify = (userId) => {
-  console.log('详细信息：', userId);
-  // 示例：跳转修改页面 → router.push(`/admin/user/modify?userId=${userId}`);
+// 查看用户详细信息
+const handleView = async (userId) => {
+  loading.value = true
+  try {
+    console.log('详细信息：', userId);
+    // 调用后端接口：获取用户详细信息
+    const res = await request.get(`/api/admin/${userId}`);
+    // 后端返回格式：{ success: true, data: {...}, message: '' }
+    // 给 userDetail 赋值（渲染到对话框）
+    Object.assign(userDetail, res.data);
+    // 转换注册时间格式（可选，优化显示）
+    userDetail.registerTime = new Date(userDetail.registerTime).toLocaleString();
+    // 显示对话框
+    detailDialogVisible.value = true;
+  } catch (error) {
+    console.error('获取用户详情失败：', error);
+    ElMessage.error('获取用户详情失败，请稍后重试');
+  }
 };
 
 // 6. 删除用户（如需实现，对接后端删除接口）
 const handleDelete = async (userId) => {
+  loading.value = true
   try {
     await ElMessageBox.confirm('确定删除该用户？', '警告', {
       type: 'warning'
     });
-    // 调用后端删除接口（示例）
-    console.log('修改用户：', userId);
-    // await axios.delete(`/api/user/admin/delete/${userId}`);
-    ElMessage.success('删除成功');
-    fetchUserList(); // 删除后刷新列表
+    // 调用后端删除接口（DELETE 方法）
+    const res = await request.delete(`/api/admin/delete/${userId}`);
+    ElMessage.success(res.message || '删除成功');
+    fetchUserList(); // 刷新用户列表
+
   } catch (error) {
-    ElMessage.info('已取消删除');
+    if (error !== 'cancel') {
+      ElMessage.error(error.message || '删除失败，请稍后重试');
+    } else {
+      ElMessage.info('已取消删除');
+    }
   }
 };
 
