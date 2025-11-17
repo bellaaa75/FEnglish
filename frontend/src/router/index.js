@@ -99,21 +99,19 @@ const routes = [
         meta: { title: '我的单词书' }
       },
       // 学习广场路由（嵌套子路由，用于放置 BookDetail）
-      {
-        path: 'plaza',
-        name: 'LearningPlaza',
-        component: LearningPlaza,
-        meta: { title: '学习广场' },
-        // 修复：BookDetail 作为 LearningPlaza 的子路由（相对路径）
-        children: [
-          {
-            path: 'book-detail/:bookId', // 相对路径，完整路径：/profile/plaza/book-detail/:bookId
-            name: 'BookDetail',
-            component: BookDetail,
-            meta: { title: '单词书详情', requiresAuth: true }
-          }
-        ]
-      },
+{
+  path: 'plaza',
+  name: 'LearningPlaza',
+  component: LearningPlaza,
+  meta: { title: '学习广场' }
+},
+// 单词书详情页（可被广场和管理员页面共用）
+{
+  path: 'book-detail/:bookId',
+  name: 'BookDetail',
+  component: BookDetail,
+  meta: { title: '单词书详情', requiresAuth: true }
+},
       // 学习记录路由
       {
         path: 'record',

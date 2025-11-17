@@ -10,4 +10,5 @@ public class VocabularyBookSimpleResp {
     private String bookId;
     private String bookName;
     private LocalDateTime publishTime;
+    private int wordCount;
 }

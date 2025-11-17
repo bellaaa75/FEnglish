@@ -3,6 +3,7 @@ package org.example.fenglish.controller;
 import jakarta.validation.Valid;
 import org.example.fenglish.entity.VocabularyBook;
 import org.example.fenglish.repository.VocabularyBookRepository;
+import org.example.fenglish.repository.WordInBookRepository;
 import org.example.fenglish.service.VocabularyBookService;
 import org.example.fenglish.service.WordInBookService;
 import org.example.fenglish.vo.request.VocabularyBookAddReq;
@@ -29,13 +30,16 @@ public class VocabularyBookController {
     private final VocabularyBookRepository vocabularyBookRepository;
     private final VocabularyBookService vocabularyBookService;
     private final WordInBookService wordInBookService;
+    private final WordInBookRepository wordInBookRepository;
 
     public VocabularyBookController(VocabularyBookService vocabularyBookService,
                                     VocabularyBookRepository vocabularyBookRepository,
-                                    WordInBookService wordInBookService) {
+                                    WordInBookService wordInBookService,
+                                    WordInBookRepository wordInBookRepository, WordInBookRepository wordInBookRepository1) {
         this.vocabularyBookRepository = vocabularyBookRepository;
         this.vocabularyBookService = vocabularyBookService;
         this.wordInBookService = wordInBookService;
+        this.wordInBookRepository = wordInBookRepository;
     }
 
 
@@ -150,6 +154,9 @@ public class VocabularyBookController {
                     vo.setBookId(book.getBookId());
                     vo.setBookName(book.getBookName());
                     vo.setPublishTime(book.getPublishTime());
+
+                    long wordCount = wordInBookRepository.countByBookId(book.getBookId());
+                    vo.setWordCount((int) wordCount);
                     return vo;
                 })
                 .collect(Collectors.toList());

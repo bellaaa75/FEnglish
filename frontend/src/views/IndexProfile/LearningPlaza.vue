@@ -115,16 +115,23 @@ onMounted(() => {
 const fetchBookList = async () => {
   try {
     loading.value = true;
-    // 关键修复：按 VocabularyBookManage 的参数格式传递（关键词、页码、每页条数）
     const response = await vocabularyBookService.searchBooks(
-      '', 
-      pageInfo.value.currentPage, 
+      searchKeyword.value,
+      pageInfo.value.currentPage,
       pageInfo.value.pageSize
     );
-    bookList.value = response.data.list || [];
-    pageInfo.value.total = response.data.total || 0;
+    // 确保映射单词数字段（根据后端实际字段名调整）
+    bookList.value = (response?.data?.list || response?.data || []).map(book => ({
+      ...book,
+      wordCount: 
+        book.total ?? 
+        book.wordCount ?? 
+        book.wordList?.length ?? 
+        0
+    }));
+    pageInfo.value.total = response?.data?.total || bookList.value.length || 0;
   } catch (error) {
-    ElMessage.error('获取单词书列表失败：' + (error.message || '未知错误'));
+    ElMessage.error('获取单词书列表失败：' + (error?.message || '未知错误'));
   } finally {
     loading.value = false;
   }
@@ -177,8 +184,14 @@ const handleCurrentChange = (page) => {
 
 // ========== 保留原有功能：详情页跳转 ==========
 const goToBookDetail = (bookId) => {
-  router.push(`/profile/plaza/book-detail/${bookId}`);
+  if (!bookId) return;
+  router.push({
+    name: 'BookDetail',
+    params: { bookId },
+    query: { returnTo: router.currentRoute.value.fullPath }
+  });
 };
+
 </script>
 
 <style scoped>

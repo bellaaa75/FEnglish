@@ -20,6 +20,8 @@ public interface WordInBookRepository extends JpaRepository<WordInBook, WordInBo
     // 检查单词是否已在单词书中（通过wordId）
     Optional<WordInBook> findByBookIdAndWordId(String bookId, String wordId);
 
+    long countByBookId(String bookId);
+
     // 通过单词书ID和单词名检查关联（适配EnglishWords的wordName查询）
     @Query("SELECT wib FROM WordInBook wib " +
             "JOIN wib.englishWords ew " +

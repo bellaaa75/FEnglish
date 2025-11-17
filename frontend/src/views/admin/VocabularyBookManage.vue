@@ -21,13 +21,23 @@
       border 
       style="width: 100%; margin-top: 20px"
     >
-      <el-table-column prop="bookId" label="ID" width="180" />
-      <el-table-column prop="bookName" label="单词书名称" width="200" />
-      <el-table-column label="发布时间">
-        <template #default="scope">
-          {{ formatDate(scope.row.publishTime) }}
-        </template>
-      </el-table-column>
+    <el-table-column prop="bookId" label="ID" width="180" />
+    <el-table-column prop="bookName" label="单词书名称" width="200">
+      <template #default="scope">
+        <span
+          class="link-like"
+          @click="goToBookDetail(scope.row.bookId)"
+          style="color: #409eff; cursor: pointer; text-decoration: underline;"
+        >
+          {{ scope.row.bookName }}
+        </span>
+      </template>
+    </el-table-column>
+    <el-table-column label="发布时间">
+      <template #default="scope">
+        {{ formatDate(scope.row.publishTime) }}
+      </template>
+    </el-table-column>
       <el-table-column label="操作" width="200">
         <template #default="scope">
           <el-button size="small" @click="handleEdit(scope.row)">编辑</el-button>
@@ -59,7 +69,14 @@ import vocabularyBookService from '@/services/vocabularyBookService'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-
+const goToBookDetail = (bookId) => {
+  if (!bookId) return;
+  router.push({
+    name: 'BookDetail',
+    params: { bookId },
+    query: { returnTo: router.currentRoute.value.fullPath }
+  });
+};
 // 日期格式化函数（兼容iOS解析bug）
 const formatDate = (dateString) => {
   if (!dateString) return '';
