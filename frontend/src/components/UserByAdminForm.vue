@@ -12,7 +12,7 @@
           @keyup.enter="fetchUserList()"
         >
           <template #append>
-            <el-button type="primary" @click="fetchUserList()">搜索</el-button>
+            <el-button type="primary" @click="fetchUserList()" :loading="loading">搜索</el-button>
           </template>
         </el-input>
         <!-- 用户列表 -->
