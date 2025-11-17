@@ -17,7 +17,11 @@ const CollectBook = () => import('@/views/IndexProfile/CollectBook.vue');
 const AdminChangePassword = () => import('../views/AdminProfile/AdminChangePassword.vue')
 const DeleteAdmin = () => import('../views/AdminProfile/DeleteAdmin.vue')
 const VocabularyBookManage = () => import('../views/admin/VocabularyBookManage.vue')
-
+const BookDetail = () => import('@/views/IndexProfile/BookDetail.vue')
+const LearningPlaza = () => import('@/views/IndexProfile/LearningPlaza.vue') // 单独提取，方便嵌套子路由
+const StudyRecord = () => import('@/views/IndexProfile/StudyRecord.vue')
+const LearnWord = () => import('@/views/IndexProfile/LearnWord.vue')
+const WordDetail = () => import('@/views/IndexProfile/WordDetail.vue')
 
 const routes = [
   {
@@ -49,7 +53,7 @@ const routes = [
     meta: { guest: true }
   },
 
-   // 新增：Profile布局路由（父路由）
+  // 新增：Profile布局路由（父路由）
   {
     path: '/profile',
     name: 'IndexProfile',
@@ -59,64 +63,75 @@ const routes = [
     children: [
       // 子路由
       {
-        path: 'userinfo', //相对路径
+        path: 'userinfo', // 相对路径
         name: 'UserInfo',
         component: UserInfo,
-        meta: {requiresAuth: true, title: '我的账号' } // 子页面标题，用于Profile布局中显示
+        meta: { requiresAuth: true, title: '我的账号' }
       },
       {
-        path: 'infoedit', //相对路径
+        path: 'infoedit', // 相对路径
         name: 'InfoEdit',
         component: InfoEdit,
-        meta: {requiresAuth: true, title: '我的账号' } // 子页面标题，用于Profile布局中显示
+        meta: { requiresAuth: true, title: '我的账号' }
       },
       {
-        path: 'changepassword', //相对路径
+        path: 'changepassword', // 相对路径
         name: 'ChangePassword',
         component: ChangePassword,
-        meta: {requiresAuth: true, title: '我的账号' } // 子页面标题，用于Profile布局中显示
+        meta: { requiresAuth: true, title: '我的账号' }
       },
       {
-        path: 'deleteuser', //相对路径
+        path: 'deleteuser', // 相对路径
         name: 'DeleteUser',
         component: DeleteUser,
-        meta: {requiresAuth: true, title: '我的账号' } // 子页面标题，用于Profile布局中显示
+        meta: { requiresAuth: true, title: '我的账号' }
       },
       {
-        path: 'collect-word', // 添加 collect-word 子路径
+        path: 'collect-word',
         name: 'CollectWord',
         component: CollectWord,
-        meta: { title: '收藏单词' } // 子页面标题，用于Profile布局中显示
+        meta: { title: '收藏单词' }
       },
       {
-        path: 'collect-book', // 添加 collect-word 子路径
+        path: 'collect-book',
         name: 'CollectBook',
         component: CollectBook,
-        meta: { title: '我的单词书' } // 子页面标题，用于Profile布局中显示
+        meta: { title: '我的单词书' }
       },
-      // 学习广场路由
+      // 学习广场路由（嵌套子路由，用于放置 BookDetail）
       {
         path: 'plaza',
-        name: 'LearningPlaza',  // 同步修改名称
-        component: () => import('../views/IndexProfile/LearningPlaza.vue')  // 修正路径
+        name: 'LearningPlaza',
+        component: LearningPlaza,
+        meta: { title: '学习广场' },
+        // 修复：BookDetail 作为 LearningPlaza 的子路由（相对路径）
+        children: [
+          {
+            path: 'book-detail/:bookId', // 相对路径，完整路径：/profile/plaza/book-detail/:bookId
+            name: 'BookDetail',
+            component: BookDetail,
+            meta: { title: '单词书详情', requiresAuth: true }
+          }
+        ]
       },
       // 学习记录路由
       {
         path: 'record',
-        name: 'StudyRecord',  // 同步修改名称
-        component: () => import('../views/IndexProfile/StudyRecord.vue')  // 修正路径
+        name: 'StudyRecord',
+        component: StudyRecord,
+        meta: { title: '学习记录' }
       },
       {
         path: 'learn-word/:wordId',
         name: 'LearnWord',
-        component: () => import('../views/IndexProfile/LearnWord.vue'),
+        component: LearnWord,
         meta: { title: '学习单词', requiresAuth: true }
       },
-      // 单词详情页（复用或新建）
+      // 单词详情页
       {
         path: 'word-detail/:wordId',
         name: 'WordDetail',
-        component: () => import('../views/IndexProfile/WordDetail.vue'), // 需创建
+        component: WordDetail,
         meta: { title: '单词详情', requiresAuth: true }
       }
     ]
@@ -129,42 +144,41 @@ const routes = [
     meta: { requiresAuth: true }, // 需要登录才能访问
     redirect: '/profile/admin/userbyadmin', // 默认重定向到第一个子路由
     children: [
-      // 子路由
       {
-        path: 'userbyadmin', //相对路径
+        path: 'userbyadmin', // 相对路径
         name: 'AdminUserByAdmin',
         component: AdminUserByAdmin,
-        meta: { title: '用户信息' } // 子页面标题，用于Profile布局中显示
+        meta: { title: '用户信息' }
       },
       {
-        path: 'changepassword', //相对路径
+        path: 'changepassword', // 相对路径
         name: 'AdminChangePassword',
         component: AdminChangePassword,
-        meta: { title: '修改密码' } // 子页面标题，用于Profile布局中显示
+        meta: { title: '修改密码' }
       },
       {
-        path: 'deleteadmin', //相对路径
+        path: 'deleteadmin', // 相对路径
         name: 'DeleteAdmin',
         component: DeleteAdmin,
-        meta: { title: '注销账号' } // 子页面标题，用于Profile布局中显示
+        meta: { title: '注销账号' }
       },
       {
-        path: 'wordlist',  // 管理员下的单词列表路径
+        path: 'wordlist',
         name: 'AdminWordList',
-        component: () => import('../views/AdminProfile/WordList.vue'),  // 直接在这里写路径
-        meta: { title: '单词管理' }  // 显示在页面标题
+        component: () => import('../views/AdminProfile/WordList.vue'),
+        meta: { title: '单词管理' }
       },
       {
-        path: 'wordedit/:wordId', // 动态路由参数
+        path: 'wordedit/:wordId',
         name: 'AdminWordEdit',
         component: () => import('@/views/AdminProfile/WordEdit.vue'),
         meta: { title: '编辑单词' }
       },
       {
-        path: 'wordadd', // 相对路径（完整路径：/profile/admin/wordadd）
-        name: 'AdminWordAdd', // 路由名称，和跳转时保持一致
-        component: () => import('../views/AdminProfile/WordAdd.vue'), // 组件路径（和 wordlist 保持同级）
-        meta: { title: '添加单词' } // 页面标题，会显示在 Profile 布局的标题区域
+        path: 'wordadd',
+        name: 'AdminWordAdd',
+        component: () => import('../views/AdminProfile/WordAdd.vue'),
+        meta: { title: '添加单词' }
       }
     ]
   },
@@ -175,7 +189,7 @@ const routes = [
     redirect: '/user/login'
   },
 
-  //单词书相关路由
+  // 单词书相关路由（管理员）
   {
     path: '/admin',
     component: AdminProfile, // 包含侧边栏的布局组件
@@ -203,25 +217,21 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL || '/'), // 注意：process.env.BASE_URL 不能错
+  history: createWebHistory(process.env.BASE_URL || '/'), // 保持原有配置
   routes
 })
 
-// 路由守卫
+// 路由守卫（保持不变）
 router.beforeEach((to, from, next) => {
   const isAuthenticated = !!localStorage.getItem('token')
   console.log('路由守卫:', to.path, '已认证:', isAuthenticated)
   
-  // 如果路由需要访客权限但用户已登录，跳转到首页
   if (to.meta.guest && isAuthenticated) {
-    router.push({ name: 'IndexProfile' }) // 跳转到已登录用户的首页
-  } 
-  // 如果路由需要认证但用户未登录，跳转到登录页
-  else if (to.meta.requiresAuth && !isAuthenticated) {
+    router.push({ name: 'IndexProfile' })
+  } else if (to.meta.requiresAuth && !isAuthenticated) {
     next('/user/login')
-  } 
-  else {
-    next() // 正常放行
+  } else {
+    next()
   }
 })
 
