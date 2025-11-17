@@ -48,6 +48,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import axios from 'axios';
 import learningStateService from '@/services/learningStateService'
+import studyRecordService from '@/services/studyRecordService'
 
 // 路由相关
 const route = useRoute();
@@ -202,11 +203,66 @@ const loadLearningState = async () => {
       learningStateExists.value = true;
       currentLearningState = dto;
       console.log('[LearnWord] loadLearningState: learnState =', dto.learnState, ', mastered =', dto.learnState === '熟练掌握');
+      // 保持熟练掌握状态
       mastered.value = (dto.learnState === '熟练掌握');
+
+      // 如果后端记录存在但为"未学"，则自动更新为"已学"
+      if (dto.learnState === '未学') {
+        console.log('[LearnWord] loadLearningState: found 未学, updating to 已学');
+        const updateRes = await learningStateService.updateLearningState(userId, wordId, '已学');
+        console.log('[LearnWord] updateLearningState(result):', updateRes);
+        // 新增学习记录（与学习状态更新无关，前端单独调用 StudyRecord 接口）
+        try {
+          const srRes = await studyRecordService.addStudyRecord(userId, wordId, new Date());
+          console.log('[LearnWord] studyRecord add result:', srRes);
+        } catch (e) {
+          console.error('[LearnWord] 创建 StudyRecord 失败:', e);
+        }
+        if (updateRes?.data === false) {
+          // 如果更新失败，尝试新增后再更新
+          console.log('[LearnWord] update failed, trying to add then update');
+          const addRes = await learningStateService.addLearningState(userId, wordId);
+          console.log('[LearnWord] addLearningState(result):', addRes);
+          if (addRes?.data === false) {
+            console.error('[LearnWord] 无法创建学习记录');
+          } else {
+            const updateRes2 = await learningStateService.updateLearningState(userId, wordId, '已学');
+            console.log('[LearnWord] updateLearningState(after add) result:', updateRes2);
+            if (updateRes2?.data === false) console.error('[LearnWord] 创建后仍无法更新为已学');
+          }
+        }
+        // 将本地状态标记为已学（但不将 mastered 勾上）
+        currentLearningState.learnState = '已学';
+        mastered.value = false;
+        ElMessage.info('已记录为已学');
+      }
     } else {
-      console.log('[LearnWord] loadLearningState: no learning state found');
+      console.log('[LearnWord] loadLearningState: no learning state found, creating and marking 已学');
       learningStateExists.value = false;
       mastered.value = false;
+      // 若无记录则新增并设置为已学
+      const addRes = await learningStateService.addLearningState(userId, wordId);
+      console.log('[LearnWord] addLearningState result:', addRes);
+      if (addRes?.data === false) {
+        console.error('[LearnWord] 后端新增学习记录失败');
+      } else {
+        const updateRes = await learningStateService.updateLearningState(userId, wordId, '已学');
+        console.log('[LearnWord] updateLearningState after add result:', updateRes);
+        if (updateRes?.data === false) {
+          console.error('[LearnWord] 新增后更新为已学失败');
+        } else {
+          learningStateExists.value = true;
+          currentLearningState = { userId, wordId, learnState: '已学' };
+          // 新增对应的 StudyRecord（与 learningState 的新增/更新无强耦合）
+          try {
+            const srRes = await studyRecordService.addStudyRecord(userId, wordId, new Date());
+            console.log('[LearnWord] studyRecord add result after addLearningState:', srRes);
+          } catch (e) {
+            console.error('[LearnWord] 创建 StudyRecord 失败(after add):', e);
+          }
+          ElMessage.info('已创建学习记录并标记为已学');
+        }
+      }
     }
   } catch (err) {
     console.error('[LearnWord] 加载学习状态失败:', err.message || err);
