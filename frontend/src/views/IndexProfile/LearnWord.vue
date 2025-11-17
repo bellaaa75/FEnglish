@@ -81,6 +81,7 @@ const selectedIndex = ref(null);
 const mastered = ref(false);                // 复选框绑定
 const learningStateExists = ref(false);     // 是否存在后端记录
 let currentLearningState = null;            // 存放后端 LearningStateDTO
+const studyRecordCreated = ref(false);      // 防止重复创建学习记录（本组件会话内去重）
 
 // 修复：直接使用固定基础路径（去掉环境变量）
 const BACKEND_BASE_URL = 'http://localhost:8080/api';
@@ -218,8 +219,13 @@ const loadLearningState = async () => {
         console.log('[LearnWord] updateLearningState(result):', updateRes);
         // 新增学习记录（与学习状态更新无关，前端单独调用 StudyRecord 接口）
         try {
-          const srRes = await studyRecordService.addStudyRecord(userId, wordId, new Date());
-          console.log('[LearnWord] studyRecord add result:', srRes);
+          if (!studyRecordCreated.value) {
+            const srRes = await studyRecordService.addStudyRecord(userId, wordId, new Date());
+            studyRecordCreated.value = true;
+            console.log('[LearnWord] studyRecord add result:', srRes);
+          } else {
+            console.log('[LearnWord] studyRecord skipped (already created in this session)');
+          }
           // 根据后端返回给用户提示
           if (srRes && (srRes.code === 200 || srRes.success === true)) {
             ElMessage.success('记录学习行为成功');
@@ -269,8 +275,13 @@ const loadLearningState = async () => {
           currentLearningState = { userId, wordId, learnState: '已学' };
           // 新增对应的 StudyRecord（与 learningState 的新增/更新无强耦合）
           try {
-            const srRes = await studyRecordService.addStudyRecord(userId, wordId, new Date());
-            console.log('[LearnWord] studyRecord add result after addLearningState:', srRes);
+            if (!studyRecordCreated.value) {
+              const srRes = await studyRecordService.addStudyRecord(userId, wordId, new Date());
+              studyRecordCreated.value = true;
+              console.log('[LearnWord] studyRecord add result after addLearningState:', srRes);
+            } else {
+              console.log('[LearnWord] studyRecord skipped(after add) (already created in this session)');
+            }
             if (srRes && (srRes.code === 200 || srRes.success === true || srRes.data === true)) {
               ElMessage.success('记录学习行为成功');
             } else {
