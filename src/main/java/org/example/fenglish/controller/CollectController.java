@@ -28,7 +28,7 @@ public class CollectController {
     /* 收藏单词 */
     @PostMapping("/word/{wordId}")
     public ApiResponse<Void> collectWord(@PathVariable String wordId,
-                                         @RequestHeader("user-id") String userId) {
+                                         @RequestHeader("userId") String userId) {
         service.collect(userId, wordId, (byte) 1);
         return ApiResponse.success();
     }
@@ -36,7 +36,7 @@ public class CollectController {
     /* 收藏单词书 */
     @PostMapping("/book/{bookId}")
     public ApiResponse<Void> collectBook(@PathVariable String bookId,
-                                         @RequestHeader("user-id") String userId) {
+                                         @RequestHeader("userId") String userId) {
         service.collect(userId, bookId, (byte) 2);
         return ApiResponse.success();
     }
@@ -44,7 +44,7 @@ public class CollectController {
     /* 取消收藏单词 */
     @DeleteMapping("/word/{wordId}")
     public ApiResponse<Void> unCollectWord(@PathVariable String wordId,
-                                           @RequestHeader("user-id") String userId) {
+                                           @RequestHeader("userId") String userId) {
         service.unCollect(userId, wordId, (byte) 1);
         return ApiResponse.success();
     }
@@ -52,7 +52,7 @@ public class CollectController {
     /* 取消收藏单词书 */
     @DeleteMapping("/book/{bookId}")
     public ApiResponse<Void> unCollectBook(@PathVariable String bookId,
-                                           @RequestHeader("user-id") String userId) {
+                                           @RequestHeader("userId") String userId) {
         service.unCollect(userId, bookId, (byte) 2);
         return ApiResponse.success();
     }
@@ -61,7 +61,7 @@ public class CollectController {
     @GetMapping("/words")
     public ApiResponse<Page<CollectWordProjection>> myWords(
             @PageableDefault(size = 10) Pageable p,
-            @RequestHeader("user-id") String userId) {
+            @RequestHeader("userId") String userId) {
         return ApiResponse.success(service.myWordCollects(userId, p));
     }
 
@@ -69,7 +69,7 @@ public class CollectController {
     @GetMapping("/books")
     public ApiResponse<Page<CollectBookProjection>> myBooks(
             @PageableDefault(size = 10) Pageable p,
-            @RequestHeader("user-id") String userId) {
+            @RequestHeader("userId") String userId) {
         return ApiResponse.success(service.myBookCollects(userId, p));
     }
 }

@@ -46,12 +46,10 @@ import vocabularyBookService from '@/services/vocabularyBookService'
 
 const router = useRouter()
 const route = useRoute()
-const bookId = route.params.bookId // 从路由获取bookId
 
 const bookForm = reactive({
-  bookId: '',
   bookName: '',
-  publishTime: ''
+  publishTime: new Date().toISOString().slice(0, 19).replace('T', ' ')
 })
 
 // 表单验证规则
@@ -67,18 +65,14 @@ const bookFormRef = ref(null)
 // 页面加载时获取单词书详情
 onMounted(async () => {
   try {
-    const response = await vocabularyBookService.getBookDetail(bookId)
-    const bookData = response.data
-    
-    // 格式化时间（后端返回的可能是Date对象，转换为字符串）
-    bookForm.bookId = bookData.bookId
-    bookForm.bookName = bookData.bookName
-    bookForm.publishTime = bookData.publishTime 
-      ? new Date(bookData.publishTime).toISOString().slice(0, 19).replace('T', ' ')
-      : ''
+    const bookId = route.params.bookId;
+    const res = await vocabularyBookService.getBookDetail(bookId);
+//  bookForm.value = res.data; // 初始化表单
+    bookForm.bookName = res.data.bookName
+    bookForm.publishTime = res.data.publishTime
   } catch (error) {
     ElMessage.error('获取单词书详情失败')
-    router.back()
+    console.error(error)
   }
 })
 
@@ -86,10 +80,7 @@ onMounted(async () => {
 const handleSubmit = async () => {
   try {
     await bookFormRef.value.validate()
-    
-    const adminId = 'admin123' // 实际应从登录信息中获取
-    await vocabularyBookService.updateBook(bookId, bookForm, adminId)
-    
+    await vocabularyBookService.updateBook(route.params.bookId, bookForm.value)
     ElMessage.success('修改成功')
     router.push('/profile/admin/vocabulary-books')
   } catch (error) {
