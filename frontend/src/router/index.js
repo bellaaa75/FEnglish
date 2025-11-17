@@ -93,8 +93,19 @@ const routes = [
         name: 'CollectBook',
         component: CollectBook,
         meta: { title: '我的单词书' } // 子页面标题，用于Profile布局中显示
+      },
+      // 学习广场路由
+      {
+        path: 'plaza',
+        name: 'LearningPlaza',  // 同步修改名称
+        component: () => import('../views/IndexProfile/LearningPlaza.vue')  // 修正路径
+      },
+      // 学习记录路由
+      {
+        path: 'record',
+        name: 'StudyRecord',  // 同步修改名称
+        component: () => import('../views/IndexProfile/StudyRecord.vue')  // 修正路径
       }
-
     ]
   },
   // 管理员
@@ -131,10 +142,16 @@ const routes = [
         meta: { title: '单词管理' }  // 显示在页面标题
       },
       {
-      path: 'wordedit/:wordId', // 动态路由参数
-      name: 'AdminWordEdit',
-      component: () => import('@/views/AdminProfile/WordEdit.vue'),
-      meta: { title: '编辑单词' }
+        path: 'wordedit/:wordId', // 动态路由参数
+        name: 'AdminWordEdit',
+        component: () => import('@/views/AdminProfile/WordEdit.vue'),
+        meta: { title: '编辑单词' }
+      },
+      {
+        path: 'wordadd', // 相对路径（完整路径：/profile/admin/wordadd）
+        name: 'AdminWordAdd', // 路由名称，和跳转时保持一致
+        component: () => import('../views/AdminProfile/WordAdd.vue'), // 组件路径（和 wordlist 保持同级）
+        meta: { title: '添加单词' } // 页面标题，会显示在 Profile 布局的标题区域
       }
     ]
   },

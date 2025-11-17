@@ -14,6 +14,16 @@
         />
         <el-button type="primary" @click="handleSearch">搜索</el-button>
         <el-button type="success" @click="resetSearch">重置</el-button>
+
+        <!-- 添加单词按钮 -->
+        <el-button 
+          type="primary" 
+          style="margin-left: auto;" 
+          @click="handleAddWord"
+        >
+          <el-icon><Plus /></el-icon> 添加单词
+        </el-button>
+
       </div>
 
       <!-- 单词列表 -->
@@ -77,6 +87,7 @@ import { ref, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import { Plus } from '@element-plus/icons-vue';
 const router = useRouter();
 
 // 搜索关键词
@@ -227,6 +238,12 @@ const handleCurrentChange = (page) => {
     // 非搜索状态：请求后端分页
     fetchWordList();
   }
+};
+
+// 添加单词跳转
+const handleAddWord = () => {
+  // 跳转到添加单词页面
+  router.push('/profile/admin/wordadd');
 };
 
 // 编辑单词跳转
