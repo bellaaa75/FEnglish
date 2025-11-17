@@ -18,9 +18,9 @@ public class CollectVO {
     public static class CollectItem {
 
         /*=== 公共字段 ===*/
-        private Long collectId;     // 收藏主键
+        private String collectId;     // 收藏主键
         private String targetId;    // 单词ID 或 单词书ID
-        private Short targetType;   // 1 单词  2 单词书
+        private Byte targetType;   // 1 单词  2 单词书
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
         private Date collectTime;
 
