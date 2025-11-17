@@ -31,6 +31,8 @@
         >
           直接查看释义
         </el-button>
+        <!-- 开发用：手动触发新增学习记录（仅在调试时可用） -->
+        <el-button v-if="isDev" type="info" @click="testAddStudyRecord" style="margin-left:12px;">测试：新增学习记录</el-button>
         <!-- 新增：熟练掌握复选框 -->
         <div style="margin-top:12px;">
           <el-checkbox v-model="mastered" @change="onMasteredChange">
@@ -48,10 +50,14 @@ import { useRoute, useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import axios from 'axios';
 import learningStateService from '@/services/learningStateService'
+import studyRecordService from '@/services/studyRecordService'
 
 // 路由相关
 const route = useRoute();
 const router = useRouter();
+
+// 环境检测（避免在模板里直接访问 process.env，防止 runtime 报错）
+const isDev = (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'development') || (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.MODE === 'development');
 
 // 获取并规范化 userId（处理可能误存为带引号的字符串）
 const getUserId = () => {
@@ -75,6 +81,7 @@ const selectedIndex = ref(null);
 const mastered = ref(false);                // 复选框绑定
 const learningStateExists = ref(false);     // 是否存在后端记录
 let currentLearningState = null;            // 存放后端 LearningStateDTO
+const studyRecordCreated = ref(false);      // 防止重复创建学习记录（本组件会话内去重）
 
 // 修复：直接使用固定基础路径（去掉环境变量）
 const BACKEND_BASE_URL = 'http://localhost:8080/api';
@@ -202,11 +209,93 @@ const loadLearningState = async () => {
       learningStateExists.value = true;
       currentLearningState = dto;
       console.log('[LearnWord] loadLearningState: learnState =', dto.learnState, ', mastered =', dto.learnState === '熟练掌握');
+      // 保持熟练掌握状态
       mastered.value = (dto.learnState === '熟练掌握');
+
+      // 如果后端记录存在但为"未学"，则自动更新为"已学"
+      if (dto.learnState === '未学') {
+        console.log('[LearnWord] loadLearningState: found 未学, updating to 已学');
+        const updateRes = await learningStateService.updateLearningState(userId, wordId, '已学');
+        console.log('[LearnWord] updateLearningState(result):', updateRes);
+        // 新增学习记录（与学习状态更新无关，前端单独调用 StudyRecord 接口）
+        try {
+          let srRes = null;
+          if (!studyRecordCreated.value) {
+            srRes = await studyRecordService.addStudyRecord(userId, wordId, new Date());
+            studyRecordCreated.value = true;
+            console.log('[LearnWord] studyRecord add result:', srRes);
+          } else {
+            console.log('[LearnWord] studyRecord skipped (already created in this session)');
+          }
+          // 根据后端返回给用户提示
+          if (srRes && (srRes.code === 200 || srRes.success === true)) {
+            ElMessage.success('记录学习行为成功');
+          } else if (srRes && srRes.data === true) {
+            ElMessage.success('记录学习行为成功');
+          } else {
+            ElMessage.warning('未能记录学习行为（后台返回）');
+          }
+        } catch (e) {
+          console.error('[LearnWord] 创建 StudyRecord 失败:', e);
+          ElMessage.error('创建学习记录失败');
+        }
+        if (updateRes?.data === false) {
+          // 如果更新失败，尝试新增后再更新
+          console.log('[LearnWord] update failed, trying to add then update');
+          const addRes = await learningStateService.addLearningState(userId, wordId);
+          console.log('[LearnWord] addLearningState(result):', addRes);
+          if (addRes?.data === false) {
+            console.error('[LearnWord] 无法创建学习记录');
+          } else {
+            const updateRes2 = await learningStateService.updateLearningState(userId, wordId, '已学');
+            console.log('[LearnWord] updateLearningState(after add) result:', updateRes2);
+            if (updateRes2?.data === false) console.error('[LearnWord] 创建后仍无法更新为已学');
+          }
+        }
+        // 将本地状态标记为已学（但不将 mastered 勾上）
+        currentLearningState.learnState = '已学';
+        mastered.value = false;
+        ElMessage.info('已记录为已学');
+      }
     } else {
-      console.log('[LearnWord] loadLearningState: no learning state found');
+      console.log('[LearnWord] loadLearningState: no learning state found, creating and marking 已学');
       learningStateExists.value = false;
       mastered.value = false;
+      // 若无记录则新增并设置为已学
+      const addRes = await learningStateService.addLearningState(userId, wordId);
+      console.log('[LearnWord] addLearningState result:', addRes);
+      if (addRes?.data === false) {
+        console.error('[LearnWord] 后端新增学习记录失败');
+      } else {
+        const updateRes = await learningStateService.updateLearningState(userId, wordId, '已学');
+        console.log('[LearnWord] updateLearningState after add result:', updateRes);
+        if (updateRes?.data === false) {
+          console.error('[LearnWord] 新增后更新为已学失败');
+        } else {
+          learningStateExists.value = true;
+          currentLearningState = { userId, wordId, learnState: '已学' };
+          // 新增对应的 StudyRecord（与 learningState 的新增/更新无强耦合）
+          try {
+            let srRes = null;
+            if (!studyRecordCreated.value) {
+              srRes = await studyRecordService.addStudyRecord(userId, wordId, new Date());
+              studyRecordCreated.value = true;
+              console.log('[LearnWord] studyRecord add result after addLearningState:', srRes);
+            } else {
+              console.log('[LearnWord] studyRecord skipped(after add) (already created in this session)');
+            }
+            if (srRes && (srRes.code === 200 || srRes.success === true || srRes.data === true)) {
+              ElMessage.success('记录学习行为成功');
+            } else {
+              ElMessage.warning('未能记录学习行为（后台返回）');
+            }
+          } catch (e) {
+            console.error('[LearnWord] 创建 StudyRecord 失败(after add):', e);
+            ElMessage.error('创建学习记录失败');
+          }
+          ElMessage.info('已创建学习记录并标记为已学');
+        }
+      }
     }
   } catch (err) {
     console.error('[LearnWord] 加载学习状态失败:', err.message || err);
@@ -316,6 +405,28 @@ const onMasteredChange = async (checked) => {
     mastered.value = !!(currentLearningState && currentLearningState.learnState === '熟练掌握');
   }
 };
+
+// 开发辅助：手动触发新增学习记录，用于调试（开发环境可见）
+const testAddStudyRecord = async () => {
+  const userId = getUserId();
+  const wordId = currentWord.value.wordId;
+  if (!userId || !wordId) {
+    ElMessage.warning('缺少 userId 或 wordId，无法测试');
+    return;
+  }
+  try {
+    const res = await studyRecordService.addStudyRecord(userId, wordId, new Date());
+    console.log('[LearnWord] testAddStudyRecord res:', res);
+    if (res && (res.code === 200 || res.success === true || res.data === true)) {
+      ElMessage.success('测试：学习记录已创建');
+    } else {
+      ElMessage.error('测试：后端未创建学习记录');
+    }
+  } catch (e) {
+    console.error('[LearnWord] testAddStudyRecord error:', e);
+    ElMessage.error('测试请求出错');
+  }
+}
 </script>
 
 <style scoped>
