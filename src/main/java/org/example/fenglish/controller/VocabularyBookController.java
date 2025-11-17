@@ -41,26 +41,23 @@ public class VocabularyBookController {
 
     // 1. 新增单词书（POST）
     @PostMapping
-    public Result<Void> addVocabularyBook(@Valid @RequestBody VocabularyBookAddReq req,
-                                          @RequestHeader("Admin-Id") String adminId) {
-        vocabularyBookService.addVocabularyBook(req, adminId);
+    public Result<Void> addVocabularyBook(@Valid @RequestBody VocabularyBookAddReq req) {
+        vocabularyBookService.addVocabularyBook(req);
         return Result.success();
     }
 
     // 2. 删除单词书（DELETE）
     @DeleteMapping("/{bookId}")
-    public Result<Void> deleteVocabularyBook(@PathVariable String bookId,
-                                             @RequestHeader("Admin-Id") String adminId) {
-        vocabularyBookService.deleteVocabularyBook(bookId, adminId);
+    public Result<Void> deleteVocabularyBook(@PathVariable String bookId) {
+        vocabularyBookService.deleteVocabularyBook(bookId);
         return Result.success();
     }
 
     // 3. 修改单词书（PUT）
     @PutMapping("/{bookId}")
     public Result<Void> updateVocabularyBook(@PathVariable String bookId,
-                                             @Valid @RequestBody VocabularyBookUpdateReq req,
-                                             @RequestHeader("Admin-Id") String adminId) {
-        vocabularyBookService.updateVocabularyBook(bookId, req, adminId);
+                                             @Valid @RequestBody VocabularyBookUpdateReq req) {
+        vocabularyBookService.updateVocabularyBook(bookId, req);
         return Result.success();
     }
 
@@ -108,18 +105,16 @@ public class VocabularyBookController {
     // 6. 向单词书添加单词（POST）
     @PostMapping("/{bookId}/words/{wordId}")
     public Result<Void> addWordToBook(@PathVariable String bookId,
-                                      @PathVariable String wordId,
-                                      @RequestHeader("Admin-Id") String adminId) {
-        wordInBookService.addWordToBook(bookId, wordId, adminId);
+                                      @PathVariable String wordId) {
+        wordInBookService.addWordToBook(bookId, wordId);
         return Result.success();
     }
 
     // 7. 从单词书删除单词（DELETE）
     @DeleteMapping("/{bookId}/words/{wordId}")
     public Result<Void> deleteWordFromBook(@PathVariable String bookId,
-                                           @PathVariable String wordId,
-                                           @RequestHeader("Admin-Id") String adminId) {
-        wordInBookService.deleteWordFromBook(bookId, wordId, adminId);
+                                           @PathVariable String wordId) {
+        wordInBookService.deleteWordFromBook(bookId, wordId);
         return Result.success();
     }
 
