@@ -38,6 +38,6 @@ public interface UserService {
     Page<OrdinaryUser> getOrdinaryUsers(String keyword, Pageable pageable);
 
     // 管理员专属：查询特定普通用户
-    OrdinaryUser getOrdinaryUserByUserId(String userId);
+    Map<String, Object> getOrdinaryUserByUserId(String userId);
 
 }

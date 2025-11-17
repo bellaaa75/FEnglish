@@ -412,7 +412,25 @@ public class UserServiceImpl implements UserService {
 
     // 管理员查询特定普通用户
     @Override
-    public OrdinaryUser getOrdinaryUserByUserId(String userId) {
-        return ordinaryUserRepository.findByUserId(userId);
+    public Map<String, Object> getOrdinaryUserByUserId(String userId) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            OrdinaryUser user = ordinaryUserRepository.findByUserId(userId);
+            if (user != null) {
+                result.put("success", true);
+                result.put("data", user);
+                result.put("message", "查询成功");
+            } else {
+                result.put("success", false);
+                result.put("data", null);
+                result.put("message", "用户不存在");
+            }
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("data", null);
+            result.put("message", "查询失败: " + e.getMessage());
+        }
+        return result;
     }
+    
 }

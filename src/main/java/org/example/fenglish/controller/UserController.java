@@ -102,6 +102,7 @@ public class UserController {
 
         // 封装分页结果（给前端友好的响应格式）
         Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
         result.put("users", userPage.getContent()); // 当前页普通用户数据
         result.put("totalPages", userPage.getTotalPages()); // 总页数
         result.put("totalCount", userPage.getTotalElements()); // 总用户数
@@ -113,11 +114,9 @@ public class UserController {
     // 管理员查询特定普通用户（仅管理员可访问）
     @GetMapping("/admin/{userId}")
     /*@PreAuthorize("hasRole('ADMIN')")*/
-    public ResponseEntity<OrdinaryUser> getOrdinaryUserByAdmin(@PathVariable String userId) {
-        OrdinaryUser user = userService.getOrdinaryUserByUserId(userId);
-        if (user == null) {
-            return ResponseEntity.notFound().build(); // 没找到返回404
-        }
-        return ResponseEntity.ok(user);
+    public ResponseEntity<Map<String, Object>> getOrdinaryUserByAdmin(@PathVariable String userId) {
+        Map<String, Object> result = new HashMap<>();
+        result = userService.getOrdinaryUserByUserId(userId);      
+        return ResponseEntity.ok(result);
     }
 }
