@@ -7,9 +7,10 @@ export default {
     console.log(`[studyRecordService] addStudyRecord: userId=${userId}, wordId=${wordId}, time=${studyTime}`)
     // 后端期望的时间格式为 yyyy-MM-dd HH:mm:ss
     const fmt = typeof studyTime === 'string' ? studyTime : format(studyTime, 'yyyy-MM-dd HH:mm:ss')
+    // 包含多种可能的键名以兼容后端实体反序列化（兼容 getWordID / getWordId / 字段名）
     const payload = {
-      user: { userId },
-      englishWord: { wordId },
+      user: { userId, userID: userId },
+      englishWord: { wordId, wordID: wordId },
       studyTime: fmt
     }
     return request.post('/api/study-records', payload)
