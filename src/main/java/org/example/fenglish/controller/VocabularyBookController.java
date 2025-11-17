@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 // 跨域配置：允许前端域名访问
 @CrossOrigin(origins = "http://localhost:8080", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
@@ -71,10 +72,37 @@ public class VocabularyBookController {
 
     // 5. 查询所有单词书（GET）
     @GetMapping
-    public Result<List<VocabularyBookSimpleResp>> getAllBooks() {
-        // VocabularyBookSimpleResp：只包含单词书基础信息（bookId、bookName、publishTime）
-        List<VocabularyBookSimpleResp> bookList = vocabularyBookService.getAllVocabularyBooks();
-        return Result.success(bookList);
+    public Result<PageResult<VocabularyBookSimpleResp>> getAllBooks(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        // 分页参数：Spring Data JPA 的 page 从 0 开始
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        // 执行分页查询
+        Page<VocabularyBook> resultPage = vocabularyBookRepository.findAll(pageable);
+
+        // 转换为简单响应对象
+        List<VocabularyBookSimpleResp> bookList = resultPage.getContent().stream()
+                .map(book -> {
+                    VocabularyBookSimpleResp resp = new VocabularyBookSimpleResp();
+                    resp.setBookId(book.getBookId());
+                    resp.setBookName(book.getBookName());
+                    resp.setPublishTime(book.getPublishTime());
+                    return resp;
+                })
+                .collect(Collectors.toList());
+
+        // 封装分页结果
+        PageResult<VocabularyBookSimpleResp> pageResult = new PageResult<>(
+                bookList,
+                resultPage.getTotalElements(),
+                resultPage.getTotalPages(),
+                page,
+                size
+        );
+
+        return Result.success(pageResult);
     }
 
     // 6. 向单词书添加单词（POST）
@@ -97,7 +125,7 @@ public class VocabularyBookController {
 
     // 新增：搜索并分页查询单词书
     @GetMapping("/search")
-    public Result<PageResult<VocabularyBook>> searchVocabularyBooks(
+    public Result<PageResult<VocabularyBookSimpleResp>> searchVocabularyBooks(
             @RequestParam(required = false) String name,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "3") int size) {
@@ -109,7 +137,6 @@ public class VocabularyBookController {
         Specification<VocabularyBook> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (name != null && !name.trim().isEmpty()) {
-                // 修正：使用 jakarta.persistence.criteria 下的 API
                 predicates.add(cb.like(
                         cb.lower(root.get("bookName")),
                         "%" + name.trim().toLowerCase() + "%"
@@ -118,16 +145,27 @@ public class VocabularyBookController {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
 
-        // 执行分页 + 条件查询（JpaRepository 方法完全兼容，仅包名变化）
+        // 执行分页 + 条件查询
         Page<VocabularyBook> resultPage = vocabularyBookRepository.findAll(spec, pageable);
 
-        // 封装分页结果
-        PageResult<VocabularyBook> pageResult = new PageResult<>(
-                resultPage.getContent(),       // 当前页数据列表
-                resultPage.getTotalElements(), // 总条数
-                resultPage.getTotalPages(),    // 总页数
-                page,                          // 当前页码（前端传入的页码）
-                size                           // 每页条数
+        // 转换为VO列表
+        List<VocabularyBookSimpleResp> voList = resultPage.getContent().stream()
+                .map(book -> {
+                    VocabularyBookSimpleResp vo = new VocabularyBookSimpleResp();
+                    vo.setBookId(book.getBookId());
+                    vo.setBookName(book.getBookName());
+                    vo.setPublishTime(book.getPublishTime());
+                    return vo;
+                })
+                .collect(Collectors.toList());
+
+        // 封装分页结果（使用VO而非实体）
+        PageResult<VocabularyBookSimpleResp> pageResult = new PageResult<>(
+                voList,                      // 转换后的VO列表
+                resultPage.getTotalElements(),
+                resultPage.getTotalPages(),
+                page,
+                size
         );
 
         return Result.success(pageResult);
