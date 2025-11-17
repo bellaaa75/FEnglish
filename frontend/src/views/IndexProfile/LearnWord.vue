@@ -31,6 +31,8 @@
         >
           直接查看释义
         </el-button>
+        <!-- 开发用：手动触发新增学习记录（仅在调试时可用） -->
+        <el-button v-if="process.env.NODE_ENV === 'development'" type="info" @click="testAddStudyRecord" style="margin-left:12px;">测试：新增学习记录</el-button>
         <!-- 新增：熟练掌握复选框 -->
         <div style="margin-top:12px;">
           <el-checkbox v-model="mastered" @change="onMasteredChange">
@@ -387,6 +389,28 @@ const onMasteredChange = async (checked) => {
     mastered.value = !!(currentLearningState && currentLearningState.learnState === '熟练掌握');
   }
 };
+
+// 开发辅助：手动触发新增学习记录，用于调试（开发环境可见）
+const testAddStudyRecord = async () => {
+  const userId = getUserId();
+  const wordId = currentWord.value.wordId;
+  if (!userId || !wordId) {
+    ElMessage.warning('缺少 userId 或 wordId，无法测试');
+    return;
+  }
+  try {
+    const res = await studyRecordService.addStudyRecord(userId, wordId, new Date());
+    console.log('[LearnWord] testAddStudyRecord res:', res);
+    if (res && (res.code === 200 || res.success === true || res.data === true)) {
+      ElMessage.success('测试：学习记录已创建');
+    } else {
+      ElMessage.error('测试：后端未创建学习记录');
+    }
+  } catch (e) {
+    console.error('[LearnWord] testAddStudyRecord error:', e);
+    ElMessage.error('测试请求出错');
+  }
+}
 </script>
 
 <style scoped>
