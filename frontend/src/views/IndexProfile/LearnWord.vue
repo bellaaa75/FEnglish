@@ -215,8 +215,17 @@ const loadLearningState = async () => {
         try {
           const srRes = await studyRecordService.addStudyRecord(userId, wordId, new Date());
           console.log('[LearnWord] studyRecord add result:', srRes);
+          // 根据后端返回给用户提示
+          if (srRes && (srRes.code === 200 || srRes.success === true)) {
+            ElMessage.success('记录学习行为成功');
+          } else if (srRes && srRes.data === true) {
+            ElMessage.success('记录学习行为成功');
+          } else {
+            ElMessage.warning('未能记录学习行为（后台返回）');
+          }
         } catch (e) {
           console.error('[LearnWord] 创建 StudyRecord 失败:', e);
+          ElMessage.error('创建学习记录失败');
         }
         if (updateRes?.data === false) {
           // 如果更新失败，尝试新增后再更新
@@ -257,8 +266,14 @@ const loadLearningState = async () => {
           try {
             const srRes = await studyRecordService.addStudyRecord(userId, wordId, new Date());
             console.log('[LearnWord] studyRecord add result after addLearningState:', srRes);
+            if (srRes && (srRes.code === 200 || srRes.success === true || srRes.data === true)) {
+              ElMessage.success('记录学习行为成功');
+            } else {
+              ElMessage.warning('未能记录学习行为（后台返回）');
+            }
           } catch (e) {
             console.error('[LearnWord] 创建 StudyRecord 失败(after add):', e);
+            ElMessage.error('创建学习记录失败');
           }
           ElMessage.info('已创建学习记录并标记为已学');
         }
