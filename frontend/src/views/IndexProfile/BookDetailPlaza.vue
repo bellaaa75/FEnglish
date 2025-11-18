@@ -1,19 +1,30 @@
 <template>
   <div class="book-detail-container">
-    <el-page-header :content="['学习广场', displayBookName]" @back="handleBack" />
+    <el-page-header @back="handleBack" />
+    
     <el-card class="book-info-card" v-if="isBookLoaded">
       <div class="book-basic-info">
         <h2>{{ displayBookName }}</h2>
         <p>发布时间: {{ displayPublishTime }}</p>
         <p>单词总数: {{ displayTotalWords }} 个</p>
-        <el-button type="primary" @click="startLearning">开始学习</el-button>
       </div>
     </el-card>
 
     <el-table :data="words" v-loading="loading" style="width:100%; margin-top:16px">
-      <el-table-column prop="wordName" label="单词" />
-      <el-table-column prop="partOfSpeech" label="词性" />
+      <el-table-column prop="wordName" label="单词" width="180" />
+      <el-table-column prop="partOfSpeech" label="词性" width="120" />
       <el-table-column prop="wordExplain" label="释义" />
+      <!-- 操作列：学习和收藏按钮 -->
+      <el-table-column label="操作" width="160">
+        <template #default>
+          <el-button type="primary" size="small" style="margin-right: 8px;">
+            学习
+          </el-button>
+          <el-button type="success" size="small">
+            收藏
+          </el-button>
+        </template>
+      </el-table-column>
     </el-table>
 
     <el-pagination
@@ -59,12 +70,8 @@ const fetchBookDetail = async () => {
     loading.value = true;
     const res = await vocabularyBookService.getBookDetail(bookId);
     bookInfo.value = res?.data || {};
-    if (Array.isArray(bookInfo.value.wordList)) {
-      words.value = bookInfo.value.wordList;
-      total.value = words.value.length;
-    } else {
-      await fetchBookWords();
-    }
+    // 无论是否有wordList，都调用分页接口加载数据
+    await fetchBookWords();
   } catch (e) {
     ElMessage.error('获取详情失败');
     router.back();
@@ -74,25 +81,72 @@ const fetchBookDetail = async () => {
 const fetchBookWords = async () => {
   try {
     loading.value = true;
-    const res = await vocabularyBookService.getBookWords(bookId, pageInfo.value.currentPage, pageInfo.value.pageSize);
-    words.value = res?.data?.list || [];
-    total.value = res?.data?.total || words.value.length;
-  } catch {
+    // 优先调用分页接口
+    try {
+      const res = await vocabularyBookService.getBookWords(bookId, pageInfo.value.currentPage, pageInfo.value.pageSize);
+      const data = res?.data ?? res;
+      if (data && Array.isArray(data.list)) {
+        words.value = data.list;
+        total.value = data.total ?? data.list.length;
+        // 同步 bookInfo.wordList（若存在）
+        if (Array.isArray(bookInfo.value?.wordList)) bookInfo.value.wordList = words.value;
+        return { success: true, total: total.value };
+      }
+    } catch (err) {
+      console.warn('getBookWords 调用失败，尝试使用 getBookDetail 回退', err);
+    }
+
+    // 回退：从详情接口读取 wordList 并进行前端分页
+    try {
+      const det = await vocabularyBookService.getBookDetail(bookId);
+      const d = det?.data ?? det;
+      if (d && Array.isArray(d.wordList)) {
+        const all = d.wordList;
+        total.value = all.length;
+        // 前端分页切片
+        const start = (pageInfo.value.currentPage - 1) * pageInfo.value.pageSize;
+        const end = start + pageInfo.value.pageSize;
+        words.value = all.slice(start, end);
+        bookInfo.value = d;
+        return { success: true, total: total.value };
+      }
+    } catch (err) {
+      console.error('getBookDetail 回退也失败', err);
+      throw err;
+    }
+
+    words.value = [];
+    total.value = 0;
+    return { success: true, total: 0 };
+  } catch (err) {
+    console.error('fetchBookWords 最终失败', err);
     ElMessage.error('加载单词失败');
-  } finally { loading.value = false; }
+    return { success: false, total: 0 };
+  } finally {
+    loading.value = false;
+  }
 };
 
-const onPageChange = (page) => { pageInfo.value.currentPage = page; fetchBookWords(); };
+const ensureValidPageAndReload = async () => {
+  const result = await fetchBookWords();
+  const t = result.total || 0;
+  const totalPages = Math.max(1, Math.ceil(t / pageInfo.value.pageSize));
+  if (pageInfo.value.currentPage > totalPages) {
+    pageInfo.value.currentPage = totalPages;
+    await fetchBookWords();
+  }
+};
+
+const onPageChange = (page) => { 
+  pageInfo.value.currentPage = page; 
+  ensureValidPageAndReload();
+};
 
 const handleBack = () => {
   const returnTo = route.query.returnTo;
   if (returnTo) router.push(String(returnTo)).catch(() => router.back()); else router.back();
 };
 
-// 跳转到 LearnWord 页面（假设路由名为 LearnWord，传 bookId）
-const startLearning = () => {
-  router.push({ name: 'LearnWord', params: { bookId } });
-};
 </script>
 
 <style scoped>

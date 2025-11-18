@@ -1,6 +1,6 @@
 <template>
   <div class="book-detail-admin">
-    <el-page-header :content="['单词书管理', displayBookName]" @back="handleBack" />
+    <el-page-header  @back="handleBack" />
     <el-card v-if="isBookLoaded" class="mb-12">
       <div class="flex-between">
         <div>
@@ -16,8 +16,8 @@
 
     <!-- 修复1：给表格添加固定高度+滚动，减少尺寸频繁变化（不修改语法，仅加基础样式） -->
     <el-table :data="words" v-loading="loading" style="width:100%; max-height: 600px; overflow-y: auto;">
-      <el-table-column prop="wordName" label="单词" />
-      <el-table-column prop="partOfSpeech" label="词性" />
+      <el-table-column prop="wordName" label="单词" width="180" />
+      <el-table-column prop="partOfSpeech" label="词性" width="120" />
       <el-table-column prop="wordExplain" label="释义" />
       <el-table-column label="操作" width="140">
         <template #default="scope">
