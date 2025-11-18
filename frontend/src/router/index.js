@@ -16,7 +16,7 @@ const CollectWord = () => import('@/views/IndexProfile/CollectWord.vue');
 const CollectBook = () => import('@/views/IndexProfile/CollectBook.vue');
 const AdminChangePassword = () => import('../views/AdminProfile/AdminChangePassword.vue')
 const DeleteAdmin = () => import('../views/AdminProfile/DeleteAdmin.vue')
-const VocabularyBookManage = () => import('../views/admin/VocabularyBookManage.vue')
+const VocabularyBookManage = () => import('../views/AdminProfile/VocabularyBookManage.vue')
 const BookDetailPlaza = () => import('@/views/IndexProfile/BookDetailPlaza.vue')
 const BookDetailAdmin = () => import('@/views/AdminProfile/BookDetailAdmin.vue')
 const LearningPlaza = () => import('@/views/IndexProfile/LearningPlaza.vue') // 单独提取，方便嵌套子路由
@@ -209,13 +209,13 @@ const routes = [
       {
         path: 'vocabulary-books/add',
         name: 'VocabularyBookAdd',
-        component: () => import('../views/admin/VocabularyBookAdd.vue'),
+        component: () => import('../views/AdminProfile/VocabularyBookAdd.vue'),
         meta: { title: '新增单词书' }
       },
       {
         path: 'vocabulary-books/edit/:bookId',
         name: 'VocabularyBookEdit',
-        component: () => import('../views/admin/VocabularyBookEdit.vue'),
+        component: () => import('../views/AdminProfile/VocabularyBookEdit.vue'),
         meta: { title: '编辑单词书' }
       }
     ]
