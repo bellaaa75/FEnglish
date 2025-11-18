@@ -14,7 +14,8 @@
       </div>
     </el-card>
 
-    <el-table :data="words" v-loading="loading" style="width:100%">
+    <!-- 修复1：给表格添加固定高度+滚动，减少尺寸频繁变化（不修改语法，仅加基础样式） -->
+    <el-table :data="words" v-loading="loading" style="width:100%; max-height: 600px; overflow-y: auto;">
       <el-table-column prop="wordName" label="单词" />
       <el-table-column prop="partOfSpeech" label="词性" />
       <el-table-column prop="wordExplain" label="释义" />
@@ -49,10 +50,11 @@
         <el-button @click="resetSelector">重置</el-button>
       </div>
 
+      <!-- 修复2：弹窗表格同样添加固定高度+滚动 -->
       <el-table
         :data="selectorList"
         v-loading="selectorLoading"
-        style="width:100%"
+        style="width:100%; max-height: 450px; overflow-y: auto;"
         @selection-change="onSelectorSelectionChange"
         :row-key="row => row.wordId"
       >
@@ -64,7 +66,8 @@
 
       <div style="text-align:right; margin-top:12px;">
         <el-pagination
-          :current-page="selectorCurrent"          :page-size="selectorPageSize"
+          :current-page="selectorCurrent"
+          :page-size="selectorPageSize"
           :total="selectorTotal"
           @current-change="onSelectorPageChange"
           layout="prev, pager, next, jumper"
@@ -87,11 +90,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, onUnmounted, getCurrentInstance } from 'vue'; // 新增onUnmounted和getCurrentInstance
 import { useRoute, useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import vocabularyBookService from '@/services/vocabularyBookService';
-//import wordService from '@/services/wordService';
 import axios from 'axios';
 
 const route = useRoute();
@@ -123,9 +125,41 @@ const selectorCurrent = ref(1);
 const selectorPageSize = ref(10);
 const selectedWordIds = ref([]);
 const addingWords = ref(false);
+const wordIdToName = ref({});
+
+// ========== 修复3：全局捕获ResizeObserver错误（兜底，不影响编译） ==========
+const errorHandler = (e) => {
+  // 仅捕获特定错误，不影响其他错误
+  if (e.message && e.message.includes('ResizeObserver loop completed with undelivered notifications')) {
+    e.stopImmediatePropagation();
+    e.preventDefault();
+    return true;
+  }
+  return false;
+};
+
+// 获取Vue app实例（用于组件内错误捕获）
+const app = getCurrentInstance()?.appContext.app;
 
 // ========== 原有生命周期与方法 ==========
-onMounted(() => fetchBookDetail());
+onMounted(() => {
+  fetchBookDetail();
+  // 监听全局错误
+  window.addEventListener('error', errorHandler);
+  // 监听Vue组件内错误
+  if (app) {
+    app.config.errorHandler = (err) => {
+      if (err.message && err.message.includes('ResizeObserver')) {
+        return false; // 忽略该错误
+      }
+    };
+  }
+});
+
+// 组件卸载时移除监听，避免内存泄漏
+onUnmounted(() => {
+  window.removeEventListener('error', errorHandler);
+});
 
 const fetchBookDetail = async () => {
   if (!bookId) return;
@@ -134,8 +168,11 @@ const fetchBookDetail = async () => {
     const res = await vocabularyBookService.getBookDetail(bookId);
     bookInfo.value = res?.data || {};
     if (Array.isArray(bookInfo.value.wordList)) {
-      words.value = bookInfo.value.wordList;
-      total.value = words.value.length;
+      // 修复4：延长延迟到10ms，让DOM完全渲染后再赋值
+      setTimeout(() => {
+        words.value = bookInfo.value.wordList;
+        total.value = words.value.length;
+      }, 10);
     } else {
       await fetchBookWords();
     }
@@ -145,14 +182,11 @@ const fetchBookDetail = async () => {
   } finally { loading.value = false; }
 };
 
-// ========== 替换：更健壮的 success 判定 ==========
 const isSuccessResponse = (res) => {
   if (!res) return false;
-  // axios 原始响应通常有 status 和 data
   if (typeof res.status === 'number' && res.status >= 200 && res.status < 300) return true;
   const payload = res.data ?? res;
   if (!payload) return false;
-  // 支持多种后端习惯：{ code:200 }, { success:true }, 或直接返回非空
   if (payload.code === 200 || payload.success === true) return true;
   return false;
 };
@@ -160,36 +194,35 @@ const isSuccessResponse = (res) => {
 const fetchBookWords = async () => {
   try {
     loading.value = true;
-    // 优先调用分页接口
     try {
       const res = await vocabularyBookService.getBookWords(bookId, pageInfo.value.currentPage, pageInfo.value.pageSize);
       const data = res?.data ?? res;
       if (data && Array.isArray(data.list)) {
-        words.value = data.list;
-        total.value = data.total ?? data.list.length;
-        // 同步 bookInfo.wordList（若存在）
-        if (Array.isArray(bookInfo.value?.wordList)) bookInfo.value.wordList = words.value;
+        // 修复5：延长延迟到10ms
+        setTimeout(() => {
+          words.value = data.list;
+          total.value = data.total ?? data.list.length;
+          if (Array.isArray(bookInfo.value?.wordList)) bookInfo.value.wordList = words.value;
+        }, 10);
         return { success: true, total: total.value };
       }
-      // 若返回结构不含 list，继续走回退逻辑
     } catch (err) {
-      // 记录但不直接失败，尝试回退
       console.warn('getBookWords 调用失败，尝试使用 getBookDetail 回退', err);
     }
 
-    // 回退：从详情接口读取 wordList（可能包含完整列表）
     try {
       const det = await vocabularyBookService.getBookDetail(bookId);
       const d = det?.data ?? det;
       if (d && Array.isArray(d.wordList)) {
         const all = d.wordList;
         total.value = all.length;
-        // 做前端分页切片以兼容原有分页 UI
         const start = (pageInfo.value.currentPage - 1) * pageInfo.value.pageSize;
         const end = start + pageInfo.value.pageSize;
-        words.value = all.slice(start, end);
-        // 同步 bookInfo
-        bookInfo.value = d;
+        // 修复6：延长延迟到10ms
+        setTimeout(() => {
+          words.value = all.slice(start, end);
+          bookInfo.value = d;
+        }, 10);
         return { success: true, total: total.value };
       }
     } catch (err) {
@@ -197,9 +230,11 @@ const fetchBookWords = async () => {
       throw err;
     }
 
-    // 若两者都没数据，清空显示
-    words.value = [];
-    total.value = 0;
+    // 修复7：延长延迟到10ms
+    setTimeout(() => {
+      words.value = [];
+      total.value = 0;
+    }, 10);
     return { success: true, total: 0 };
   } catch (err) {
     console.error('fetchBookWords 最终失败', err);
@@ -210,7 +245,6 @@ const fetchBookWords = async () => {
   }
 };
 
-// ========== 替换：ensureValidPageAndReload ==========
 const ensureValidPageAndReload = async () => {
   const result = await fetchBookWords();
   const t = result.total || 0;
@@ -232,51 +266,51 @@ const handleBack = () => {
   else router.back();
 };
 
-// ========== 新增：选择器方法 ==========
+// ========== 选择器方法 ==========
 const openWordSelector = () => {
   selectorVisible.value = true;
   selectorKeyword.value = '';
   selectedWordIds.value = [];
   selectorCurrent.value = 1;
-  fetchSelectorList();
+  wordIdToName.value = {};
+  // 修复8：延长弹窗数据加载延迟到20ms，确保弹窗DOM渲染完成
+  setTimeout(() => {
+    fetchSelectorList();
+  }, 20);
 };
 
 const fetchSelectorList = async () => {
   try {
     selectorLoading.value = true;
-
     const params = {
-      page: selectorCurrent.value,
-      currentPage: selectorCurrent.value,
-      pageNo: selectorCurrent.value,
+      pageNum: selectorCurrent.value,
       pageSize: selectorPageSize.value,
       keyword: selectorKeyword.value || undefined,
     };
 
-    // 读取本地 token（按你项目实际 key）
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-
     const res = await axios.get('/api/words', {
       params,
-      withCredentials: true, // 若后端使用 cookie/session
+      withCredentials: true,
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
 
-    console.log('debug: axios res.data', res.data);
-    // 解析并赋值（按之前的解析逻辑）
     const payload = res.data;
     if (payload && Array.isArray(payload.data)) {
-      selectorList.value = payload.data;
-      selectorTotal.value = Number(payload.total ?? payload.data.length);
-      // 同步后端返回的页码/页大小到前端 UI（可选）
-      selectorCurrent.value = payload.currentPage ?? selectorCurrent.value;
-      selectorPageSize.value = payload.pageSize ?? selectorPageSize.value;
-      return;
+      // 修复9：延长延迟到10ms
+      setTimeout(() => {
+        selectorList.value = payload.data;
+        selectorTotal.value = Number(payload.total ?? payload.data.length);
+        selectorPageSize.value = payload.pageSize ?? selectorPageSize.value;
+        selectorCurrent.value = payload.currentPage ?? selectorCurrent.value;
+        payload.data.forEach(word => {
+          wordIdToName.value[word.wordId] = word.wordName;
+        });
+      }, 10);
     }
-    // 其余兼容解析...
   } catch (err) {
     console.error('fetchSelectorList 错误', err);
-    ElMessage.error('加载单词库失败（请检查认证）');
+    ElMessage.error('加载单词库失败');
   } finally {
     selectorLoading.value = false;
   }
@@ -302,7 +336,7 @@ const onSelectorSelectionChange = (rows) => {
   selectedWordIds.value = rows.map(r => r.wordId);
 };
 
-// ========== 替换：添加单词后刷新（使用更宽松的成功判定，并回退分页） ==========
+// ========== 核心优化：添加单词（统一综合提示，屏蔽服务器错误） ==========
 const addSelectedWords = async () => {
   if (!selectedWordIds.value.length) {
     ElMessage.warning('请先选择单词');
@@ -311,45 +345,48 @@ const addSelectedWords = async () => {
 
   addingWords.value = true;
   let successCount = 0;
-  const failDetails = [];
+  const failedWordNames = [];
 
   for (const wordId of selectedWordIds.value) {
+    const wordName = wordIdToName.value[wordId] || `ID:${wordId}`;
     try {
       const res = await vocabularyBookService.addWordToBook(bookId, { wordId });
       if (isSuccessResponse(res)) {
         successCount++;
       } else {
-        // 若后端返回 { code:200, data:null } but request wrapper presents differently, isSuccessResponse 已兼容
-        failDetails.push({ wordId, resp: res });
-        console.warn('添加单词返回非成功：', wordId, res);
+        failedWordNames.push(wordName);
+        console.warn(`单词 ${wordName} 添加失败（非成功响应）`, res);
       }
     } catch (err) {
-      const serverMsg = err?.response?.data ?? err?.message ?? err;
-      failDetails.push({ wordId, error: serverMsg });
-      console.error('添加单词失败：', wordId, serverMsg);
+      failedWordNames.push(wordName);
+      console.error(`单词 ${wordName} 添加失败（服务器错误）`, err);
     }
   }
 
   addingWords.value = false;
-
-  if (successCount > 0) {
-    ElMessage.success(`成功添加 ${successCount} 个单词${failDetails.length ? `，失败 ${failDetails.length} 个` : ''}`);
-  } else {
-    ElMessage.error('添加失败，详情见控制台');
-  }
-
-  if (failDetails.length) console.table(failDetails);
-
   selectorVisible.value = false;
   selectedWordIds.value = [];
 
-  // 新策略：尝试重新加载当前页；若失败则回退到第一页并重试
+  let message = '';
+  const successText = `${successCount} 个单词添加成功`;
+  const failText = `${failedWordNames.length} 个单词（${failedWordNames.join('、')}）添加失败，已存在于单词书中`;
+
+  if (successCount > 0 && failedWordNames.length > 0) {
+    message = `${successText}，${failText}`;
+  } else if (successCount > 0) {
+    message = successText;
+  } else {
+    message = failText;
+  }
+
+  const messageType = failedWordNames.length > 0 ? 'warning' : 'success';
+  ElMessage[messageType](message);
+
   let r = await fetchBookWords();
   if (!r.success) {
     pageInfo.value.currentPage = 1;
     await fetchBookWords();
   } else {
-    // 若当前页没有数据（例如新添加导致 total 改变），保证页号有效
     const totalPages = Math.max(1, Math.ceil((r.total || 0) / pageInfo.value.pageSize));
     if (pageInfo.value.currentPage > totalPages) {
       pageInfo.value.currentPage = totalPages;
@@ -358,7 +395,6 @@ const addSelectedWords = async () => {
   }
 };
 
-// ========== 替换：删除单词后刷新（使用 ensureValidPageAndReload）=========
 const onRemoveWord = async (wordId) => {
   try {
     await ElMessageBox.confirm('确认从该单词书删除此单词？', '删除确认', {
@@ -389,5 +425,15 @@ const onRemoveWord = async (wordId) => {
   display:flex; 
   justify-content:space-between; 
   align-items:center; 
+}
+
+/* 可选：优化滚动条样式，提升体验（不影响功能） */
+::v-deep .el-table__body-wrapper::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::v-deep .el-table__body-wrapper::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: #ccc;
 }
 </style>

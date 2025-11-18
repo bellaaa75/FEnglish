@@ -1,43 +1,52 @@
 <template>
   <div class="vocab-book-manage">
-    <!-- 操作栏：搜索框 + 添加按钮 -->
+    <!-- 操作栏：搜索框 + 搜索/重置按钮 + 添加按钮 -->
     <div class="operation-bar">
-      <el-input 
-        v-model="searchKeyword" 
-        placeholder="搜索单词书名称" 
-        class="search-input"
-        clearable
-        @keyup.enter="handleSearch"
-      />
+      <!-- 搜索区域：输入框 + 搜索/重置按钮（同一行布局） -->
+      <div class="search-area">
+        <el-input 
+          v-model="searchKeyword" 
+          placeholder="搜索单词书名称" 
+          class="search-input"
+          clearable
+          @keyup.enter="handleSearch"
+        />
+        <el-button type="primary" @click="handleSearch" class="search-btn">
+          搜索
+        </el-button>
+        <el-button type="default" @click="handleReset" class="reset-btn">
+          重置
+        </el-button>
+      </div>
       <el-button type="primary" @click="handleAdd">
         <el-icon><Plus /></el-icon>
         新增单词书
       </el-button>
     </div>
 
-    <!-- 单词书列表 -->
+    <!-- 单词书列表（移除v-loading，恢复原写法） -->
     <el-table 
       :data="bookList" 
       border 
       style="width: 100%; margin-top: 20px"
     >
-    <el-table-column prop="bookId" label="ID" width="180" />
-    <el-table-column prop="bookName" label="单词书名称" width="200">
-      <template #default="scope">
-        <span
-          class="link-like"
-          @click="goToBookDetail(scope.row.bookId)"
-          style="color: #409eff; cursor: pointer; text-decoration: underline;"
-        >
-          {{ scope.row.bookName }}
-        </span>
-      </template>
-    </el-table-column>
-    <el-table-column label="发布时间">
-      <template #default="scope">
-        {{ formatDate(scope.row.publishTime) }}
-      </template>
-    </el-table-column>
+      <el-table-column prop="bookId" label="ID" width="180" />
+      <el-table-column prop="bookName" label="单词书名称" width="200">
+        <template #default="scope">
+          <span
+            class="link-like"
+            @click="goToBookDetail(scope.row.bookId)"
+            style="color: #409eff; cursor: pointer; text-decoration: underline;"
+          >
+            {{ scope.row.bookName }}
+          </span>
+        </template>
+      </el-table-column>
+      <el-table-column label="发布时间">
+        <template #default="scope">
+          {{ formatDate(scope.row.publishTime) }}
+        </template>
+      </el-table-column>
       <el-table-column label="操作" width="200">
         <template #default="scope">
           <el-button size="small" @click="handleEdit(scope.row)">编辑</el-button>
@@ -162,6 +171,13 @@ const handleSearch = () => {
   searchBooks()
 }
 
+// 重置搜索（清空关键词 + 加载全部数据）
+const handleReset = () => {
+  searchKeyword.value = ''  // 清空输入框
+  pageInfo.value.currentPage = 1  // 重置到第一页
+  fetchBookList()  // 加载全部数据（复用原有逻辑）
+}
+
 // 新增单词书
 const handleAdd = () => {
   router.push('/profile/admin/vocabulary-books/add')
@@ -197,13 +213,15 @@ const handleDelete = async (bookId) => {
 // 分页大小改变
 const handleSizeChange = (size) => {
   pageInfo.value.pageSize = size
-  searchBooks()
+  // 区分：有搜索关键词则执行搜索，无则加载全部
+  searchKeyword.value.trim() ? searchBooks() : fetchBookList()
 }
 
 // 当前页改变
 const handleCurrentChange = (page) => {
   pageInfo.value.currentPage = page
-  searchBooks()
+  // 区分：有搜索关键词则执行搜索，无则加载全部
+  searchKeyword.value.trim() ? searchBooks() : fetchBookList()
 }
 
 </script>
@@ -219,9 +237,43 @@ const handleCurrentChange = (page) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 20px; /* 防止元素挤在一起 */
+}
+
+/* 搜索区域：输入框 + 按钮 横向布局 */
+.search-area {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* 按钮与输入框、按钮之间的间距 */
 }
 
 .search-input {
   width: 300px;
+}
+
+/* 搜索/重置按钮样式优化 */
+.search-btn {
+  min-width: 80px;
+}
+
+.reset-btn {
+  min-width: 80px;
+}
+
+/* 适配小屏幕：防止操作栏换行错乱 */
+@media (max-width: 768px) {
+  .operation-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .search-area {
+    width: 100%;
+  }
+  
+  .search-input {
+    flex: 1; /* 输入框占满剩余宽度 */
+    width: auto;
+  }
 }
 </style>
