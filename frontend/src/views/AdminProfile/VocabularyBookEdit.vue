@@ -1,14 +1,15 @@
 <template>
   <div class="vocab-book-form">
-    <el-page-header :content="['单词书管理', '编辑单词书']" @back="handleBack" />
+    <el-page-header @back="handleBack" />
     
     <el-form 
-      ref="bookForm" 
+      ref="bookFormRef" 
       :model="bookForm" 
       :rules="rules" 
       label-width="120px" 
       class="form-container"
     >
+      <!-- 单词书ID不可编辑，仅展示 -->
       <el-form-item label="单词书ID" prop="bookId">
         <el-input v-model="bookForm.bookId" disabled />
       </el-form-item>
@@ -26,7 +27,7 @@
           v-model="bookForm.publishTime"
           type="datetime"
           placeholder="选择发布时间"
-          value-format="YYYY-MM-DD HH:mm:ss"
+          value-format="YYYY-MM-DDTHH:mm:ss"
         />
       </el-form-item>
 
@@ -47,12 +48,14 @@ import vocabularyBookService from '@/services/vocabularyBookService'
 const router = useRouter()
 const route = useRoute()
 
+// 表单数据
 const bookForm = reactive({
-  bookName: '',
-  publishTime: new Date().toISOString().slice(0, 19).replace('T', ' ')
+  bookId: '',       // 单词书ID（不可编辑）
+  bookName: '',     // 单词书名称（可编辑）
+  publishTime: ''   // 发布时间（可编辑）
 })
 
-// 表单验证规则
+// 表单验证规则（与新增页面保持一致）
 const rules = {
   bookName: [
     { required: true, message: '请输入单词书名称', trigger: 'blur' },
@@ -65,27 +68,47 @@ const bookFormRef = ref(null)
 // 页面加载时获取单词书详情
 onMounted(async () => {
   try {
-    const bookId = route.params.bookId;
-    const res = await vocabularyBookService.getBookDetail(bookId);
-//  bookForm.value = res.data; // 初始化表单
-    bookForm.bookName = res.data.bookName
-    bookForm.publishTime = res.data.publishTime
+    const bookId = route.params.bookId
+    if (!bookId) {
+      ElMessage.error('单词书ID不存在')
+      router.back()
+      return
+    }
+
+    // 调用接口获取单词书详情
+    const res = await vocabularyBookService.getBookDetail(bookId)
+    const bookData = res.data || {}
+    
+    // 填充表单数据（注意时间格式兼容性处理）
+    bookForm.bookId = bookData.bookId
+    bookForm.bookName = bookData.bookName
+    bookForm.publishTime = bookData.publishTime 
+      ? bookData.publishTime.replace('T', ' ') 
+      : ''
   } catch (error) {
-    ElMessage.error('获取单词书详情失败')
+    ElMessage.error('获取单词书详情失败：' + (error.message || '未知错误'))
     console.error(error)
   }
 })
 
-// 提交修改
+// 提交编辑内容
 const handleSubmit = async () => {
   try {
+    // 表单验证
     await bookFormRef.value.validate()
-    await vocabularyBookService.updateBook(route.params.bookId, bookForm.value)
+    
+    // 调用更新接口（传递bookId和表单数据）
+    await vocabularyBookService.updateBook(route.params.bookId, {
+      bookName: bookForm.bookName,
+      publishTime: bookForm.publishTime || null
+    })
+    
     ElMessage.success('修改成功')
     router.push('/profile/admin/vocabulary-books')
   } catch (error) {
-    if (error.name === 'Error') {
-      ElMessage.error(error.message || '修改失败')
+    // 区分表单验证错误和后端错误
+    if (error.name !== 'ValidationError') {
+      ElMessage.error('修改失败：' + (error.message || '未知错误'))
     }
   }
 }
