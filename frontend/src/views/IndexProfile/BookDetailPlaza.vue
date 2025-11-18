@@ -192,10 +192,9 @@ const fetchBookWords = async () => {
     return { success: false, total: 0 };
   } finally {
     loading.value = false;
+    syncCollectedStatus()   // ✅ 放到这里
   }
-  // ✅ 拿到最新 words 后再回写收藏状态
-  syncCollectedStatus()
-  return { success: true, total: total.value }
+
 };
 
 const ensureValidPageAndReload = async () => {
