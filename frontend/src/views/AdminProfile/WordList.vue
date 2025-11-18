@@ -1,7 +1,7 @@
 <template>
   <el-container class="word-list-container">
     <el-main class="word-content">
-      <h3>单词管理</h3>
+      
       
       <!-- 搜索区域 -->
       <div class="search-container">
