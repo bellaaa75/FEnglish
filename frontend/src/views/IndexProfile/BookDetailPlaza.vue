@@ -16,8 +16,8 @@
       <el-table-column prop="wordExplain" label="释义" />
       <!-- 操作列：学习和收藏按钮 -->
       <el-table-column label="操作" width="160">
-        <template #default>
-          <el-button type="primary" size="small" style="margin-right: 8px;">
+        <template #default="scope">
+          <el-button type="primary" size="small" style="margin-right: 8px;" @click="handleLearn(scope.row.wordId)" >
             学习
           </el-button>
           <el-button type="success" size="small">
@@ -53,6 +53,21 @@ const words = ref([]);
 const total = ref(0);
 const loading = ref(false);
 const pageInfo = ref({ currentPage: 1, pageSize: 20 });
+
+const handleLearn = (wordId) => {
+  if (!wordId) {
+    ElMessage.warning('单词ID不存在');
+    return;
+  }
+  // 跳转到LearnWord页面，传递单词ID参数
+  router.push({
+    name: 'LearnWord', // 确保路由名称与路由配置一致
+    params: { wordId } // 传递当前单词的ID
+  }).catch(err => {
+    console.error('跳转学习页面失败:', err);
+    ElMessage.error('无法跳转到学习页面');
+  });
+};
 
 const displayBookName = computed(() => bookInfo.value?.bookName || '单词书详情');
 const displayPublishTime = computed(() => {
