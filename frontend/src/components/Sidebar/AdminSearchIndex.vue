@@ -15,7 +15,7 @@
       </el-menu-item>
 
       <!-- 新增单词书管理 -->
-      <el-menu-item index="/admin/vocabulary-books">
+      <el-menu-item index="/profile/admin/vocabulary-books">
         <span>单词书管理</span>
       </el-menu-item>
 
