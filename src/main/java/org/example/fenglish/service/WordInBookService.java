@@ -47,7 +47,7 @@ public class WordInBookService {
 
     // 2. 从单词书删除单词
     public void deleteWordFromBook(String bookId, String wordId) {
-        // 校验1：单词书是否存在且有权操作
+        // 校验1：单词书是否存在
         VocabularyBook book = vocabularyBookRepository.findById(bookId)
                 .orElseThrow(() -> new EntityNotFoundException("单词书不存在"));
         // 校验2：单词是否在单词书中

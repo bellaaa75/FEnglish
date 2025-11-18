@@ -186,7 +186,7 @@ const handleCurrentChange = (page) => {
 const goToBookDetail = (bookId) => {
   if (!bookId) return;
   router.push({
-    name: 'BookDetail',
+    name: 'BookDetailPlaza',
     params: { bookId },
     query: { returnTo: router.currentRoute.value.fullPath }
   });

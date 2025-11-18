@@ -17,7 +17,8 @@ const CollectBook = () => import('@/views/IndexProfile/CollectBook.vue');
 const AdminChangePassword = () => import('../views/AdminProfile/AdminChangePassword.vue')
 const DeleteAdmin = () => import('../views/AdminProfile/DeleteAdmin.vue')
 const VocabularyBookManage = () => import('../views/admin/VocabularyBookManage.vue')
-const BookDetail = () => import('@/views/IndexProfile/BookDetail.vue')
+const BookDetailPlaza = () => import('@/views/IndexProfile/BookDetailPlaza.vue')
+const BookDetailAdmin = () => import('@/views/AdminProfile/BookDetailAdmin.vue')
 const LearningPlaza = () => import('@/views/IndexProfile/LearningPlaza.vue') // 单独提取，方便嵌套子路由
 const StudyRecord = () => import('@/views/IndexProfile/StudyRecord.vue')
 const LearnWord = () => import('@/views/IndexProfile/LearnWord.vue')
@@ -99,19 +100,25 @@ const routes = [
         meta: { title: '我的单词书' }
       },
       // 学习广场路由（嵌套子路由，用于放置 BookDetail）
-{
-  path: 'plaza',
-  name: 'LearningPlaza',
-  component: LearningPlaza,
-  meta: { title: '学习广场' }
-},
-// 单词书详情页（可被广场和管理员页面共用）
-{
-  path: 'book-detail/:bookId',
-  name: 'BookDetail',
-  component: BookDetail,
-  meta: { title: '单词书详情', requiresAuth: true }
-},
+      {
+        path: 'plaza',
+        name: 'LearningPlaza',
+        component: LearningPlaza,
+        meta: { title: '学习广场' }
+      },
+      // 单词书详情页（可被广场和管理员页面共用）
+      {
+        path: '/profile/plaza/book-detail/:bookId',
+        name: 'BookDetailPlaza',
+        component: BookDetailPlaza,
+        meta: { title: '单词书详情（广场）' }
+      },
+      {
+        path: '/admin/vocabulary-book/book-detail/:bookId',
+        name: 'BookDetailAdmin',
+        component: BookDetailAdmin,
+        meta: { title: '单词书详情（管理）', requiresAuth: true }
+      },
       // 学习记录路由
       {
         path: 'record',

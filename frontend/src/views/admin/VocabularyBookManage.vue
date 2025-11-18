@@ -69,14 +69,16 @@ import vocabularyBookService from '@/services/vocabularyBookService'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+
 const goToBookDetail = (bookId) => {
   if (!bookId) return;
   router.push({
-    name: 'BookDetail',
+    name: 'BookDetailAdmin',
     params: { bookId },
     query: { returnTo: router.currentRoute.value.fullPath }
   });
 };
+
 // 日期格式化函数（兼容iOS解析bug）
 const formatDate = (dateString) => {
   if (!dateString) return '';
