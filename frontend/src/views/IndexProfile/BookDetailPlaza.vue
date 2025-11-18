@@ -17,12 +17,21 @@
       <!-- 操作列：学习和收藏按钮 -->
       <el-table-column label="操作" width="160">
         <template #default="scope">
-          <el-button type="primary" size="small" style="margin-right: 8px;" @click="handleLearn(scope.row.wordId)" >
-            学习
-          </el-button>
-          <el-button type="success" size="small">
-            收藏
-          </el-button>
+          <div class="op-buttons">
+            <el-button type="primary" size="small" style="margin-right: 8px;" @click="handleLearn(scope.row.wordId)">
+              学习
+            </el-button>
+
+            <!-- 收藏/已收藏 -->
+            <el-button
+              :type="scope.row.collected ? 'success' : 'primary'"
+              size="small"
+              :disabled="scope.row.collected"
+              @click="handleCollect(scope.row)">
+              <el-icon><Star v-if="!scope.row.collected" /><StarFilled v-else /></el-icon>
+              {{ scope.row.collected ? '已收藏' : '收藏' }}
+            </el-button>
+          </div>
         </template>
       </el-table-column>
     </el-table>
@@ -44,6 +53,10 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import vocabularyBookService from '@/services/vocabularyBookService';
+import { Star, StarFilled } from '@element-plus/icons-vue';
+
+import request from '@/utils/request' ;// 用于收藏接口
+
 
 const route = useRoute();
 const router = useRouter();
@@ -53,6 +66,21 @@ const words = ref([]);
 const total = ref(0);
 const loading = ref(false);
 const pageInfo = ref({ currentPage: 1, pageSize: 20 });
+
+/* ===== 新增：已收藏单词 id 集合 ===== */
+const collectedWordIds = ref(new Set())
+
+/* ===== 拉取用户收藏的单词 id（一次性） ===== */
+const fetchCollectedWords = async () => {
+  try {
+    const res = await request.get('/api/collect/words', { params: { page: 0, size: 1000 } })
+    const list = res.data?.content || []
+    collectedWordIds.value = new Set(list.map(item => String(item.targetId)))
+  } catch (e) {
+    console.error('拉取单词收藏状态失败', e)
+  }
+}
+
 
 const handleLearn = (wordId) => {
   if (!wordId) {
@@ -77,7 +105,32 @@ const displayPublishTime = computed(() => {
 const displayTotalWords = computed(() => total.value || (Array.isArray(bookInfo.value?.wordList) ? bookInfo.value.wordList.length : 0));
 const isBookLoaded = computed(() => Object.keys(bookInfo.value || {}).length > 0);
 
-onMounted(() => fetchBookDetail());
+// onMounted(() => fetchBookDetail());
+onMounted(async () => {
+  await fetchBookDetail() // 原有逻辑
+  await fetchCollectedWords() // 新增
+  syncCollectedStatus() // 把已收藏回写到当前页
+})
+
+/* ===== 把后端返回的收藏状态回写到当前页 ===== */
+const syncCollectedStatus = () => {
+  words.value.forEach(w => {
+    w.collected = collectedWordIds.value.has(String(w.wordId))
+  })
+}
+
+/* ===== 收藏/取消收藏 ===== */
+const handleCollect = async (row) => {
+  if (row.collected) return
+  try {
+    await request.post(`/api/collect/word/${row.wordId}`)
+    row.collected = true // 立即变已收藏
+    collectedWordIds.value.add(String(row.wordId)) // 加入集合，翻页仍生效
+    ElMessage.success('收藏成功')
+  } catch (e) {
+    ElMessage.error(e?.message || '收藏失败')
+  }
+}
 
 const fetchBookDetail = async () => {
   if (!bookId) return;
@@ -140,6 +193,9 @@ const fetchBookWords = async () => {
   } finally {
     loading.value = false;
   }
+  // ✅ 拿到最新 words 后再回写收藏状态
+  syncCollectedStatus()
+  return { success: true, total: total.value }
 };
 
 const ensureValidPageAndReload = async () => {
@@ -167,4 +223,16 @@ const handleBack = () => {
 <style scoped>
 .book-detail-container { padding:16px; background:#fff; }
 .book-info-card { margin-bottom:12px; }
+/* 让操作列的两颗按钮始终并排不换行 */
+.el-table__cell .cell {
+  display: flex;
+  gap: 8px;          /* 按钮间距 */
+  white-space: nowrap;
+}
+.op-buttons {
+  display: inline-flex;   /* 让容器本身不独占一行 */
+  gap: 8px;               /* 按钮间距 */
+  white-space: nowrap;    /* 强制不换行 */
+  align-items: center;    /* 垂直居中 */
+}
 </style>

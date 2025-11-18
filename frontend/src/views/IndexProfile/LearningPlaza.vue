@@ -32,13 +32,13 @@
             </span>
             
             <!-- 新增：收藏按钮 -->
-            <el-button 
-              type="primary" 
-              size="small" 
-              class="collect-btn"
-              @click.stop="handleCollect(book.bookId)"
-            >
-              收藏
+            <el-button
+              :type="book.collected ? 'success' : 'primary'"
+              size="small"
+              :disabled="book.collected"
+              @click="handleCollect(book)">   <!-- 把整个 book 传进去 -->
+              <el-icon><Star v-if="!book.collected" /><StarFilled v-else /></el-icon>
+              {{ book.collected ? '已收藏' : '收藏' }}
             </el-button>
           </div>
         </template>
@@ -71,10 +71,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { ElMessage } from 'element-plus';
+import { Star, StarFilled } from '@element-plus/icons-vue';   // ① 引入图标
+import request from '@/utils/request';                       // ② 引入 axios 封装
 import { useRouter } from 'vue-router';
 import vocabularyBookService from '@/services/vocabularyBookService';
-
+import { ElMessage } from 'element-plus';
 const router = useRouter();
 
 // ========== 完全对齐 VocabularyBookManage 的核心变量 ==========
@@ -114,10 +115,20 @@ const formatDate = (dateString) => {
   });
 };
 
-// ========== 新增：收藏按钮事件（仅占位） ==========
-const handleCollect = (bookId) => {
-  // 预留功能实现位置
-  console.log('准备收藏单词书：', bookId);
+// 处理收藏
+const handleCollect = async (book) => {
+  if (book.collected) return;          // 已经收藏直接返回，兜底
+
+  try {
+    await request.post(`/api/collect/book/${book.bookId}`);
+
+    // ① 立即回写状态，页面瞬间变“已收藏”
+    book.collected = true;
+
+    ElMessage.success('收藏成功');
+  } catch (error) {
+    ElMessage.error(error?.message || '收藏失败，请稍后再试');
+  }
 };
 
 // ========== 对齐接口调用逻辑（关键修复：参数格式与前者一致） ==========
@@ -126,46 +137,51 @@ onMounted(() => {
   fetchBookList();
 });
 
-// 获取单词书列表（空关键词查询全部，参数格式：关键词、页码、每页条数）
+// 获取单词书列表（首次加载、重置搜索用）
 const fetchBookList = async () => {
   try {
     loading.value = true;
-    const response = await vocabularyBookService.searchBooks(
+    const res = await vocabularyBookService.searchBooks(
       searchKeyword.value,
       pageInfo.value.currentPage,
       pageInfo.value.pageSize
     );
-    // 确保映射单词数字段（根据后端实际字段名调整）
-    bookList.value = (response?.data?.list || response?.data || []).map(book => ({
-      ...book,
-      wordCount: 
-        book.total ?? 
-        book.wordCount ?? 
-        book.wordList?.length ?? 
-        0
+    bookList.value = (res?.data?.list || []).map(b => ({
+      ...b,
+      wordCount: b.total ?? b.wordCount ?? b.wordList?.length ?? 0,
+      collected: false          // 先默认 false
     }));
-    pageInfo.value.total = response?.data?.total || bookList.value.length || 0;
-  } catch (error) {
-    ElMessage.error('获取单词书列表失败：' + (error?.message || '未知错误'));
+    pageInfo.value.total = res?.data?.total || 0;
+
+    // ⚠️ 关键：同步收藏状态
+    await fetchCollectedStatus();
+  } catch (e) {
+    ElMessage.error('获取列表失败：' + (e?.message || '未知错误'));
   } finally {
     loading.value = false;
   }
 };
 
-// 搜索单词书（带关键词，参数格式与前者一致）
+// 搜索单词书（关键词搜索、翻页都用它）
 const searchBooks = async () => {
   try {
     loading.value = true;
-    // 关键修复：按 VocabularyBookManage 的参数格式传递
-    const response = await vocabularyBookService.searchBooks(
+    const res = await vocabularyBookService.searchBooks(
       searchKeyword.value.trim(),
       pageInfo.value.currentPage,
       pageInfo.value.pageSize
     );
-    bookList.value = response.data.list || [];
-    pageInfo.value.total = response.data.total || 0;
-  } catch (error) {
-    ElMessage.error('搜索失败：' + (error.message || '未知错误'));
+    bookList.value = (res?.data?.list || []).map(b => ({
+      ...b,
+      wordCount: b.total ?? b.wordCount ?? b.wordList?.length ?? 0,
+      collected: false
+    }));
+    pageInfo.value.total = res?.data?.total || 0;
+
+    // ⚠️ 同样要同步
+    await fetchCollectedStatus();
+  } catch (e) {
+    ElMessage.error('搜索失败：' + (e?.message || '未知错误'));
   } finally {
     loading.value = false;
   }
@@ -206,7 +222,23 @@ const goToBookDetail = (bookId) => {
     query: { returnTo: router.currentRoute.value.fullPath }
   });
 };
+const fetchCollectedStatus = async () => {
+  if (!bookList.value.length) return;
+  try {
+    const res = await request.get('/api/collect/books', { params: { page: 0, size: 1000 } });
+    // 把后端返回的 id 全部转成字符串，保证类型一致
+    const collectedSet = new Set(
+      (res.data.content || []).map(item => String(item.targetId))
+    );
 
+    // 再比对
+    bookList.value.forEach(book => {
+      book.collected = collectedSet.has(String(book.bookId));
+    });
+  } catch (e) {
+    console.error('拉取收藏状态失败', e);
+  }
+};
 </script>
 
 <style scoped>
