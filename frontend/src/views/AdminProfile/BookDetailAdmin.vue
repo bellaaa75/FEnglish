@@ -64,12 +64,10 @@
 
       <div style="text-align:right; margin-top:12px;">
         <el-pagination
-          background
-          :current-page="selectorPage.current"
-          :page-size="selectorPage.pageSize"
+          :current-page="selectorCurrent"          :page-size="selectorPageSize"
           :total="selectorTotal"
-          layout="prev, pager, next, jumper"
           @current-change="onSelectorPageChange"
+          layout="prev, pager, next, jumper"
         />
       </div>
 
@@ -93,7 +91,8 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import vocabularyBookService from '@/services/vocabularyBookService';
-import wordService from '@/services/wordService';
+//import wordService from '@/services/wordService';
+import axios from 'axios';
 
 const route = useRoute();
 const router = useRouter();
@@ -120,7 +119,8 @@ const selectorKeyword = ref('');
 const selectorList = ref([]);
 const selectorLoading = ref(false);
 const selectorTotal = ref(0);
-const selectorPage = ref({ current: 1, pageSize: 10 });
+const selectorCurrent = ref(1);
+const selectorPageSize = ref(10);
 const selectedWordIds = ref([]);
 const addingWords = ref(false);
 
@@ -237,54 +237,64 @@ const openWordSelector = () => {
   selectorVisible.value = true;
   selectorKeyword.value = '';
   selectedWordIds.value = [];
-  selectorPage.value.current = 1;
+  selectorCurrent.value = 1;
   fetchSelectorList();
 };
 
 const fetchSelectorList = async () => {
   try {
     selectorLoading.value = true;
-    const res = await wordService.getWordList();
-    
-    let allWords = res?.data || [];
-    
-    // 若有搜索关键词，则在前端过滤
-    if (selectorKeyword.value) {
-      const keyword = selectorKeyword.value.toLowerCase();
-      allWords = allWords.filter(w => 
-        (w.wordName && w.wordName.toLowerCase().includes(keyword)) || 
-        (w.wordExplain && w.wordExplain.toLowerCase().includes(keyword))
-      );
+
+    const params = {
+      page: selectorCurrent.value,
+      currentPage: selectorCurrent.value,
+      pageNo: selectorCurrent.value,
+      pageSize: selectorPageSize.value,
+      keyword: selectorKeyword.value || undefined,
+    };
+
+    // 读取本地 token（按你项目实际 key）
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+
+    const res = await axios.get('/api/words', {
+      params,
+      withCredentials: true, // 若后端使用 cookie/session
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
+
+    console.log('debug: axios res.data', res.data);
+    // 解析并赋值（按之前的解析逻辑）
+    const payload = res.data;
+    if (payload && Array.isArray(payload.data)) {
+      selectorList.value = payload.data;
+      selectorTotal.value = Number(payload.total ?? payload.data.length);
+      // 同步后端返回的页码/页大小到前端 UI（可选）
+      selectorCurrent.value = payload.currentPage ?? selectorCurrent.value;
+      selectorPageSize.value = payload.pageSize ?? selectorPageSize.value;
+      return;
     }
-    
-    selectorTotal.value = allWords.length;
-    
-    // 前端分页：计算当前页的数据
-    const start = (selectorPage.value.current - 1) * selectorPage.value.pageSize;
-    const end = start + selectorPage.value.pageSize;
-    selectorList.value = allWords.slice(start, end);
-    
+    // 其余兼容解析...
   } catch (err) {
-    ElMessage.error('加载单词库失败');
-    selectorList.value = [];
+    console.error('fetchSelectorList 错误', err);
+    ElMessage.error('加载单词库失败（请检查认证）');
   } finally {
     selectorLoading.value = false;
   }
 };
 
+const onSelectorPageChange = (page) => {
+  selectorCurrent.value = page;
+  fetchSelectorList();
+};
+
 const onSelectorSearch = () => {
-  selectorPage.value.current = 1;
+  selectorCurrent.value = 1;
   fetchSelectorList();
 };
 
 const resetSelector = () => {
   selectorKeyword.value = '';
-  selectorPage.value.current = 1;
-  fetchSelectorList();
-};
-
-const onSelectorPageChange = (page) => {
-  selectorPage.value.current = page;
+  selectorCurrent.value = 1;
   fetchSelectorList();
 };
 

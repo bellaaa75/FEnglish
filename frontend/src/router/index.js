@@ -113,12 +113,7 @@ const routes = [
         component: BookDetailPlaza,
         meta: { title: '单词书详情（广场）' }
       },
-      {
-        path: '/admin/vocabulary-book/book-detail/:bookId',
-        name: 'BookDetailAdmin',
-        component: BookDetailAdmin,
-        meta: { title: '单词书详情（管理）', requiresAuth: true }
-      },
+
       // 学习记录路由
       {
         path: 'record',
@@ -184,6 +179,12 @@ const routes = [
         name: 'AdminWordAdd',
         component: () => import('../views/AdminProfile/WordAdd.vue'),
         meta: { title: '添加单词' }
+      },
+      {
+        path: 'vocabulary-books/book-detail/:bookId',
+        name: 'BookDetailAdmin',
+        component: BookDetailAdmin,
+        meta: { title: '单词书详情（管理）', requiresAuth: true }
       }
     ]
   },
