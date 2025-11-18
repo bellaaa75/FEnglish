@@ -38,6 +38,13 @@
           <el-checkbox v-model="mastered" @change="onMasteredChange">
             熟练掌握
           </el-checkbox>
+          <el-button 
+            type="primary" 
+            @click="handleBack" 
+            class="back-btn"
+          >
+            返回上一页
+          </el-button>
         </div>
       </div>
     </el-main>
@@ -406,6 +413,10 @@ const onMasteredChange = async (checked) => {
   }
 };
 
+const handleBack = () => {
+  router.back();
+};
+
 // 开发辅助：手动触发新增学习记录，用于调试（开发环境可见）
 const testAddStudyRecord = async () => {
   const userId = getUserId();
@@ -430,6 +441,30 @@ const testAddStudyRecord = async () => {
 </script>
 
 <style scoped>
+.back-btn {
+  position: fixed;
+  right: 20px;
+  bottom: 28px;
+  z-index: 999;
+  /* 紧凑内边距：上下6px，左右12px */
+  padding: 8px 20px !important;
+  margin: 0 !important;
+  font-size: 15px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  /* 覆盖 Element Plus 的 CSS 变量 */
+  --el-button-padding-horizontal: 16px !important;
+  --el-button-padding-vertical: 12px !important;
+  /* 防止内部文本有额外间距 */
+  line-height: 1;
+}
+
+/* 确保按钮内的文字没有额外 padding/margin */
+::v-deep(.back-btn .el-button__text) {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
 .learn-word-container {
   height: 100vh;
   background-color: #f5f7fa;

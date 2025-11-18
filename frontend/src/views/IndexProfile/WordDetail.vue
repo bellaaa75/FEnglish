@@ -49,7 +49,7 @@
 
       <!-- 右下角返回按钮 -->
       <el-button type="primary" @click="goBack" class="fixed-back-btn">
-        返回
+        返回上一页
       </el-button>
     </el-main>
   </el-container>
