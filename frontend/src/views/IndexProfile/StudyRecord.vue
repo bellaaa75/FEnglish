@@ -19,7 +19,7 @@
             <div class="dow">日</div><div class="dow">一</div><div class="dow">二</div><div class="dow">三</div><div class="dow">四</div><div class="dow">五</div><div class="dow">六</div>
             <div class="calendar-grid">
               <template v-for="(cell, idx) in calendarCells" :key="idx">
-                <div class="cell" :class="{empty: !cell.date}" :style="cellStyle(cell.count)">
+                <div class="cell" :class="{ empty: !cell.date, future: cell.isFuture, today: cell.isToday }" :style="cellStyle(cell.count, cell.isFuture)">
                   <div class="cell-count" v-if="cell.date">{{ cell.count === 0 ? 0 : cell.count }}</div>
                 </div>
               </template>
@@ -168,9 +168,11 @@ export default {
           const d = new Date(year, month, dayIndex)
           const dStr = format(d, 'yyyy-MM-dd')
           const count = map.get(dStr) || 0
-          cells.push({ date: dStr, count })
+          const isFuture = d.setHours(0,0,0,0) > new Date().setHours(0,0,0,0)
+          const isToday = d.toDateString() === new Date().toDateString()
+          cells.push({ date: dStr, count, isFuture, isToday })
         } else {
-          cells.push({ date: null, count: 0 })
+          cells.push({ date: null, count: 0, isFuture: false, isToday: false })
         }
       }
       calendarCells.value = cells
@@ -225,12 +227,13 @@ export default {
       const top = document.querySelector('.top')
       if (top) top.style.display = ''
     })
-    const cellStyle = (count) => {
-      if (!count) return { background: '#fff' }
+    const cellStyle = (count, isFuture) => {
+      if (isFuture) return { background: '#f2f2f2', color: '#999' }
+      if (!count) return { background: '#fff', color: '#111' }
       const m = maxCount.value || 1
       const ratio = Math.min(1, count / m)
-      // interpolate between light blue and dark blue
-      const alpha = 0.2 + ratio * 0.65
+      // interpolate between light blue and dark blue (use solid-ish color via rgba)
+      const alpha = 0.35 + ratio * 0.5
       return { background: `rgba(43,156,244,${alpha})`, color: '#fff' }
     }
 
@@ -255,11 +258,13 @@ export default {
 .metric { display:flex; align-items:baseline; gap:8px; margin:6px 0 }
 .metric .label { color:#333 }
 .metric .value { font-size: 22px; font-weight:700; color:#111 }
-.calendar-container { margin: 12px; padding: 10px; border: 2px solid #e6f2ff; }
+.calendar-container { margin: 12px; padding: 0px; border: 0px solid #e6f2ff; }
 .calendar-container .dow { display:inline-block; width: calc((100% - 14px)/7); text-align:center; color:#666; padding:6px 0 }
-.calendar-grid { display:grid; grid-template-columns: repeat(7, 1fr); gap:4px; margin-top:8px }
-.cell { min-height: 48px; border:1px solid #e6eef9; display:flex; align-items:center; justify-content:center }
+.calendar-grid { display:grid; grid-template-columns: repeat(7, 1fr); gap:0px; margin-top:8px }
+.cell { min-height: 48px; border: none; display:flex; align-items:center; justify-content:center; box-sizing: border-box }
 .cell.empty { background: #fafafa }
+.cell.future { background: #f2f2f2; color: #999 }
+.cell.today { box-shadow: inset 0 0 0 2px rgba(43,156,244,0.35); border-radius: 2px }
 .cell-count { font-weight:600 }
 .trend-card { height: 520px }
 .trend-header { font-weight: 600; margin-bottom: 8px }
