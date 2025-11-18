@@ -185,21 +185,7 @@ const routes = [
         name: 'BookDetailAdmin',
         component: BookDetailAdmin,
         meta: { title: '单词书详情（管理）', requiresAuth: true }
-      }
-    ]
-  },
-
-  // 404 路由（避免路由不匹配导致空白）
-  {
-    path: '/:pathMatch(.*)*',
-    redirect: '/user/login'
-  },
-
-  // 单词书相关路由（管理员）
-  {
-    path: '/admin',
-    component: AdminProfile, // 包含侧边栏的布局组件
-    children: [
+      },
       {
         path: 'vocabulary-books',
         name: 'VocabularyBookManage',
@@ -219,8 +205,15 @@ const routes = [
         meta: { title: '编辑单词书' }
       }
     ]
-  }
+  },
+
+  // 404 路由（避免路由不匹配导致空白）
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/user/login'
+  },
 ]
+
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL || '/'), // 保持原有配置

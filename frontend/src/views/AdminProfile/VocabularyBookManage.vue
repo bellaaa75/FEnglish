@@ -24,7 +24,7 @@
       </el-button>
     </div>
 
-    <!-- 单词书列表（移除v-loading，恢复原写法） -->
+    <!-- 单词书列表 -->
     <el-table 
       :data="bookList" 
       border 
