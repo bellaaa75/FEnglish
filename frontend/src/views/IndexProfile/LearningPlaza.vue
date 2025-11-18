@@ -31,6 +31,16 @@
             >
               {{ book.bookName }}
             </span>
+            
+            <!-- 新增：收藏按钮 -->
+            <el-button 
+              type="primary" 
+              size="small" 
+              class="collect-btn"
+              @click.stop="handleCollect(book.bookId)"
+            >
+              收藏
+            </el-button>
           </div>
         </template>
         <div class="book-info">
@@ -103,6 +113,12 @@ const formatDate = (dateString) => {
     hour: '2-digit',
     minute: '2-digit'
   });
+};
+
+// ========== 新增：收藏按钮事件（仅占位） ==========
+const handleCollect = (bookId) => {
+  // 预留功能实现位置
+  console.log('准备收藏单词书：', bookId);
 };
 
 // ========== 对齐接口调用逻辑（关键修复：参数格式与前者一致） ==========
@@ -246,7 +262,7 @@ const goToBookDetail = (bookId) => {
 
 .book-header {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between; /* 调整为两端对齐，容纳按钮 */
   align-items: center;
 }
 
@@ -256,6 +272,11 @@ const goToBookDetail = (bookId) => {
   cursor: pointer;
   color: #409eff;
   text-decoration: underline;
+}
+
+/* 新增：收藏按钮样式 */
+.collect-btn {
+  margin-left: 10px;
 }
 
 .book-info {
