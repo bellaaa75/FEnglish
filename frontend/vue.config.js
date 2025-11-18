@@ -10,6 +10,9 @@ module.exports = defineConfig({
         target: 'http://localhost:8080', // 你的后端 API 基础地址
         changeOrigin: true, // 改变源地址，解决跨域问题
       }
+    },
+    client: {
+      overlay: false // 关闭开发环境的全屏错误覆盖层（黑屏问题直接解决）
     }
   }
 })

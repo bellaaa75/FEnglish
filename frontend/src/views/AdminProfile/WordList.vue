@@ -15,10 +15,9 @@
         <el-button type="primary" @click="handleSearch">搜索</el-button>
         <el-button type="success" @click="resetSearch">重置</el-button>
 
-        <!-- 添加单词按钮 -->
+        <!-- 添加单词按钮（固定到最右边） -->
         <el-button 
           type="primary" 
-          style="margin-left: auto;" 
           @click="handleAddWord"
         >
           <el-icon><Plus /></el-icon> 添加单词
@@ -26,7 +25,7 @@
 
       </div>
 
-      <!-- 单词列表 -->
+      <!-- 单词列表（优化列宽策略） -->
       <el-table
         :data="wordList"
         border
@@ -42,31 +41,31 @@
         <el-table-column
           prop="wordName"
           label="单词"
-          width="150"
+          width="120"
         />
         <el-table-column
           prop="partOfSpeech"
           label="词性"
-          width="100"
+          width="120"
           :formatter="formatPartOfSpeech"
         />
         <el-table-column
           prop="wordExplain"
           label="释义"
-          width="400"
+          width="600"
         />
         <el-table-column
           label="操作"
-          width="200"
+          align="left"
         >
           <template #default="scope">
-            <el-button type="primary" size="small" @click="handleEdit(scope.row)">编辑</el-button>
+            <el-button type="primary" size="small" style="margin-right: 8px;" @click="handleEdit(scope.row)">编辑</el-button>
             <el-button type="danger" size="small" @click="handleDelete(scope.row.wordId)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
 
-      <!-- 分页控件（删除废弃的 total-pages 属性，解决警告） -->
+      <!-- 分页控件 -->
       <el-pagination
         background
         :current-page="pageInfo.currentPage"
@@ -307,21 +306,32 @@ const handleDelete = async (wordId) => {
   padding: 20px 0;
 }
 
+/* 搜索区域：让添加按钮固定在最右边 */
 .search-container {
   display: flex;
   gap: 10px;
   align-items: center;
   margin-bottom: 10px;
+  justify-content: flex-start;
+}
+/* 关键样式：通过margin-left: auto将添加按钮推到最右侧 */
+.search-container .el-button:last-child {
+  margin-left: auto !important;
 }
 
 /* 优化表格单元格内边距和文字换行 */
 ::v-deep .el-table td {
   padding: 12px 8px;
 }
+/* 操作列按钮强制水平排列，禁止换行 */
 ::v-deep .el-table .cell {
   white-space: normal;
   word-wrap: break-word;
   word-break: break-all;
+}
+::v-deep .el-table .cell .el-button {
+  display: inline-block !important;
+  vertical-align: middle;
 }
 
 /* 加载状态样式 */
