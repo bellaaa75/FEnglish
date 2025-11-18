@@ -1,6 +1,5 @@
 <template>
   <div class="record-container">
-    <h3>学习广场</h3>
     
     <!-- 搜索区域（对齐 VocabularyBookManage 的操作栏样式） -->
     <div class="operation-bar">
