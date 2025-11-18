@@ -1,116 +1,231 @@
 <template>
-  <div>
-    <!-- 卡片列表 -->
-    <el-card v-for="(word, index) in words" :key="index" class="card">
-      <template #header>
-        <div class="card-header">
-          <span>{{ word.collectTime }}</span> <!-- 显示收藏的日期 -->
-        </div>
-      </template>
-      <div v-for="(item, idx) in word.items" :key="idx" class="text item">
-        {{ item.wordName }} - {{ item.wordExplain }}
-        <el-button size="mini" @click="unfavoriteWord(index, idx)">取消收藏</el-button>
+  <div class="profile-info">
+    <!-- 左侧：按日期分组的单词收藏 -->
+    <div class="left-content">
+      <!-- 加载 -->
+      <div v-if="loading" class="loading">
+        <el-icon size="26"><Loading /></el-icon>
+        <p>加载中...</p>
       </div>
-      <template #footer>
-        <!-- Footer content为空，可以添加一些操作按钮或信息 -->
-      </template>
-    </el-card>
 
-    <!-- 分页控件 -->
-    <div class="pagination">
+      <!-- 错误 -->
+      <div v-else-if="error" class="error">
+        <el-icon color="red"><Warning /></el-icon>
+        <span>加载失败，请稍后再试</span>
+      </div>
+
+      <!-- 空状态 -->
+      <div v-else-if="total === 0" class="empty">
+        <el-icon size="48" color="#ccc"><Document /></el-icon>
+        <p>暂无收藏的单词</p>
+      </div>
+
+      <!-- 按日期分组展示 -->
+      <div v-else class="group-wrap">
+        <div
+          v-for="[date, list] in groupedWords"
+          :key="date"
+          class="date-group"
+        >
+          <div class="date-title">{{ date }}</div>
+          <ul class="word-list">
+            <li v-for="w in list" :key="w.collectId" class="word-item">
+              <router-link
+                :to="{ name: 'WordDetail', params: { wordId: w.targetId } }"
+                class="word-link"
+              >
+              <el-icon><CollectionTag  /></el-icon> <!-- 在这里插入图标 -->
+                {{ w.wordName }}
+              </router-link>
+              <span class="first-explain">{{ firstExplain(w.wordExplain) }}</span>
+              <el-button
+                type="danger"
+                size="small"
+                @click="handleUncollect(w.targetId)"
+              >
+                <el-icon style="margin-right: 4px"><Delete /></el-icon>取消收藏
+              </el-button>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 分页 -->
       <el-pagination
+        v-if="total > 0"
         background
-        :current-page="pageInfo.currentPage"
-        :page-sizes="[5, 10, 15, 20]"
-        :page-size="pageInfo.pageSize"
-        :total="pageInfo.total"
-        :total-pages="pageInfo.totalPages"
-        layout="sizes, prev, pager, next, jumper, total"
+        layout="sizes,prev,pager,next,jumper,total"
+        :total="total"
+        :page-size="size"
+        :current-page="page"
+        :page-sizes="[5,10,15,20]"
         @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
+        @current-change="handlePageChange"
       />
+    </div>
+
+    <!-- 右侧：操作栏 -->
+    <div class="right-actions">
+      <ActionSidebar />
     </div>
   </div>
 </template>
 
 <script setup>
-import { reactive, onMounted } from 'vue';
-import request from '@/utils/request';
-import { ElMessage } from 'element-plus';
+import { ref, computed } from 'vue'
+import { ElMessage } from 'element-plus'
+import { Delete, Document, Loading, Warning,CollectionTag } from '@element-plus/icons-vue'
+import ActionSidebar from '@/components/Sidebar/ActionSidebar.vue'
+import request from '@/utils/request'
 
-// 分页信息（与WordList保持一致的结构）
-const pageInfo = reactive({
-  currentPage: 1,
-  pageSize: 10,
-  total: 0,
-  totalPages: 0
-});
+/* 分页 & 原始数据 */
+const page = ref(1)
+const size = ref(10)
+const total = ref(0)
+const words = ref([])
+const loading = ref(false)
+const error = ref(false)
+/* 只取第一个释义 */
+const firstExplain = (exp) => (exp ? exp.split('；')[0] : '')
 
-const words = reactive([]);     // 单词数据
+/* 日期格式化：yyyy-mm-dd */
+const fmtDate = (str) => {
+  if (!str) return ''
+  const d = new Date(str)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+    d.getDate()
+  ).padStart(2, '0')}`
+}
 
-// 取消收藏单词的方法
-const unfavoriteWord = async (dateIndex, wordIndex) => {
-  const wordId = words[dateIndex].items[wordIndex].targetId;
+/* 分组：Map<yyyy-mm-dd, Array>  降序 */
+const groupedWords = computed(() => {
+  const map = new Map()
+  words.value.forEach((item) => {
+    const date = fmtDate(item.collectTime)
+    if (!map.has(date)) map.set(date, [])
+    map.get(date).push(item)
+  })
+  // 按日期降序
+  return new Map([...map.entries()].sort((a, b) => b[0].localeCompare(a[0])))
+})
+
+/* 加载数据 */
+const loadWords = async () => {
+  loading.value = true
+  error.value = false
   try {
-    await request.delete(`/api/collect/word/${wordId}`);
-    words[dateIndex].items.splice(wordIndex, 1); // 成功后移除单词
-    // 如果当前日期分组为空，移除该分组
-    if (words[dateIndex].items.length === 0) {
-      words.splice(dateIndex, 1);
-    }
-    ElMessage.success('取消收藏成功');
-    // 重新计算总页数
-    pageInfo.total--;
-    pageInfo.totalPages = Math.ceil(pageInfo.total / pageInfo.pageSize);
-  } catch (error) {
-    ElMessage.error(error.message || '取消收藏失败');
+    const res = await request.get('/api/collect/words', {
+      params: { page: page.value - 1, size: size.value }
+    })
+    words.value = res.data.content || []
+    total.value = res.data.totalElements || 0
+  } catch (e) {
+    error.value = true
+    ElMessage.error(e?.message || '获取收藏失败')
+  } finally {
+    loading.value = false
   }
-};
+}
 
-// 从后端接口获取收藏的单词
-const fetchCollectedWords = async () => {
+/* 取消收藏 */
+const handleUncollect = async (wordId) => {
   try {
-    const response = await request.get('/api/collect/words', {
-      params: {
-        page: pageInfo.currentPage - 1, // 后端从0开始计数
-        size: pageInfo.pageSize
-      }
-    });
-    console.log(response.data); // 添加日志来查看响应内容
-    const collectedWords = response.data.data.content;
-    const groupedWords = collectedWords.reduce((acc, word) => {
-      const date = word.collectTime.toISOString().split('T')[0]; // 提取日期部分
-      if (!acc[date]) {
-        acc[date] = { collectTime: date, items: [] };
-      }
-      acc[date].items.push(word);
-      return acc;
-    }, {});
-
-    words.splice(0, words.length, ...Object.values(groupedWords));
-    // 更新分页信息
-    pageInfo.total = response.data.data.totalElements;
-    pageInfo.totalPages = response.data.data.totalPages || Math.ceil(pageInfo.total / pageInfo.pageSize);
-  } catch (error) {
-    ElMessage.error(error.message || '获取收藏单词失败');
+    await request.delete(`/api/collect/word/${wordId}`)
+    ElMessage.success('已取消收藏')
+    loadWords()
+  } catch (e) {
+    ElMessage.error(e?.message || '操作失败')
   }
-};
+}
 
-// 每页条数改变
-const handleSizeChange = (size) => {
-  pageInfo.pageSize = size;
-  pageInfo.currentPage = 1; // 重置到第一页
-  fetchCollectedWords();
-};
+/* 分页事件 */
+const handleSizeChange = (val) => { size.value = val; page.value = 1; loadWords() }
+const handlePageChange = (val) => { page.value = val; loadWords() }
 
-// 当前页改变
-const handleCurrentChange = (page) => {
-  pageInfo.currentPage = page;
-  fetchCollectedWords();
-};
-
-// 在组件挂载时调用接口获取数据
-onMounted(() => {
-  fetchCollectedWords();
-});
+/* 初始化 */
+loadWords()
 </script>
+
+<style scoped>
+/* ====== 两栏布局 ====== */
+.profile-info {
+  display: flex;
+  padding: 0;
+  overflow-y: auto;
+}
+.left-content {
+  flex: 1;
+  padding: 30px;
+}
+.right-actions {
+  width: 150px;
+  flex-shrink: 0;
+}
+
+/* ====== 分组样式 ====== */
+.group-wrap {
+  margin-bottom: 20px;
+}
+.date-group {
+  margin-bottom: 24px;
+}
+.date-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #409eff;
+  margin-bottom: 8px;
+}
+.word-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.word-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+.word-link {
+  font-size: 16px;
+  color: #303133;
+  text-decoration: none;
+}
+.word-link:hover {
+  color: #409eff;
+  text-decoration: underline;
+}
+
+/* ====== 分页 ====== */
+.el-pagination {
+  margin-top: 20px;
+  text-align: center;
+  
+}
+
+/* ====== 状态样式 ====== */
+.loading,
+.error,
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 0;
+}
+
+.info-line {
+  display: flex;
+  align-items: center;
+  gap: 2px;          /* 图标|单词|释义 之间间距 */
+}
+.first-explain {
+  font-size: 14px;
+  color: #909399;   /* Element 灰色 */
+  margin-left: 4px; /* 再微调一点 */
+}
+</style>

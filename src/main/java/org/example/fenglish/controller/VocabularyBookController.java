@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 // 跨域配置：允许前端域名访问
@@ -107,9 +108,10 @@ public class VocabularyBookController {
     }
 
     // 6. 向单词书添加单词（POST）
-    @PostMapping("/{bookId}/words/{wordId}")
+    @PostMapping("/{bookId}/words")
     public Result<Void> addWordToBook(@PathVariable String bookId,
-                                      @PathVariable String wordId) {
+                                      @RequestBody Map<String, String> body) {
+        String wordId = body.get("wordId");
         wordInBookService.addWordToBook(bookId, wordId);
         return Result.success();
     }
