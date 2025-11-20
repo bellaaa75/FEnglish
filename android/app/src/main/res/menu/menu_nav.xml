@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_plaza"
+        android:icon="@drawable/tv"
+        android:title="学习广场" />
+    <item
+        android:id="@+id/nav_book"
+        android:icon="@drawable/book"
+        android:title="单词书" />
+    <item
+        android:id="@+id/nav_fav"
+        android:icon="@drawable/star"
+        android:title="单词收藏" />
+    <item
+        android:id="@+id/nav_me"
+        android:icon="@drawable/user"
+        android:title="我的账号" />
+
+</menu>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 图标与文字间距（默认 4dp） -->
+    <dimen name="design_bottom_navigation_margin">10dp</dimen>
+</resources>
