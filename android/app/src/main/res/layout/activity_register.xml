@@ -1,0 +1,102 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <!-- 顶部Logo和标语 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="FEnglish"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_gravity="center"
+        android:layout_marginTop="50dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="开启英语词汇之旅，从这里出发"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"/>
+
+    <!-- 表单区域 -->
+    <EditText
+        android:id="@+id/et_user_mailbox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:hint="邮箱"
+        android:inputType="textEmailAddress" />
+
+    <EditText
+        android:id="@+id/et_phone_number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="手机号（选填）"
+        android:inputType="phone"
+        android:layout_marginTop="10dp"/>
+
+
+    <EditText
+        android:id="@+id/et_user_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:hint="用户名" />
+
+    <EditText
+        android:id="@+id/et_user_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="设置密码"
+        android:inputType="textPassword"
+        android:layout_marginTop="10dp"/>
+
+    <EditText
+        android:id="@+id/et_confirm_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="确认密码"
+        android:inputType="textPassword"
+        android:layout_marginTop="10dp"/>
+
+
+    <Spinner
+        android:id="@+id/spinner_gender"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/gender_array"
+        android:layout_marginTop="10dp"/>
+
+    <!-- 按钮区域 -->
+    <Button
+        android:id="@+id/btn_register"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="注册账号"
+        android:layout_marginTop="20dp"/>
+
+    <!-- 返回登录 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="已有账号？"/>
+
+        <TextView
+            android:id="@+id/tv_back_to_login"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="返回登录"
+            android:textColor="@android:color/holo_blue_light"
+            android:layout_marginStart="5dp"/>
+    </LinearLayout>
+</LinearLayout>

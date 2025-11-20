@@ -2,7 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
+        android:name=".application.MyApp"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -11,28 +16,28 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.FenglishAndroid">
-<!--        <activity-->
-<!--            android:name=".MainActivity"-->
-<!--            android:exported="true">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
 
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
-<!--        </activity>-->
+        <!-- 启动页 -->
         <activity
-            android:name=".IndexActivity"
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!-- 保留原MainActivity但移除启动过滤器 -->
+
+        <!-- 主页面 -->
         <activity
-            android:name=".MainActivity"
-            android:exported="true">
-        </activity>
+            android:name=".ui.index.IndexActivity"
+            android:exported="false" />
+
+        <!-- 登录注册相关 -->
+        <activity android:name=".ui.login.LoginActivity" />
+        <activity android:name=".ui.login.AdminLoginActivity" />
+        <activity android:name=".ui.register.RegisterActivity" />
+        <activity android:name=".ui.register.AdminRegisterActivity" />
+
     </application>
 
 </manifest>

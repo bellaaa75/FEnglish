@@ -43,4 +43,27 @@ dependencies {
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
+    // Retrofit 网络请求库
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+
+    // OkHttp
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.11.0' // 建议添加，便于调试
+
+    // ViewModel 和 LiveData
+    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.6.2'
+    implementation 'androidx.lifecycle:lifecycle-livedata:2.6.2'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2' // 如果使用Kotlin
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.2' // 如果使用Kotlin
+
+    // 或者使用完整的 lifecycle 依赖（推荐）
+    def lifecycle_version = "2.6.2"
+    implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-livedata:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
+
+    // 如果需要使用 ViewModelProvider（在 Activity/Fragment 中获取 ViewModel）
+    implementation 'androidx.activity:activity:1.8.0'
+    implementation 'androidx.fragment:fragment:1.6.1'
 }

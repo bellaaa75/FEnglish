@@ -1,0 +1,90 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <!-- 顶部Logo和标语 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="FEnglish"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_gravity="center"
+        android:layout_marginTop="50dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="开启英语词汇之旅，从这里出发"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"/>
+
+    <!-- 表单区域 -->
+    <EditText
+        android:id="@+id/et_identifier"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="手机号/邮箱"
+        android:layout_marginTop="30dp"/>
+
+    <EditText
+        android:id="@+id/et_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="密码"
+        android:inputType="textPassword"
+        android:layout_marginTop="10dp"/>
+
+    <!-- 按钮区域 -->
+    <Button
+        android:id="@+id/btn_login"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="登录"
+        android:layout_marginTop="20dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="还没有账号？"/>
+
+        <TextView
+            android:id="@+id/tv_go_register"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="去注册"
+            android:textColor="@android:color/holo_blue_light"
+            android:layout_marginStart="5dp"/>
+    </LinearLayout>
+
+    <!-- 管理员登录入口 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="管理员登录入口"/>
+
+        <TextView
+            android:id="@+id/tv_admin_login"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="点击进入"
+            android:textColor="@android:color/holo_blue_light"
+            android:layout_marginStart="5dp"/>
+    </LinearLayout>
+</LinearLayout>

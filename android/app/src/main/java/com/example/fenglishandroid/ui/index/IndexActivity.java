@@ -1,4 +1,4 @@
-package com.example.fenglishandroid;
+package com.example.fenglishandroid.ui.index;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,12 +14,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.fenglishandroid.R;
 import com.example.fenglishandroid.fragment.HomeGridFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class IndexActivity extends AppCompatActivity {
 
-    private ViewPager2        pager;
+    private ViewPager2 pager;
     private BottomNavigationView nav;
 
     @Override

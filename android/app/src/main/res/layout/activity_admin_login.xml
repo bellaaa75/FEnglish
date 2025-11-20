@@ -1,0 +1,81 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="管理员登录"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_gravity="center"
+        android:layout_marginTop="50dp"/>
+
+    <EditText
+        android:id="@+id/et_identifier"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="管理员ID"
+        android:layout_marginTop="30dp"/>
+
+    <EditText
+        android:id="@+id/et_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="密码"
+        android:inputType="textPassword"
+        android:layout_marginTop="10dp"/>
+
+    <Button
+        android:id="@+id/btn_login"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="登录"
+        android:layout_marginTop="20dp"/>
+
+    <!-- 管理员注册入口 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="还没有管理员账号？"/>
+
+        <TextView
+            android:id="@+id/tv_admin_register"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="去注册"
+            android:textColor="@android:color/holo_blue_light"
+            android:layout_marginStart="5dp"/>
+    </LinearLayout>
+
+    <!-- 返回普通用户登录 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="返回普通用户登录"/>
+
+        <TextView
+            android:id="@+id/tv_back_to_ordinary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="点击返回"
+            android:textColor="@android:color/holo_blue_light"
+            android:layout_marginStart="5dp"/>
+    </LinearLayout>
+</LinearLayout>
