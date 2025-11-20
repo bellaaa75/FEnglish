@@ -40,20 +40,20 @@ public class RegisterActivity extends AppCompatActivity {
         etConfirmPassword = findViewById(R.id.et_confirm_password);
         etPhoneNumber = findViewById(R.id.et_phone_number);
         etUserMailbox = findViewById(R.id.et_user_mailbox);
-        spinnerGender = findViewById(R.id.spinner_gender);
+        //spinnerGender = findViewById(R.id.spinner_gender);
         btnRegister = findViewById(R.id.btn_register);
         tvBackToLogin = findViewById(R.id.tv_back_to_login);
 
         // 设置性别下拉框
-        setupGenderSpinner();
+        //setupGenderSpinner();
     }
 
-    private void setupGenderSpinner() {
+    /*private void setupGenderSpinner() {
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.gender_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerGender.setAdapter(adapter);
-    }
+    }*/
 
     private void initViewModel() {
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
@@ -91,10 +91,11 @@ public class RegisterActivity extends AppCompatActivity {
         String confirmPassword = etConfirmPassword.getText().toString().trim();
         String phoneNumber = etPhoneNumber.getText().toString().trim();
         String userMailbox = etUserMailbox.getText().toString().trim();
-        String gender = spinnerGender.getSelectedItem().toString();
+        //String gender = spinnerGender.getSelectedItem().toString();
+
 
         // 基本验证
-        if (userName.isEmpty() || userPassword.isEmpty() || confirmPassword.isEmpty()) {
+        if (userMailbox.isEmpty() || userName.isEmpty() || userPassword.isEmpty() || confirmPassword.isEmpty()) {
             Toast.makeText(this, "请填写必填信息", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -104,16 +105,18 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        if ("请选择性别".equals(gender)) {
+        /*if ("请选择性别".equals(gender)) {
             gender = ""; // 或者设置为默认值
-        }
+        }*/
 
         OrdinaryUserRegisterRequest request = new OrdinaryUserRegisterRequest();
         request.setUserName(userName);
         request.setUserPassword(userPassword);
-        request.setPhoneNumber(phoneNumber);
+        if (!phoneNumber.isEmpty()) {
+            request.setPhoneNumber(phoneNumber);
+        }
         request.setUserMailbox(userMailbox);
-        request.setGender(gender);
+        /*request.setGender(gender);*/
 
         userViewModel.registerOrdinary(request);
     }

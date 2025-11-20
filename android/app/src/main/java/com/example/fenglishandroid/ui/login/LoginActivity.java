@@ -52,6 +52,10 @@ public class LoginActivity extends AppCompatActivity {
                 return; // Activity正在销毁，不处理回调
             }
             if (response != null && response.isSuccess()) {
+                if (response.getToken() == null || response.getUserId() == null) {
+                    Toast.makeText(this, "登录信息异常", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 Toast.makeText(this, "登录成功！", Toast.LENGTH_SHORT).show();
                 saveUserInfo(response.getToken(), response.getUserId(), "ordinary");
                 // 跳转到主界面
@@ -130,28 +134,12 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         try {
-            // 在后台线程执行跳转，避免阻塞UI
-            new Thread(() -> {
-                // 模拟一些初始化工作（如果有的话）
-                try {
-                    Thread.sleep(100); // 给系统一点时间处理
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                // 回到主线程执行跳转
-                runOnUiThread(() -> {
-                    try {
-                        Intent intent = new Intent(LoginActivity.this, IndexActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                        finish();
-                    } catch (Exception e) {
-                        Log.e("LoginActivity", "跳转异常", e);
-                    }
-                });
-            }).start();
+            // 模拟一些初始化工作（如果有的话）
+            Intent intent = new Intent(LoginActivity.this, IndexActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            finish();
         } catch (Exception e) {
             Log.e("LoginActivity", "跳转异常", e);
         }

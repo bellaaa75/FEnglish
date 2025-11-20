@@ -63,12 +63,12 @@
         android:layout_marginTop="10dp"/>
 
 
-    <Spinner
+    <!--<Spinner
         android:id="@+id/spinner_gender"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:entries="@array/gender_array"
-        android:layout_marginTop="10dp"/>
+        android:layout_marginTop="10dp"/>-->
 
     <!-- 按钮区域 -->
     <Button

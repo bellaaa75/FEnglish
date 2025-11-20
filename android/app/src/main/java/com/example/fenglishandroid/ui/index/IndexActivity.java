@@ -79,8 +79,11 @@ public class IndexActivity extends AppCompatActivity {
 
     /* ====================== 字体替换工具 ====================== */
     private void setBottomNavFont(BottomNavigationView nav) {
-        Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/simhei.ttf");
-        iterateSetTypeface(nav, tf);
+        // 异步加载字体，避免阻塞UI
+        new Thread(() -> {
+            Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/simhei.ttf");
+            runOnUiThread(() -> iterateSetTypeface(nav, tf));
+        }).start();
     }
 
     private void iterateSetTypeface(ViewGroup parent, Typeface tf) {

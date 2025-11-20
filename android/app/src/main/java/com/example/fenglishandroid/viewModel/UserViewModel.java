@@ -30,11 +30,12 @@ public class UserViewModel extends AndroidViewModel {
         repository.registerOrdinary(request, new UserRepository.OnResultListener() {
             @Override
             public void onSuccess(BaseResponse response) {
+                Log.d("Register", "注册成功: " + response.toString());
                 registerLiveData.postValue(response);
             }
-
             @Override
             public void onFailure(String errorMsg) {
+                Log.d("Register", "注册失败: " + errorMsg);
                 errorLiveData.postValue(errorMsg);
             }
         });
