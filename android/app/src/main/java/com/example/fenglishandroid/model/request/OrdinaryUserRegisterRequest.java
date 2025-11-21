@@ -5,7 +5,7 @@ public class OrdinaryUserRegisterRequest {
     private String userPassword;
     private String phoneNumber;
     private String userMailbox;
-    private String gender;
+   /* private String gender;*/
     public String getUserName() {
         return userName;
     }
@@ -30,10 +30,10 @@ public class OrdinaryUserRegisterRequest {
     public void setUserMailbox(String userMailbox) {
         this.userMailbox = userMailbox;
     }
-    public String getGender() {
+    /*public String getGender() {
         return gender;
     }
     public void setGender(String gender) {
         this.gender = gender;
-    }
+    }*/
 }

@@ -22,7 +22,7 @@ public class UserViewModel extends AndroidViewModel {
 
     public UserViewModel(@NonNull Application application) {
         super(application);
-        repository = new UserRepository();
+        repository = new UserRepository(application);
     }
 
     // 普通用户注册
@@ -91,6 +91,16 @@ public class UserViewModel extends AndroidViewModel {
                 errorLiveData.postValue(errorMsg);
             }
         });
+    }
+
+    // 检查是否已登录
+    public boolean isLoggedIn() {
+        return repository.isLoggedIn();
+    }
+
+    // 获取当前Token
+    public String getCurrentToken() {
+        return repository.getCurrentToken();
     }
 
     // Getter方法供View观察
