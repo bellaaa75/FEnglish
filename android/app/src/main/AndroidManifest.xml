@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.fenglishandroid">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -31,6 +32,12 @@
         <activity
             android:name=".ui.index.IndexActivity"
             android:exported="false" />
+
+        <!-- 管理员主页Activity -->
+        <activity
+            android:name=".ui.admin.AdminIndexActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FenglishAndroid" />
 
         <!-- 登录注册相关 -->
         <activity android:name=".ui.login.LoginActivity" />

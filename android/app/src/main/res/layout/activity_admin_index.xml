@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- 内容区域：ViewPager2 -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/admin_view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/admin_bottom_nav" />
+
+    <!-- 底部导航栏（删除app:itemTextSize，和普通用户一致） -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/admin_bottom_nav"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/white"
+        app:itemIconSize="28dp"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/menu_admin_nav" />
+
+</RelativeLayout>

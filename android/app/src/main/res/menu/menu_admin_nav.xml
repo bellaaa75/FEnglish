@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- 账号管理（默认选中） -->
+    <item
+        android:id="@+id/menu_admin_account"
+        android:icon="@drawable/users"
+    android:title="用户账号管理"
+    app:showAsAction="withText" />
+
+    <!-- 单词书管理 -->
+    <item
+        android:id="@+id/menu_admin_wordbook"
+        android:icon="@drawable/book"
+    android:title="单词书管理"
+    app:showAsAction="withText" />
+
+    <!-- 单词管理 -->
+    <item
+        android:id="@+id/menu_admin_word"
+        android:icon="@drawable/pen"
+    android:title="单词管理"
+    app:showAsAction="withText" />
+
+    <item
+        android:id="@+id/menu_admin_setting"
+        android:icon="@drawable/user"
+        android:title="我的账号"
+        app:showAsAction="withText" />
+
+</menu>

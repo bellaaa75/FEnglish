@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.fenglishandroid.R;
 import com.example.fenglishandroid.model.request.LoginRequest;
+import com.example.fenglishandroid.ui.admin.AdminIndexActivity;
 import com.example.fenglishandroid.ui.register.AdminRegisterActivity;
 import com.example.fenglishandroid.viewModel.UserViewModel;
 
@@ -100,8 +101,8 @@ public class AdminLoginActivity extends AppCompatActivity {
 
     private void navigateToAdminMain() {
         // 跳转到管理员主界面
-        // Intent intent = new Intent(this, AdminMainActivity.class);
-        // startActivity(intent);
+        Intent intent = new Intent(AdminLoginActivity.this, AdminIndexActivity.class);
+        startActivity(intent);
         finish();
     }
 }
