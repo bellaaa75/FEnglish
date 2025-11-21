@@ -32,6 +32,9 @@ public class LoginActivity extends AppCompatActivity {
         initViews();
         initViewModel();
         setupClickListeners();
+
+        // 检查是否已登录，如果已登录直接跳转到主界面
+        checkLoginStatus();
     }
 
     private void initViews() {
@@ -57,7 +60,6 @@ public class LoginActivity extends AppCompatActivity {
                     return;
                 }
                 Toast.makeText(this, "登录成功！", Toast.LENGTH_SHORT).show();
-                saveUserInfo(response.getToken(), response.getUserId(), "ordinary");
                 // 跳转到主界面
                 navigateToMain();
             } else {
@@ -119,13 +121,13 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private void saveUserInfo(String token, String userId, String userType) {
-        SharedPreferences sp = getSharedPreferences("user_info", MODE_PRIVATE);
-        sp.edit()
-                .putString("token", token)
-                .putString("user_id", userId)
-                .putString("user_type", userType)
-                .apply();
+    // 新增：检查登录状态
+    private void checkLoginStatus() {
+        if (userViewModel.isLoggedIn()) {
+            // 如果已经登录，直接跳转到主界面
+            Log.d("LoginActivity", "用户已登录，自动跳转到主界面");
+            navigateToMain();
+        }
     }
 
     private void navigateToMain() {
@@ -142,6 +144,16 @@ public class LoginActivity extends AppCompatActivity {
             finish();
         } catch (Exception e) {
             Log.e("LoginActivity", "跳转异常", e);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // 清理观察者（ViewModelProvider 会自动处理，这里只是保险）
+        if (userViewModel != null) {
+            userViewModel.getLoginLiveData().removeObservers(this);
+            userViewModel.getErrorLiveData().removeObservers(this);
         }
     }
 }

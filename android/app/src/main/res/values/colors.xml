@@ -13,4 +13,18 @@
     <color name="gray">#FF9E9E9E</color>
     <color name="gray_light">#FFE0E0E0</color>
     <color name="gray_dark">#FF616161</color>
+    <!-- Material Design Color Palette -->
+
+
+    <!-- 自定义颜色 -->
+    <color name="primary_color">#2196F3</color>
+    <color name="primary_dark">#1976D2</color>
+    <color name="primary_light">#BBDEFB</color>
+    <color name="accent_color">#FF4081</color>
+
+    <!-- 文本颜色 -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="text_on_primary">#FFFFFF</color>
+    <color name="text_on_accent">#FFFFFF</color>
 </resources>
