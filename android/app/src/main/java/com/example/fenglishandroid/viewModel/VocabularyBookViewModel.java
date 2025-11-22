@@ -3,10 +3,14 @@ package com.example.fenglishandroid.viewModel;
 import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.example.fenglishandroid.model.VocabularyBookDetailResp;
 import com.example.fenglishandroid.model.VocabularyBookSimpleResp;
 import com.example.fenglishandroid.model.request.PageResult;
+import com.example.fenglishandroid.model.request.VocabularyBookAddReq;
+import com.example.fenglishandroid.model.request.VocabularyBookUpdateReq;
 import com.example.fenglishandroid.repository.VocabularyBookRepository;
 
 import java.util.List;
@@ -16,6 +20,9 @@ public class VocabularyBookViewModel extends AndroidViewModel {
     private MutableLiveData<List<VocabularyBookSimpleResp>> bookListLiveData;
     private MutableLiveData<Boolean> loadingLiveData;
     private MutableLiveData<String> errorLiveData;
+    private MutableLiveData<Boolean> addResultLiveData = new MutableLiveData<>();
+    private MutableLiveData<Boolean> updateResultLiveData = new MutableLiveData<>();
+    private MutableLiveData<VocabularyBookDetailResp> bookDetailLiveData = new MutableLiveData<>();
 
     public VocabularyBookViewModel(@NonNull Application application) {
         super(application);
@@ -53,7 +60,56 @@ public class VocabularyBookViewModel extends AndroidViewModel {
 
             @Override
             public void onFailure(Throwable throwable) {
-                // 处理错误
+                errorLiveData.postValue(throwable.getMessage());
+            }
+        });
+    }
+
+    // 新增单词书
+    public void addVocabularyBook(VocabularyBookAddReq req) {
+        repository.addBook(req, new VocabularyBookRepository.RepositoryCallback<Void>() {
+            @Override
+            public void onSuccess(Void data) {
+                addResultLiveData.postValue(true);
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+                addResultLiveData.postValue(false);
+                errorLiveData.postValue(throwable.getMessage());
+            }
+        });
+    }
+
+    // 获取单词书详情
+    public LiveData<VocabularyBookDetailResp> getBookDetail(String bookId) {
+        repository.getBookDetail(bookId, new VocabularyBookRepository.RepositoryCallback<VocabularyBookDetailResp>() {
+            @Override
+            public void onSuccess(VocabularyBookDetailResp data) {
+                bookDetailLiveData.postValue(data);
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+                bookDetailLiveData.postValue(null);
+                errorLiveData.postValue(throwable.getMessage());
+            }
+        });
+        return bookDetailLiveData;
+    }
+
+    // 更新单词书
+    public void updateVocabularyBook(String bookId, VocabularyBookUpdateReq req) {
+        repository.updateBook(bookId, req, new VocabularyBookRepository.RepositoryCallback<Void>() {
+            @Override
+            public void onSuccess(Void data) {
+                updateResultLiveData.postValue(true);
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+                updateResultLiveData.postValue(false);
+                errorLiveData.postValue(throwable.getMessage());
             }
         });
     }
@@ -62,4 +118,6 @@ public class VocabularyBookViewModel extends AndroidViewModel {
     public MutableLiveData<List<VocabularyBookSimpleResp>> getBookListLiveData() { return bookListLiveData; }
     public MutableLiveData<Boolean> getLoadingLiveData() { return loadingLiveData; }
     public MutableLiveData<String> getErrorLiveData() { return errorLiveData; }
+    public LiveData<Boolean> getAddResultLiveData() { return addResultLiveData; }
+    public LiveData<Boolean> getUpdateResultLiveData() { return updateResultLiveData; }
 }

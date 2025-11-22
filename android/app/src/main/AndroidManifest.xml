@@ -45,6 +45,16 @@
         <activity android:name=".ui.register.RegisterActivity" />
         <activity android:name=".ui.register.AdminRegisterActivity" />
 
+        <!-- 注册新增单词书Activity -->
+        <activity
+            android:name=".ui.admin.AddVocabularyBookActivity"
+            android:exported="false" />
+
+        <!-- 注册编辑单词书Activity -->
+        <activity
+            android:name=".ui.admin.EditVocabularyBookActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>
