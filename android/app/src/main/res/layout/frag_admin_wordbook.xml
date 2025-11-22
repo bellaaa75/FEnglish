@@ -2,13 +2,32 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="16dp">
 
-    <TextView
+    <!-- 搜索区域 -->
+    <SearchView
+        android:id="@+id/search_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:queryHint="搜索单词书名称"
+        android:iconifiedByDefault="false"
+        android:padding="8dp"/>
+
+    <!-- 操作按钮 -->
+    <Button
+        android:id="@+id/btn_add"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="单词书管理界面（空白，后续填充）"
-        android:textSize="18sp" />
+        android:text="新增单词书"
+        android:layout_gravity="end"
+        android:layout_marginTop="8dp"/>
+
+    <!-- 单词书列表 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="16dp"/>
 
 </LinearLayout>

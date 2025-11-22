@@ -76,4 +76,9 @@ public class RetrofitClient {
     public static UserApiService getUserApi() {
         return getInstance().create(UserApiService.class);
     }
+
+    public static VocabularyBookService getVocabularyBookService() {
+        return getInstance().create(VocabularyBookService.class);
+    }
+
 }
