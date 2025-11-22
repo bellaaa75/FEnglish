@@ -8,13 +8,15 @@
     android:background="@drawable/shape_item_border"
     android:layout_marginBottom="8dp">
 
-    <!-- 单词信息 -->
+    <!-- 单词信息（占满剩余宽度，避免重叠） -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingRight="16dp"> <!-- 与操作按钮留间距 -->
 
+        <!-- 单词名称 -->
         <TextView
             android:id="@+id/tv_word_name"
             android:layout_width="wrap_content"
@@ -24,45 +26,50 @@
             android:textColor="@color/black"
             android:textStyle="bold"/>
 
+        <!-- 词性+释义 横向布局（不固定宽度，自适应内容） -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
             android:orientation="horizontal"
-            android:layout_marginTop="4dp">
+            android:gravity="center_vertical">
 
+            <!-- 词性（灰色背景，原灰色区域） -->
             <TextView
                 android:id="@+id/tv_part_of_speech"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="n."
-                android:textSize="14sp"
-                android:textColor="@color/gray"
-                android:background="@drawable/shape_tag"
-                android:paddingHorizontal="6dp"
-                android:paddingVertical="2dp"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="2dp"
+            android:text="n."
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            android:background="@color/gray_light"/> <!-- 灰色背景，保持原样式 -->
 
+            <!-- 释义（与词性留间距） -->
             <TextView
                 android:id="@+id/tv_word_explain"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:text="苹果"
-                android:textSize="14sp"
-                android:textColor="@color/black"
-                android:layout_marginStart="8dp"/>
+                android:textColor="@color/gray_dark"
+                android:textSize="14sp"/>
+
         </LinearLayout>
     </LinearLayout>
 
-    <!-- 操作按钮（用项目已有颜色） -->
+    <!-- 操作按钮 -->
     <TextView
         android:id="@+id/tv_edit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="编辑"
         android:textColor="@color/purple_500"
-    android:textSize="14sp"
-    android:clickable="true"
-    android:focusable="true"
-    android:layout_marginEnd="16dp"/>
+        android:textSize="14sp"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_marginEnd="16dp"/>
 
     <TextView
         android:id="@+id/tv_delete"
@@ -70,8 +77,8 @@
         android:layout_height="wrap_content"
         android:text="删除"
         android:textColor="@color/red"
-    android:textSize="14sp"
-    android:clickable="true"
-    android:focusable="true"/>
+        android:textSize="14sp"
+        android:clickable="true"
+        android:focusable="true"/>
 
 </LinearLayout>

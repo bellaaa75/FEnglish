@@ -81,4 +81,7 @@ public class RetrofitClient {
         return getInstance().create(VocabularyBookService.class);
     }
 
+    public static WordService getWordService() {
+        return getInstance().create(WordService.class);
+    }
 }

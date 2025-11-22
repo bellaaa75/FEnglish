@@ -1,6 +1,5 @@
 package com.example.fenglishandroid.fragment.admin;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +16,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.fenglishandroid.R;
+import com.example.fenglishandroid.service.RetrofitClient;
+import com.example.fenglishandroid.service.WordService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
@@ -24,21 +25,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import okhttp3.Interceptor;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.http.Body;
-import retrofit2.http.DELETE;
-import retrofit2.http.POST;
-import retrofit2.http.Path;
 
 public class AdminWordFragment extends Fragment {
     // 控件
@@ -55,53 +45,27 @@ public class AdminWordFragment extends Fragment {
 
     // 分页参数
     private int currentPage = 1;
-    private int pageSize = 10;
-    private int totalPages = 1;
+    private int pageSize = 10; // 每页默认10个单词
+    private int totalPages = 1; // 总页数（从后端获取）
     private String keyword = "";
 
-    // Retrofit Service（内部接口，不新增文件）
-    private WordService wordService;
+    // 分页控件集合（方便统一处理）
+    private List<TextView> pageTvList = new ArrayList<>();
+    private static final int PAGE_BUTTON_COUNT = 4; // 分页按钮数量（固定4个）
 
-    // 关键：和LoginActivity一致的SharedPreferences名称（仓库中是"MyApp"）
-    private static final String SP_NAME = "MyApp";
-    private static final String SP_KEY_TOKEN = "token";
+    // 公共WordService接口
+    private WordService wordService;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.frag_admin_word, container, false);
 
-        // 关键修改：添加Token拦截器，从正确的SharedPreferences读取Token
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(new Interceptor() {
-                    @Override
-                    public okhttp3.Response intercept(Chain chain) throws IOException {
-                        // 1. 从LoginActivity存储Token的SharedPreferences中读取（名称：MyApp，键：token）
-                        SharedPreferences sp = getContext().getSharedPreferences(SP_NAME, getContext().MODE_PRIVATE);
-                        String token = sp.getString(SP_KEY_TOKEN, "");
-                        Log.d("WordDebug", "读取到的Token：" + (token.isEmpty() ? "空" : token.substring(0, 20) + "...")); // 隐藏完整Token，保护隐私
-
-                        // 2. 构建新请求，添加Authorization头（Bearer Token格式）
-                        Request originalRequest = chain.request();
-                        Request newRequest = originalRequest.newBuilder()
-                                .addHeader("Authorization", "Bearer " + token) // 后端要求的Token格式
-                                .build();
-
-                        // 3. 继续执行请求
-                        return chain.proceed(newRequest);
-                    }
-                })
-                .build();
-
-        // 初始化Retrofit（使用10.0.2.2，适配模拟器，团队共用）
-        wordService = new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:8080/") // 团队共用，模拟器自动映射电脑localhost
-                .client(client) // 加入带Token的客户端
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
-                .create(WordService.class);
+        // 初始化WordService
+        wordService = RetrofitClient.getWordService();
 
         initView(view);
+        initPageTvList(); // 初始化分页控件集合
         initAdapter();
         initListener();
         fetchWordList(); // 加载数据
@@ -121,7 +85,16 @@ public class AdminWordFragment extends Fragment {
         tvPage4 = view.findViewById(R.id.tv_page_4);
     }
 
-    // RecyclerView适配器（内部类，无新增目录）
+    // 初始化分页控件集合（方便循环处理）
+    private void initPageTvList() {
+        pageTvList.clear();
+        pageTvList.add(tvPage1);
+        pageTvList.add(tvPage2);
+        pageTvList.add(tvPage3);
+        pageTvList.add(tvPage4);
+    }
+
+    // RecyclerView适配器
     private void initAdapter() {
         wordAdapter = new WordAdapter(wordList, new OnItemClickListener() {
             @Override
@@ -142,7 +115,7 @@ public class AdminWordFragment extends Fragment {
         // 搜索
         btnSearch.setOnClickListener(v -> {
             keyword = etSearch.getText().toString().trim();
-            currentPage = 1;
+            currentPage = 1; // 搜索后重置为第一页
             fetchWordList();
         });
 
@@ -150,111 +123,151 @@ public class AdminWordFragment extends Fragment {
         btnReset.setOnClickListener(v -> {
             etSearch.setText("");
             keyword = "";
-            currentPage = 1;
+            currentPage = 1; // 重置后回到第一页
             fetchWordList();
         });
 
-        // 分页点击
+        // 上一页
         ivPrev.setOnClickListener(v -> {
             if (currentPage > 1) {
                 currentPage--;
-                updatePageUI();
-                fetchWordList();
+                updatePageUI(); // 更新分页样式
+                fetchWordList(); // 加载数据
             } else {
                 Toast.makeText(getContext(), "已是第一页", Toast.LENGTH_SHORT).show();
             }
         });
 
+        // 下一页
         ivNext.setOnClickListener(v -> {
-            if (currentPage < totalPages) {
+            if (currentPage < totalPages) { // 只有当前页 < 总页数时才能翻页
                 currentPage++;
-                updatePageUI();
-                fetchWordList();
+                updatePageUI(); // 更新分页样式
+                fetchWordList(); // 加载数据
             } else {
                 Toast.makeText(getContext(), "已是最后一页", Toast.LENGTH_SHORT).show();
             }
         });
 
-        tvPage1.setOnClickListener(v -> switchPage(1));
-        tvPage2.setOnClickListener(v -> switchPage(2));
-        tvPage3.setOnClickListener(v -> switchPage(3));
-        tvPage4.setOnClickListener(v -> switchPage(4));
+        // 分页数字点击（循环绑定，避免重复代码）
+        for (int i = 0; i < pageTvList.size(); i++) {
+            int finalI = i;
+            pageTvList.get(i).setOnClickListener(v -> {
+                // 获取当前点击的页码（转为int）
+                String pageStr = pageTvList.get(finalI).getText().toString().trim();
+                if (pageStr.isEmpty()) return;
+                int targetPage = Integer.parseInt(pageStr);
+                // 只有目标页在有效范围内且不等于当前页时才切换
+                if (targetPage >= 1 && targetPage <= totalPages && targetPage != currentPage) {
+                    currentPage = targetPage;
+                    updatePageUI();
+                    fetchWordList();
+                }
+            });
+        }
     }
 
-    // 切换页码
-    private void switchPage(int targetPage) {
-        if (targetPage < 1 || targetPage > totalPages) return;
-        currentPage = targetPage;
-        updatePageUI();
-        fetchWordList();
-    }
-
-    // 更新分页样式
+    // 核心优化：更新分页UI（当前页居中，不足4页全展示）
     private void updatePageUI() {
-        // 重置样式
-        tvPage1.setBackgroundResource(0);
-        tvPage1.setTextColor(getResources().getColor(R.color.black));
-        tvPage2.setBackgroundResource(0);
-        tvPage2.setTextColor(getResources().getColor(R.color.black));
-        tvPage3.setBackgroundResource(0);
-        tvPage3.setTextColor(getResources().getColor(R.color.black));
-        tvPage4.setBackgroundResource(0);
-        tvPage4.setTextColor(getResources().getColor(R.color.black));
+        // 1. 重置所有分页按钮样式
+        resetPageTvStyle();
 
-        // 选中当前页
-        switch (currentPage) {
-            case 1:
-                tvPage1.setBackgroundResource(R.drawable.shape_page_selected);
-                tvPage1.setTextColor(getResources().getColor(R.color.white));
-                break;
-            case 2:
-                tvPage2.setBackgroundResource(R.drawable.shape_page_selected);
-                tvPage2.setTextColor(getResources().getColor(R.color.white));
-                break;
-            case 3:
-                tvPage3.setBackgroundResource(R.drawable.shape_page_selected);
-                tvPage3.setTextColor(getResources().getColor(R.color.white));
-                break;
-            case 4:
-                tvPage4.setBackgroundResource(R.drawable.shape_page_selected);
-                tvPage4.setTextColor(getResources().getColor(R.color.white));
-                break;
+        // 2. 根据总页数和当前页，计算要显示的4个页码
+        int[] displayPages = calculateDisplayPages();
+
+        // 3. 给分页按钮设置页码和点击事件
+        for (int i = 0; i < pageTvList.size(); i++) {
+            int pageNum = displayPages[i];
+            if (pageNum > 0 && pageNum <= totalPages) { // 只显示有效页码
+                pageTvList.get(i).setText(String.valueOf(pageNum));
+                pageTvList.get(i).setVisibility(View.VISIBLE); // 显示按钮
+
+                // 高亮当前页
+                if (pageNum == currentPage) {
+                    pageTvList.get(i).setBackgroundResource(R.drawable.shape_page_selected);
+                    pageTvList.get(i).setTextColor(getResources().getColor(R.color.white));
+                }
+            } else {
+                pageTvList.get(i).setVisibility(View.GONE); // 隐藏无效页码按钮
+            }
+        }
+
+        // 4. 控制上一页/下一页按钮状态（可选：添加禁用样式）
+        updatePrevNextButtonStatus();
+    }
+
+    // 计算要显示的4个页码（核心逻辑）
+    private int[] calculateDisplayPages() {
+        int[] pages = new int[PAGE_BUTTON_COUNT];
+        if (totalPages <= PAGE_BUTTON_COUNT) {
+            // 情况1：总页数 ≤ 4，显示所有页码（1,2,3,...totalPages）
+            for (int i = 0; i < totalPages; i++) {
+                pages[i] = i + 1;
+            }
+            // 剩余位置填充0（后续隐藏）
+            for (int i = totalPages; i < PAGE_BUTTON_COUNT; i++) {
+                pages[i] = 0;
+            }
+        } else {
+            // 情况2：总页数 > 4，当前页居中（尽量让当前页在中间位置）
+            if (currentPage <= 2) {
+                // 前2页：显示1,2,3,4（当前页在1或2时，左侧无更多页）
+                pages[0] = 1;
+                pages[1] = 2;
+                pages[2] = 3;
+                pages[3] = 4;
+            } else if (currentPage >= totalPages - 1) {
+                // 后2页：显示 totalPages-3, totalPages-2, totalPages-1, totalPages（当前页在最后2页时，右侧无更多页）
+                pages[0] = totalPages - 3;
+                pages[1] = totalPages - 2;
+                pages[2] = totalPages - 1;
+                pages[3] = totalPages;
+            } else {
+                // 中间页：显示 currentPage-2, currentPage-1, currentPage, currentPage+1（当前页居中）
+                pages[0] = currentPage - 2;
+                pages[1] = currentPage - 1;
+                pages[2] = currentPage;
+                pages[3] = currentPage + 1;
+            }
+        }
+        return pages;
+    }
+
+    // 重置分页按钮样式
+    private void resetPageTvStyle() {
+        for (TextView tv : pageTvList) {
+            tv.setBackgroundResource(0);
+            tv.setTextColor(getResources().getColor(R.color.black));
+            tv.setVisibility(View.VISIBLE);
         }
     }
 
-    // 核心：调用后端分页接口（携带Token）
+    // 更新上一页/下一页按钮状态（可选：添加禁用效果，更友好）
+    private void updatePrevNextButtonStatus() {
+        // 上一页：当前页=1时禁用
+        ivPrev.setAlpha(currentPage == 1 ? 0.5f : 1.0f);
+        ivPrev.setClickable(currentPage != 1);
+
+        // 下一页：当前页=总页数时禁用
+        ivNext.setAlpha(currentPage == totalPages ? 0.5f : 1.0f);
+        ivNext.setClickable(currentPage != totalPages);
+    }
+
+    // 核心：调用后端分页接口（GET请求+Query参数）
     private void fetchWordList() {
-        // 1. 打印请求参数
-        Map<String, Object> params = new HashMap<>();
-        params.put("pageNum", currentPage);
-        params.put("pageSize", pageSize);
-        if (!keyword.isEmpty()) {
-            params.put("keyword", keyword);
-        }
-        Log.d("WordDebug", "请求参数：" + params.toString());
+        Log.d("WordDebug", "请求参数：pageNum=" + currentPage + ", pageSize=" + pageSize + ", keyword=" + keyword);
 
-        // 2. 转换参数为JSON（和登录请求一致）
-        RequestBody requestBody = RequestBody.create(
-                MediaType.parse("application/json; charset=utf-8"),
-                gson.toJson(params)
-        );
-
-        // 3. 发起POST请求（自动携带Token）
-        Call<ResponseBody> call = wordService.getWordList(requestBody);
+        Call<ResponseBody> call = wordService.getWordList(currentPage, pageSize, keyword);
         Log.d("WordDebug", "请求URL：" + call.request().url().toString());
-        Log.d("WordDebug", "请求头：" + call.request().headers().toString());
+        // Log.d("WordDebug", "携带的Token：" + call.request().header("Authorization"));
 
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                // 打印响应状态码和响应头
-                Log.d("WordDebug", "响应状态码：" + response.code());
-                Log.d("WordDebug", "响应头：" + response.headers().toString());
-
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         String json = response.body().string();
-                        Log.d("WordDebug", "响应数据：" + json); // 打印后端返回的完整JSON
+                        Log.d("WordDebug", "响应数据：" + json);
 
                         Map<String, Object> result = gson.fromJson(json, new TypeToken<Map<String, Object>>() {}.getType());
                         boolean success = (boolean) result.get("success");
@@ -264,30 +277,34 @@ public class AdminWordFragment extends Fragment {
                                     gson.toJson(result.get("data")),
                                     new TypeToken<List<Map<String, Object>>>() {}.getType()
                             );
-                            totalPages = ((Double) result.get("totalPages")).intValue();
-                            int total = ((Double) result.get("total")).intValue();
+                            // 处理总页数（避免Double转int报错）
+                            totalPages = result.get("totalPages") instanceof Double ?
+                                    ((Double) result.get("totalPages")).intValue() :
+                                    Integer.parseInt(result.get("totalPages").toString());
+                            int total = result.get("total") instanceof Double ?
+                                    ((Double) result.get("total")).intValue() :
+                                    Integer.parseInt(result.get("total").toString());
 
                             // 更新UI
                             wordList.clear();
                             wordList.addAll(newWordList);
                             wordAdapter.notifyDataSetChanged();
-                            updatePageUI();
+                            updatePageUI(); // 加载数据后更新分页样式
                             Toast.makeText(getContext(), "共" + total + "个单词", Toast.LENGTH_SHORT).show();
                         } else {
                             String message = result.get("message") != null ? result.get("message").toString() : "未知错误";
                             Toast.makeText(getContext(), "加载失败：" + message, Toast.LENGTH_SHORT).show();
-                            Log.e("WordDebug", "加载失败：" + message);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
-                        Log.e("WordDebug", "解析失败：" + e.getMessage());
                         Toast.makeText(getContext(), "解析失败", Toast.LENGTH_SHORT).show();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Toast.makeText(getContext(), "数据处理失败", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    // 处理401（Token无效/过期/未携带）
                     if (response.code() == 401) {
                         Toast.makeText(getContext(), "Token无效/未登录，请重新登录", Toast.LENGTH_SHORT).show();
-                        Log.e("WordDebug", "401未授权：Token可能为空或无效");
                     } else if (response.code() == 404) {
                         Toast.makeText(getContext(), "接口路径错误（404）", Toast.LENGTH_SHORT).show();
                     } else if (response.code() == 500) {
@@ -306,15 +323,15 @@ public class AdminWordFragment extends Fragment {
         });
     }
 
-    // 调用后端删除接口（携带Token）
+    // 删除单词接口
     private void deleteWord(int wordID) {
-        wordService.deleteWord(wordID).enqueue(new Callback<ResponseBody>() {
+        Call<ResponseBody> call = wordService.deleteWord(wordID);
+        call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         String json = response.body().string();
-                        Log.d("WordDebug", "删除响应数据：" + json);
                         Map<String, Object> result = gson.fromJson(json, new TypeToken<Map<String, Object>>() {}.getType());
                         boolean success = (boolean) result.get("success");
 
@@ -341,7 +358,6 @@ public class AdminWordFragment extends Fragment {
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 Toast.makeText(getContext(), "网络错误：" + t.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e("WordDebug", "删除网络失败：" + t.getMessage(), t);
             }
         });
     }
@@ -373,15 +389,27 @@ public class AdminWordFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull WordViewHolder holder, int position) {
             Map<String, Object> word = data.get(position);
-            // 绑定数据（后端返回的字段）
+            // 1. 绑定单词名称
             holder.tvWordName.setText(word.get("wordName") != null ? word.get("wordName").toString() : "");
-            holder.tvPartOfSpeech.setText(word.get("partOfSpeech") != null ? word.get("partOfSpeech").toString() : "");
+
+            // 2. 绑定词性（原灰色区域，显示 partOfSpeech 字段）
+            String partOfSpeech = word.get("partOfSpeech") != null ? word.get("partOfSpeech").toString() : "未知词性";
+            holder.tvPartOfSpeech.setText(partOfSpeech); // 变量名与XML ID对应
+
+            // 3. 绑定单词释义
             holder.tvWordExplain.setText(word.get("wordExplain") != null ? word.get("wordExplain").toString() : "");
 
             // 操作事件
             holder.tvEdit.setOnClickListener(v -> listener.onEditClick(word));
             holder.tvDelete.setOnClickListener(v -> {
-                int wordID = word.get("wordID") != null ? ((Double) word.get("wordID")).intValue() : 0;
+                // 处理wordID类型转换
+                int wordID = 0;
+                Object idObj = word.get("wordID");
+                if (idObj instanceof Double) {
+                    wordID = ((Double) idObj).intValue();
+                } else if (idObj instanceof Integer) {
+                    wordID = (Integer) idObj;
+                }
                 if (wordID != 0) {
                     listener.onDeleteClick(wordID);
                 } else {
@@ -395,26 +423,22 @@ public class AdminWordFragment extends Fragment {
             return data == null ? 0 : data.size();
         }
 
+        // 修正 ViewHolder：变量名与XML控件ID完全一致
         class WordViewHolder extends RecyclerView.ViewHolder {
-            TextView tvWordName, tvPartOfSpeech, tvWordExplain, tvEdit, tvDelete;
+            TextView tvWordName;
+            TextView tvPartOfSpeech; // 对应XML中的 id: tv_part_of_speech（驼峰命名）
+            TextView tvWordExplain;
+            TextView tvEdit;
+            TextView tvDelete;
 
             public WordViewHolder(@NonNull View itemView) {
                 super(itemView);
                 tvWordName = itemView.findViewById(R.id.tv_word_name);
-                tvPartOfSpeech = itemView.findViewById(R.id.tv_part_of_speech);
+                tvPartOfSpeech = itemView.findViewById(R.id.tv_part_of_speech); // 绑定正确ID
                 tvWordExplain = itemView.findViewById(R.id.tv_word_explain);
                 tvEdit = itemView.findViewById(R.id.tv_edit);
                 tvDelete = itemView.findViewById(R.id.tv_delete);
             }
         }
-    }
-
-    // 内部Retrofit接口（相对路径）
-    interface WordService {
-        @POST("api/words")
-        Call<ResponseBody> getWordList(@Body RequestBody requestBody);
-
-        @DELETE("api/words/{wordID}")
-        Call<ResponseBody> deleteWord(@Path("wordID") int wordID);
     }
 }

@@ -34,7 +34,7 @@ public class LoginActivity extends AppCompatActivity {
         setupClickListeners();
 
         // 检查是否已登录，如果已登录直接跳转到主界面
-        checkLoginStatus();
+        // checkLoginStatus();
     }
 
     private void initViews() {
