@@ -10,7 +10,7 @@ import com.example.fenglishandroid.R;
 import com.example.fenglishandroid.fragment.admin.AdminAccountFragment;
 import com.example.fenglishandroid.fragment.admin.AdminSettingFragment;
 import com.example.fenglishandroid.fragment.admin.AdminWordFragment;
-import com.example.fenglishandroid.fragment.admin.AdminWordbookFragment;
+import com.example.fenglishandroid.fragment.admin.AdminWordBookFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import java.util.ArrayList;
@@ -44,7 +44,7 @@ public class AdminIndexActivity extends AppCompatActivity {
         fragmentList = new ArrayList<>();
         // 顺序：用户账号管理（默认）→ 单词书管理 → 单词管理-管理员个人账号管理
         fragmentList.add(new AdminAccountFragment());
-        fragmentList.add(new AdminWordbookFragment());
+        fragmentList.add(new AdminWordBookFragment());
         fragmentList.add(new AdminWordFragment());
         fragmentList.add(new AdminSettingFragment());
     }

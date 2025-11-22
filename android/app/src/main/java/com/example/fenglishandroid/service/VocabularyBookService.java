@@ -10,7 +10,7 @@ import retrofit2.http.*;
 
 public interface VocabularyBookService {
     // 获取单词书列表
-    @GET("/api/vocabulary-books/search")
+    @GET("api/vocabulary-books/search")
     Call<Result<PageResult<VocabularyBookSimpleResp>>> getBookList(
             @Query("name") String name,
             @Query("page") int page,
@@ -18,7 +18,7 @@ public interface VocabularyBookService {
     );
 
     // 搜索单词书
-    @GET("/api/vocabulary-books/search")
+    @GET("api/vocabulary-books/search")
     Call<Result<PageResult<VocabularyBookSimpleResp>>> searchBooks(
             @Query("name") String keyword,
             @Query("page") int page,
@@ -26,33 +26,33 @@ public interface VocabularyBookService {
     );
 
     // 删除单词书
-    @DELETE("/api/vocabulary-books/{bookId}")
+    @DELETE("api/vocabulary-books/{bookId}")
     Call<Result<Void>> deleteBook(@Path("bookId") String bookId);
 
     // 新增单词书
-    @POST("/api/vocabulary-books")
+    @POST("api/vocabulary-books")
     Call<Result<Void>> addBook(@Body VocabularyBookAddReq bookData);
 
     // 获取单词书详情
-    @GET("/api/vocabulary-books/{bookId}")
+    @GET("api/vocabulary-books/{bookId}")
     Call<Result<VocabularyBookDetailResp>> getBookDetail(@Path("bookId") String bookId);
 
     // 更新单词书
-    @PUT("/api/vocabulary-books/{bookId}")
+    @PUT("api/vocabulary-books/{bookId}")
     Call<Result<Void>> updateBook(
             @Path("bookId") String bookId,
             @Body VocabularyBookUpdateReq bookData
     );
 
     // 向单词书添加单词
-    @POST("/api/vocabulary-books/{bookId}/words")
+    @POST("api/vocabulary-books/{bookId}/words")
     Call<Result<Void>> addWordToBook(
             @Path("bookId") String bookId,
             @Body WordAddReq payload
     );
 
     // 从单词书删除单词
-    @DELETE("/api/vocabulary-books/{bookId}/words/{wordId}")
+    @DELETE("api/vocabulary-books/{bookId}/words/{wordId}")
     Call<Result<Void>> removeWordFromBook(
             @Path("bookId") String bookId,
             @Path("wordId") String wordId

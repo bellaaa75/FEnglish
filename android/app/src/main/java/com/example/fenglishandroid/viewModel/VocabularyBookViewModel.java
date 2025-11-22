@@ -43,6 +43,21 @@ public class VocabularyBookViewModel extends AndroidViewModel {
         });
     }
 
+    // 搜索单词书
+    public void searchBooks(String keyword, int page, int size) {
+        repository.searchBooks(keyword, page, size, new VocabularyBookRepository.RepositoryCallback<PageResult<VocabularyBookSimpleResp>>() {
+            @Override
+            public void onSuccess(PageResult<VocabularyBookSimpleResp> data) {
+                bookListLiveData.postValue(data.getList());
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+                // 处理错误
+            }
+        });
+    }
+
     // getter方法
     public MutableLiveData<List<VocabularyBookSimpleResp>> getBookListLiveData() { return bookListLiveData; }
     public MutableLiveData<Boolean> getLoadingLiveData() { return loadingLiveData; }

@@ -5,14 +5,42 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- 搜索区域 -->
-    <SearchView
-        android:id="@+id/search_view"
+    <!-- 搜索区域：SearchView + 搜索/重置按钮 -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:spacing="8dp">
+
+        <SearchView
+            android:id="@+id/search_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
         android:queryHint="搜索单词书名称"
         android:iconifiedByDefault="false"
         android:padding="8dp"/>
+
+        <Button
+            android:id="@+id/btn_search"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:text="搜索"
+            android:paddingHorizontal="12dp"
+            android:backgroundTint="@color/purple_500"
+            android:textSize="14sp"/>
+
+        <Button
+            android:id="@+id/btn_reset"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:text="重置"
+            android:paddingHorizontal="12dp"
+            android:backgroundTint="@color/gray"
+            android:textSize="14sp"/>
+
+    </LinearLayout>
 
     <!-- 操作按钮 -->
     <Button
@@ -21,13 +49,72 @@
         android:layout_height="wrap_content"
         android:text="新增单词书"
         android:layout_gravity="end"
-        android:layout_marginTop="8dp"/>
+        android:backgroundTint="@color/purple_500"
+        android:layout_marginTop="16dp"/>
 
     <!-- 单词书列表 -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="16dp"/>
+        android:layout_height="0dp"
+        android:layout_weight="1"
+    android:layout_marginTop="16dp"/>
+
+    <!-- 分页控件 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:spacing="8dp">
+
+        <ImageView
+            android:id="@+id/iv_prev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_media_previous"
+            android:contentDescription="上一页"/>
+
+        <TextView
+            android:id="@+id/tv_page_1"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:text="1"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/tv_page_2"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:text="2"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/tv_page_3"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:text="3"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/tv_page_4"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:text="4"
+            android:textSize="16sp"/>
+
+        <ImageView
+            android:id="@+id/iv_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_media_next"
+            android:contentDescription="下一页"/>
+
+    </LinearLayout>
 
 </LinearLayout>
