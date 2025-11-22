@@ -1,15 +1,9 @@
 package com.example.fenglishandroid.repository;
 
-import android.content.SharedPreferences;
-import android.content.Context;
-
 import com.example.fenglishandroid.model.BaseResponse;
 import com.example.fenglishandroid.model.request.AdminRegisterRequest;
-import com.example.fenglishandroid.model.request.ChangePasswordRequest;
-import com.example.fenglishandroid.model.request.DeleteAccountRequest;
 import com.example.fenglishandroid.model.request.LoginRequest;
 import com.example.fenglishandroid.model.request.OrdinaryUserRegisterRequest;
-import com.example.fenglishandroid.model.request.UpdateUserRequest;
 import com.example.fenglishandroid.service.RetrofitClient;
 import com.example.fenglishandroid.service.UserApiService;
 
@@ -20,11 +14,8 @@ import retrofit2.Response;
 public class UserRepository {
     private static final String TAG = "UserRepository";
     private UserApiService apiService;
-    private Context context;
 
-    public UserRepository(Context context) {
-        this.context = context.getApplicationContext(); // 保存context
-        RetrofitClient.init(this.context); // 初始化RetrofitClient
+    public UserRepository() {
         this.apiService = RetrofitClient.getUserApi();
     }
 
@@ -72,8 +63,6 @@ public class UserRepository {
             @Override
             public void onResponse(Call<BaseResponse> call, Response<BaseResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    saveToken(response.body().getToken());
-                    saveUserId(response.body().getUserId());
                     listener.onSuccess(response.body());
                 } else {
                     listener.onFailure("登录失败：" + response.message());
@@ -93,8 +82,6 @@ public class UserRepository {
             @Override
             public void onResponse(Call<BaseResponse> call, Response<BaseResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    saveToken(response.body().getToken());
-                    saveUserId(response.body().getUserId());
                     listener.onSuccess(response.body());
                 } else {
                     listener.onFailure("登录失败：" + response.message());
@@ -106,173 +93,6 @@ public class UserRepository {
                 listener.onFailure("网络错误：" + t.getMessage());
             }
         });
-    }
-    // 获取用户信息
-    public void getUserInfo(final OnResultListener listener) {
-        apiService.getUserInfo().enqueue(new Callback<BaseResponse>() {
-            @Override
-            public void onResponse(Call<BaseResponse> call, Response<BaseResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    listener.onSuccess(response.body());
-                } else {
-                    if (response.code() == 401) {
-                        // Token过期或无效
-                        clearToken();
-                        listener.onFailure("登录已过期，请重新登录");
-                    } else {
-                        listener.onFailure("获取用户信息失败：" + response.message());
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<BaseResponse> call, Throwable t) {
-                listener.onFailure("网络错误：" + t.getMessage());
-            }
-        });
-    }
-
-    // 更新用户信息
-    public void updateUser(UpdateUserRequest request, final OnResultListener listener) {
-        apiService.updateUser(request).enqueue(new Callback<BaseResponse>() {
-            @Override
-            public void onResponse(Call<BaseResponse> call, Response<BaseResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    listener.onSuccess(response.body());
-                } else {
-                    if (response.code() == 401) {
-                        clearToken();
-                        listener.onFailure("登录已过期，请重新登录");
-                    } else {
-                        listener.onFailure("更新用户信息失败：" + response.message());
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<BaseResponse> call, Throwable t) {
-                listener.onFailure("网络错误：" + t.getMessage());
-            }
-        });
-    }
-
-    // 修改密码
-    public void changePassword(ChangePasswordRequest request, final OnResultListener listener) {
-        apiService.changePassword(request).enqueue(new Callback<BaseResponse>() {
-            @Override
-            public void onResponse(Call<BaseResponse> call, Response<BaseResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    listener.onSuccess(response.body());
-                } else {
-                    if (response.code() == 401) {
-                        clearToken();
-                        listener.onFailure("登录已过期，请重新登录");
-                    } else {
-                        listener.onFailure("修改密码失败：" + response.message());
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<BaseResponse> call, Throwable t) {
-                listener.onFailure("网络错误：" + t.getMessage());
-            }
-        });
-    }
-
-    // 注销账号
-    public void deleteAccount(DeleteAccountRequest request, final OnResultListener listener) {
-        apiService.deleteAccount(request).enqueue(new Callback<BaseResponse>() {
-            @Override
-            public void onResponse(Call<BaseResponse> call, Response<BaseResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    // 注销成功，清除本地数据
-                    if (response.body().isSuccess()) {
-                        clearUserData();
-                    }
-                    listener.onSuccess(response.body());
-                } else {
-                    if (response.code() == 401) {
-                        clearToken();
-                        listener.onFailure("登录已过期，请重新登录");
-                    } else {
-                        listener.onFailure("注销账号失败：" + response.message());
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<BaseResponse> call, Throwable t) {
-                listener.onFailure("网络错误：" + t.getMessage());
-            }
-        });
-    }
-
-    // 退出登录
-    public void logout(final OnResultListener listener) {
-        apiService.logout().enqueue(new Callback<BaseResponse>() {
-            @Override
-            public void onResponse(Call<BaseResponse> call, Response<BaseResponse> response) {
-                // 无论服务器响应如何，都清除本地数据
-                clearUserData();
-                if (response.isSuccessful() && response.body() != null) {
-                    listener.onSuccess(response.body());
-                } else {
-                    listener.onSuccess(new BaseResponse()); // 即使失败也返回成功，因为本地数据已清除
-                }
-            }
-
-            @Override
-            public void onFailure(Call<BaseResponse> call, Throwable t) {
-                // 即使网络失败，也清除本地数据
-                clearUserData();
-                listener.onSuccess(new BaseResponse());
-            }
-        });
-    }
-
-    // 保存Token到SharedPreferences
-    private void saveToken(String token) {
-        SharedPreferences sp = context.getSharedPreferences("user_info", Context.MODE_PRIVATE);
-        sp.edit().putString("token", token).apply();
-    }
-
-    // 保存用户ID到SharedPreferences
-    private void saveUserId(String userId) {
-        SharedPreferences sp = context.getSharedPreferences("user_info", Context.MODE_PRIVATE);
-        sp.edit().putString("user_id", userId).apply();
-    }
-
-    // 清除Token
-    private void clearToken() {
-        SharedPreferences sp = context.getSharedPreferences("user_info", Context.MODE_PRIVATE);
-        sp.edit().remove("token").apply();
-    }
-
-    // 清除所有用户数据
-    private void clearUserData() {
-        SharedPreferences sp = context.getSharedPreferences("user_info", Context.MODE_PRIVATE);
-        sp.edit()
-                .remove("token")
-                .remove("user_id")
-                .apply();
-    }
-
-    // 获取当前Token
-    public String getCurrentToken() {
-        SharedPreferences sp = context.getSharedPreferences("user_info", Context.MODE_PRIVATE);
-        return sp.getString("token", null);
-    }
-
-    // 获取当前用户ID
-    public String getCurrentUserId() {
-        SharedPreferences sp = context.getSharedPreferences("user_info", Context.MODE_PRIVATE);
-        return sp.getString("user_id", null);
-    }
-
-    // 检查是否已登录
-    public boolean isLoggedIn() {
-        return getCurrentToken() != null && !getCurrentToken().isEmpty();
     }
 
     // 回调接口
