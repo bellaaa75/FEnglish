@@ -25,9 +25,17 @@ public interface WordService {
 
     /**
      * 删除单词（后端是DELETE请求）
-     * @param wordID 单词ID
+     * @param wordId 单词Id
      * @return 响应数据
      */
-    @DELETE("api/words/{wordID}")
-    Call<ResponseBody> deleteWord(@Path("wordID") int wordID);
+    @DELETE("api/words/{wordId}")
+    Call<ResponseBody> deleteWord(@Path("wordId") String wordId); // 后端要求字符串类型
+
+    // 模糊搜索单词接口（匹配后端URL）
+    @GET("api/words/name/fuzzy/{wordName}")
+    Call<ResponseBody> searchWordByFuzzyName(
+            @Path("wordName") String wordName, // 搜索关键词（路径参数）
+            @Query("pageNum") int pageNum,     // 分页参数（URL参数）
+            @Query("pageSize") int pageSize    // 分页参数（URL参数）
+    );
 }

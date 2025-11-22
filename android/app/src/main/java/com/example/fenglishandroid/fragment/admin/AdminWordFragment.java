@@ -1,5 +1,7 @@
 package com.example.fenglishandroid.fragment.admin;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -56,6 +58,12 @@ public class AdminWordFragment extends Fragment {
     // 公共WordService接口
     private WordService wordService;
 
+    // 全局Toast对象（避免堆积）
+    private Toast mToast;
+
+    // 标记当前是否为搜索状态（true：搜索结果，false：全部单词）
+    private boolean isSearchMode = false;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -68,7 +76,7 @@ public class AdminWordFragment extends Fragment {
         initPageTvList(); // 初始化分页控件集合
         initAdapter();
         initListener();
-        fetchWordList(); // 加载数据
+        fetchWordList(); // 加载数据（默认显示全部单词）
         return view;
     }
 
@@ -99,12 +107,13 @@ public class AdminWordFragment extends Fragment {
         wordAdapter = new WordAdapter(wordList, new OnItemClickListener() {
             @Override
             public void onEditClick(Map<String, Object> word) {
-                Toast.makeText(getContext(), "编辑单词：" + word.get("wordName"), Toast.LENGTH_SHORT).show();
+                showToast("编辑单词：" + word.get("wordName"));
             }
 
             @Override
-            public void onDeleteClick(int wordID) {
-                deleteWord(wordID); // 调用删除接口
+            public void onDeleteClick(String wordId, String wordName) {
+                // 点击删除时先显示确认弹窗
+                showDeleteConfirmDialog(wordId, wordName);
             }
         });
         rvWordList.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -112,29 +121,39 @@ public class AdminWordFragment extends Fragment {
     }
 
     private void initListener() {
-        // 搜索
+        // 搜索按钮
         btnSearch.setOnClickListener(v -> {
             keyword = etSearch.getText().toString().trim();
+            if (keyword.isEmpty()) {
+                showToast("请输入搜索关键词");
+                return;
+            }
+            isSearchMode = true; // 进入搜索模式
             currentPage = 1; // 搜索后重置为第一页
-            fetchWordList();
+            fetchSearchResult(); // 调用搜索接口
         });
 
-        // 重置
+        // 重置按钮
         btnReset.setOnClickListener(v -> {
-            etSearch.setText("");
-            keyword = "";
-            currentPage = 1; // 重置后回到第一页
-            fetchWordList();
+            etSearch.setText(""); // 清空输入框
+            keyword = ""; // 清空关键词
+            isSearchMode = false; // 退出搜索模式
+            currentPage = 1; // 重置为第一页
+            fetchWordList(); // 加载全部单词
         });
 
         // 上一页
         ivPrev.setOnClickListener(v -> {
             if (currentPage > 1) {
                 currentPage--;
+                if (isSearchMode) {
+                    fetchSearchResult(); // 搜索模式下加载上一页搜索结果
+                } else {
+                    fetchWordList(); // 非搜索模式下加载上一页全部单词
+                }
                 updatePageUI(); // 更新分页样式
-                fetchWordList(); // 加载数据
             } else {
-                Toast.makeText(getContext(), "已是第一页", Toast.LENGTH_SHORT).show();
+                showToast("已是第一页");
             }
         });
 
@@ -142,10 +161,14 @@ public class AdminWordFragment extends Fragment {
         ivNext.setOnClickListener(v -> {
             if (currentPage < totalPages) { // 只有当前页 < 总页数时才能翻页
                 currentPage++;
+                if (isSearchMode) {
+                    fetchSearchResult(); // 搜索模式下加载下一页搜索结果
+                } else {
+                    fetchWordList(); // 非搜索模式下加载下一页全部单词
+                }
                 updatePageUI(); // 更新分页样式
-                fetchWordList(); // 加载数据
             } else {
-                Toast.makeText(getContext(), "已是最后一页", Toast.LENGTH_SHORT).show();
+                showToast("已是最后一页");
             }
         });
 
@@ -160,8 +183,12 @@ public class AdminWordFragment extends Fragment {
                 // 只有目标页在有效范围内且不等于当前页时才切换
                 if (targetPage >= 1 && targetPage <= totalPages && targetPage != currentPage) {
                     currentPage = targetPage;
+                    if (isSearchMode) {
+                        fetchSearchResult(); // 搜索模式下加载目标页搜索结果
+                    } else {
+                        fetchWordList(); // 非搜索模式下加载目标页全部单词
+                    }
                     updatePageUI();
-                    fetchWordList();
                 }
             });
         }
@@ -253,13 +280,12 @@ public class AdminWordFragment extends Fragment {
         ivNext.setClickable(currentPage != totalPages);
     }
 
-    // 核心：调用后端分页接口（GET请求+Query参数）
+    // 加载全部单词（原有逻辑，无改动）
     private void fetchWordList() {
         Log.d("WordDebug", "请求参数：pageNum=" + currentPage + ", pageSize=" + pageSize + ", keyword=" + keyword);
 
         Call<ResponseBody> call = wordService.getWordList(currentPage, pageSize, keyword);
         Log.d("WordDebug", "请求URL：" + call.request().url().toString());
-        // Log.d("WordDebug", "携带的Token：" + call.request().header("Authorization"));
 
         call.enqueue(new Callback<ResponseBody>() {
             @Override
@@ -290,85 +316,176 @@ public class AdminWordFragment extends Fragment {
                             wordList.addAll(newWordList);
                             wordAdapter.notifyDataSetChanged();
                             updatePageUI(); // 加载数据后更新分页样式
-                            Toast.makeText(getContext(), "共" + total + "个单词", Toast.LENGTH_SHORT).show();
+                            showToast("共" + total + "个单词");
                         } else {
                             String message = result.get("message") != null ? result.get("message").toString() : "未知错误";
-                            Toast.makeText(getContext(), "加载失败：" + message, Toast.LENGTH_SHORT).show();
+                            showToast("加载失败：" + message);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
-                        Toast.makeText(getContext(), "解析失败", Toast.LENGTH_SHORT).show();
+                        showToast("解析失败");
                     } catch (Exception e) {
                         e.printStackTrace();
-                        Toast.makeText(getContext(), "数据处理失败", Toast.LENGTH_SHORT).show();
+                        showToast("数据处理失败");
                     }
                 } else {
                     if (response.code() == 401) {
-                        Toast.makeText(getContext(), "Token无效/未登录，请重新登录", Toast.LENGTH_SHORT).show();
+                        showToast("Token无效/未登录，请重新登录");
                     } else if (response.code() == 404) {
-                        Toast.makeText(getContext(), "接口路径错误（404）", Toast.LENGTH_SHORT).show();
+                        showToast("接口路径错误（404）");
                     } else if (response.code() == 500) {
-                        Toast.makeText(getContext(), "后端接口报错（500）", Toast.LENGTH_SHORT).show();
+                        showToast("后端接口报错（500）");
                     } else {
-                        Toast.makeText(getContext(), "请求失败：" + response.code(), Toast.LENGTH_SHORT).show();
+                        showToast("请求失败：" + response.code());
                     }
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                Toast.makeText(getContext(), "网络错误：" + t.getMessage(), Toast.LENGTH_SHORT).show();
+                showToast("网络错误：" + t.getMessage());
                 Log.e("WordDebug", "网络失败：" + t.getMessage(), t);
             }
         });
     }
 
-    // 删除单词接口
-    private void deleteWord(int wordID) {
-        Call<ResponseBody> call = wordService.deleteWord(wordID);
+    // 新增：加载搜索结果（调用后端模糊搜索接口）
+    private void fetchSearchResult() {
+        Log.d("WordDebug", "搜索关键词：" + keyword + ", 页码：" + currentPage);
+
+        // 调用后端模糊搜索接口：GET /api/words/name/fuzzy/{wordName}
+        Call<ResponseBody> call = wordService.searchWordByFuzzyName(keyword, currentPage, pageSize);
+        Log.d("WordDebug", "搜索请求URL：" + call.request().url().toString());
+
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         String json = response.body().string();
-                        Map<String, Object> result = gson.fromJson(json, new TypeToken<Map<String, Object>>() {}.getType());
-                        boolean success = (boolean) result.get("success");
+                        Log.d("WordDebug", "搜索响应数据：" + json);
 
-                        if (success) {
-                            Toast.makeText(getContext(), "删除成功", Toast.LENGTH_SHORT).show();
-                            fetchWordList(); // 刷新列表
+                        // 后端返回直接是单词列表（成功返回列表，失败返回空列表）
+                        List<Map<String, Object>> searchResult = gson.fromJson(
+                                json,
+                                new TypeToken<List<Map<String, Object>>>() {}.getType()
+                        );
+
+                        int total = searchResult.size();
+                        // 计算搜索结果的总页数（向上取整）
+                        totalPages = (total + pageSize - 1) / pageSize;
+
+                        // 更新UI
+                        wordList.clear();
+                        wordList.addAll(searchResult);
+                        wordAdapter.notifyDataSetChanged();
+                        updatePageUI(); // 更新分页样式
+
+                        if (total == 0) {
+                            showToast("未找到包含关键词\"" + keyword + "\"的单词");
                         } else {
-                            String message = result.get("message") != null ? result.get("message").toString() : "未知错误";
-                            Toast.makeText(getContext(), "删除失败：" + message, Toast.LENGTH_SHORT).show();
+                            showToast("找到" + total + "个匹配单词");
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
-                        Toast.makeText(getContext(), "解析失败", Toast.LENGTH_SHORT).show();
+                        showToast("搜索结果解析失败");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        showToast("搜索数据处理失败");
+                    }
+                } else {
+                    showToast("搜索失败，状态码：" + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                showToast("搜索网络错误：" + t.getMessage());
+                Log.e("WordDebug", "搜索网络失败：" + t.getMessage(), t);
+            }
+        });
+    }
+
+    // 删除单词接口（原有逻辑，无改动）
+    private void deleteWord(String wordId) {
+        Log.d("WordDebug", "删除单词：wordId=" + wordId); // 打印wordId，确认格式正确
+        Call<ResponseBody> call = wordService.deleteWord(wordId); // 传递字符串wordId
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        String json = response.body().string();
+                        Log.d("WordDebug", "删除响应数据：" + json);
+                        Map<String, Object> result = gson.fromJson(json, new TypeToken<Map<String, Object>>() {}.getType());
+                        boolean success = (boolean) result.get("success");
+                        String message = result.get("message") != null ? result.get("message").toString() : "操作失败";
+
+                        if (success) {
+                            showToast("删除成功");
+                            // 根据当前模式刷新数据
+                            if (isSearchMode) {
+                                fetchSearchResult();
+                            } else {
+                                fetchWordList();
+                            }
+                        } else {
+                            showToast("删除失败：" + message);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        showToast("解析失败");
                     }
                 } else {
                     if (response.code() == 401) {
-                        Toast.makeText(getContext(), "Token无效/未登录，请重新登录", Toast.LENGTH_SHORT).show();
+                        showToast("Token无效/未登录，请重新登录");
+                    } else if (response.code() == 404) {
+                        showToast("单词不存在（404）");
                     } else {
-                        Toast.makeText(getContext(), "删除失败，状态码：" + response.code(), Toast.LENGTH_SHORT).show();
+                        showToast("删除失败，状态码：" + response.code());
                     }
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                Toast.makeText(getContext(), "网络错误：" + t.getMessage(), Toast.LENGTH_SHORT).show();
+                showToast("网络错误：" + t.getMessage());
+                Log.e("WordDebug", "删除网络失败：" + t.getMessage(), t);
             }
         });
     }
 
-    // 内部点击事件接口
-    interface OnItemClickListener {
-        void onEditClick(Map<String, Object> word);
-        void onDeleteClick(int wordID);
+    // 显示删除确认弹窗（原有逻辑，无改动）
+    private void showDeleteConfirmDialog(String wordId, String wordName) {
+        new AlertDialog.Builder(getContext())
+                .setTitle("确认删除")
+                .setMessage("你确定要删除单词 \"" + wordName + "\" 吗？删除后不可恢复！")
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // 点击确定，执行删除操作
+                        deleteWord(wordId);
+                        dialog.dismiss(); // 关闭弹窗
+                    }
+                })
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // 点击取消，不执行操作，关闭弹窗
+                        dialog.dismiss();
+                    }
+                })
+                .setCancelable(false) // 点击弹窗外部不关闭
+                .show();
     }
 
-    // 内部RecyclerView适配器
+    // 内部点击事件接口（原有逻辑，无改动）
+    interface OnItemClickListener {
+        void onEditClick(Map<String, Object> word);
+        void onDeleteClick(String wordId, String wordName);
+    }
+
+    // 内部RecyclerView适配器（原有逻辑，无改动）
     class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder> {
         private List<Map<String, Object>> data;
         private OnItemClickListener listener;
@@ -390,7 +507,8 @@ public class AdminWordFragment extends Fragment {
         public void onBindViewHolder(@NonNull WordViewHolder holder, int position) {
             Map<String, Object> word = data.get(position);
             // 1. 绑定单词名称
-            holder.tvWordName.setText(word.get("wordName") != null ? word.get("wordName").toString() : "");
+            String wordName = word.get("wordName") != null ? word.get("wordName").toString() : "未知单词";
+            holder.tvWordName.setText(wordName);
 
             // 2. 绑定词性（原灰色区域，显示 partOfSpeech 字段）
             String partOfSpeech = word.get("partOfSpeech") != null ? word.get("partOfSpeech").toString() : "未知词性";
@@ -402,18 +520,18 @@ public class AdminWordFragment extends Fragment {
             // 操作事件
             holder.tvEdit.setOnClickListener(v -> listener.onEditClick(word));
             holder.tvDelete.setOnClickListener(v -> {
-                // 处理wordID类型转换
-                int wordID = 0;
-                Object idObj = word.get("wordID");
-                if (idObj instanceof Double) {
-                    wordID = ((Double) idObj).intValue();
-                } else if (idObj instanceof Integer) {
-                    wordID = (Integer) idObj;
+                // 获取字符串类型的wordId
+                String wordId = null;
+                Object idObj = word.get("wordId");
+                if (idObj != null) {
+                    wordId = idObj.toString();
                 }
-                if (wordID != 0) {
-                    listener.onDeleteClick(wordID);
+
+                if (wordId != null && !wordId.isEmpty()) {
+                    // 传递wordId和wordName到弹窗
+                    listener.onDeleteClick(wordId, wordName);
                 } else {
-                    Toast.makeText(getContext(), "单词ID无效", Toast.LENGTH_SHORT).show();
+                    showToast("单词ID无效");
                 }
             });
         }
@@ -440,5 +558,14 @@ public class AdminWordFragment extends Fragment {
                 tvDelete = itemView.findViewById(R.id.tv_delete);
             }
         }
+    }
+
+    // 自定义Toast方法（原有逻辑，无改动）
+    private void showToast(String message) {
+        if (mToast != null) {
+            mToast.cancel();
+        }
+        mToast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
+        mToast.show();
     }
 }
