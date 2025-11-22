@@ -2,13 +2,130 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/white">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <!-- 搜索区域（复用项目已有图标和样式） -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="单词管理界面（空白，后续填充）"
-        android:textSize="18sp" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <EditText
+            android:id="@+id/et_search"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:hint="请输入单词搜索"
+            android:inputType="text"
+            android:paddingHorizontal="12dp"
+            android:background="@drawable/shape_edittext"
+            android:drawableLeft="@drawable/search"
+        android:drawablePadding="8dp"
+        android:textSize="14sp"/>
+
+        <Button
+            android:id="@+id/btn_search"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="搜索"
+            android:layout_marginStart="8dp"
+            android:backgroundTint="@color/purple_500"
+            android:textColor="@color/white"
+            android:paddingHorizontal="16dp"/>
+
+        <Button
+            android:id="@+id/btn_reset"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="重置"
+            android:layout_marginStart="8dp"
+            android:backgroundTint="@color/gray"
+            android:textColor="@color/white"
+            android:paddingHorizontal="16dp"/>
+    </LinearLayout>
+
+    <!-- 单词列表 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_word_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:overScrollMode="never"/>
+
+    <!-- 分页组件（复用项目已有箭头） -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="16dp">
+
+        <ImageView
+            android:id="@+id/iv_prev"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_arrow_left"
+            android:layout_marginEnd="16dp"
+            android:clickable="true"
+            android:focusable="true"/>
+
+        <TextView
+            android:id="@+id/tv_page_1"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:text="1"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:clickable="true"
+            android:focusable="true"/>
+
+        <TextView
+            android:id="@+id/tv_page_2"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:text="2"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:background="@drawable/shape_page_selected"
+            android:textColor="@color/white"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginHorizontal="4dp"/>
+
+        <TextView
+            android:id="@+id/tv_page_3"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:text="3"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:clickable="true"
+            android:focusable="true"/>
+
+        <TextView
+            android:id="@+id/tv_page_4"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:text="4"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginHorizontal="4dp"/>
+
+        <ImageView
+            android:id="@+id/iv_next"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_arrow_right"
+            android:layout_marginStart="16dp"
+            android:clickable="true"
+            android:focusable="true"/>
+
+    </LinearLayout>
 
 </LinearLayout>
