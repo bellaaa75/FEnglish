@@ -17,32 +17,33 @@
     <SearchView
         android:id="@+id/search_view"
         android:layout_width="0dp"
-    android:layout_height="40dp"
-    android:layout_weight="1"
-    android:iconifiedByDefault="false"
-    android:padding="8dp"
-    android:queryHint="搜索单词书名称" />
+        android:layout_height="40dp"
+        android:layout_weight="1"
+        android:iconifiedByDefault="false"
+        android:padding="8dp"
+        android:textSize="16sp"
+        android:queryHint="搜索单词书名称" />
 
     <Button
         android:id="@+id/btn_search"
         android:layout_width="75dp"
-    android:layout_height="40dp"
-    android:layout_marginStart="8dp"
-    android:paddingHorizontal="16dp"
-    android:text="搜索"
-    android:textSize="14sp"
-    android:textColor="@color/white" />
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:paddingHorizontal="16dp"
+        android:text="搜索"
+        android:textSize="14sp"
+        android:textColor="@color/white" />
 
     <Button
         android:id="@+id/btn_reset"
         android:layout_width="69dp"
-    android:layout_height="40dp"
-    android:layout_marginStart="8dp"
-    android:backgroundTint="@color/gray"
-    android:paddingHorizontal="16dp"
-    android:text="重置"
-    android:textSize="14sp"
-    android:textColor="@color/white" />
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:backgroundTint="@color/gray"
+        android:paddingHorizontal="16dp"
+        android:text="重置"
+        android:textSize="14sp"
+        android:textColor="@color/white" />
 
     </LinearLayout>
 
