@@ -33,9 +33,5 @@ public interface WordService {
 
     // 模糊搜索单词接口（匹配后端URL）
     @GET("api/words/name/fuzzy/{wordName}")
-    Call<ResponseBody> searchWordByFuzzyName(
-            @Path("wordName") String wordName, // 搜索关键词（路径参数）
-            @Query("pageNum") int pageNum,     // 分页参数（URL参数）
-            @Query("pageSize") int pageSize    // 分页参数（URL参数）
-    );
+    Call<ResponseBody> searchWordByFuzzyName(@Path("wordName") String wordName);
 }

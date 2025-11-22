@@ -41,14 +41,15 @@ public class AdminWordFragment extends Fragment {
     private TextView tvPage1, tvPage2, tvPage3, tvPage4;
 
     // 数据和适配器
-    private List<Map<String, Object>> wordList = new ArrayList<>();
+    private List<Map<String, Object>> wordList = new ArrayList<>(); // 当前页显示的数据
+    private List<Map<String, Object>> fullSearchResult = new ArrayList<>(); // 搜索模式下的完整结果（用于前端分页）
     private WordAdapter wordAdapter;
     private Gson gson = new Gson();
 
     // 分页参数
     private int currentPage = 1;
     private int pageSize = 10; // 每页默认10个单词
-    private int totalPages = 1; // 总页数（从后端获取）
+    private int totalPages = 1; // 总页数（从后端获取/前端计算）
     private String keyword = "";
 
     // 分页控件集合（方便统一处理）
@@ -130,7 +131,7 @@ public class AdminWordFragment extends Fragment {
             }
             isSearchMode = true; // 进入搜索模式
             currentPage = 1; // 搜索后重置为第一页
-            fetchSearchResult(); // 调用搜索接口
+            fetchSearchResult(); // 调用搜索接口（获取完整结果）
         });
 
         // 重置按钮
@@ -138,6 +139,7 @@ public class AdminWordFragment extends Fragment {
             etSearch.setText(""); // 清空输入框
             keyword = ""; // 清空关键词
             isSearchMode = false; // 退出搜索模式
+            fullSearchResult.clear(); // 清空完整搜索结果
             currentPage = 1; // 重置为第一页
             fetchWordList(); // 加载全部单词
         });
@@ -147,9 +149,9 @@ public class AdminWordFragment extends Fragment {
             if (currentPage > 1) {
                 currentPage--;
                 if (isSearchMode) {
-                    fetchSearchResult(); // 搜索模式下加载上一页搜索结果
+                    loadCurrentPageSearchResult(); // 搜索模式：前端截取当前页数据
                 } else {
-                    fetchWordList(); // 非搜索模式下加载上一页全部单词
+                    fetchWordList(); // 非搜索模式：调用后端分页接口
                 }
                 updatePageUI(); // 更新分页样式
             } else {
@@ -162,9 +164,9 @@ public class AdminWordFragment extends Fragment {
             if (currentPage < totalPages) { // 只有当前页 < 总页数时才能翻页
                 currentPage++;
                 if (isSearchMode) {
-                    fetchSearchResult(); // 搜索模式下加载下一页搜索结果
+                    loadCurrentPageSearchResult(); // 搜索模式：前端截取当前页数据
                 } else {
-                    fetchWordList(); // 非搜索模式下加载下一页全部单词
+                    fetchWordList(); // 非搜索模式：调用后端分页接口
                 }
                 updatePageUI(); // 更新分页样式
             } else {
@@ -184,9 +186,9 @@ public class AdminWordFragment extends Fragment {
                 if (targetPage >= 1 && targetPage <= totalPages && targetPage != currentPage) {
                     currentPage = targetPage;
                     if (isSearchMode) {
-                        fetchSearchResult(); // 搜索模式下加载目标页搜索结果
+                        loadCurrentPageSearchResult(); // 搜索模式：前端截取当前页数据
                     } else {
-                        fetchWordList(); // 非搜索模式下加载目标页全部单词
+                        fetchWordList(); // 非搜索模式：调用后端分页接口
                     }
                     updatePageUI();
                 }
@@ -349,12 +351,12 @@ public class AdminWordFragment extends Fragment {
         });
     }
 
-    // 新增：加载搜索结果（调用后端模糊搜索接口）
+    // 新增：获取完整搜索结果（调用后端接口）
     private void fetchSearchResult() {
-        Log.d("WordDebug", "搜索关键词：" + keyword + ", 页码：" + currentPage);
+        Log.d("WordDebug", "搜索关键词：" + keyword);
 
-        // 调用后端模糊搜索接口：GET /api/words/name/fuzzy/{wordName}
-        Call<ResponseBody> call = wordService.searchWordByFuzzyName(keyword, currentPage, pageSize);
+        // 调用后端模糊搜索接口：GET /api/words/name/fuzzy/{wordName}（无分页参数，获取全部结果）
+        Call<ResponseBody> call = wordService.searchWordByFuzzyName(keyword);
         Log.d("WordDebug", "搜索请求URL：" + call.request().url().toString());
 
         call.enqueue(new Callback<ResponseBody>() {
@@ -363,28 +365,26 @@ public class AdminWordFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         String json = response.body().string();
-                        Log.d("WordDebug", "搜索响应数据：" + json);
+                        Log.d("WordDebug", "搜索响应数据（完整结果）：" + json);
 
                         // 后端返回直接是单词列表（成功返回列表，失败返回空列表）
-                        List<Map<String, Object>> searchResult = gson.fromJson(
+                        fullSearchResult = gson.fromJson(
                                 json,
                                 new TypeToken<List<Map<String, Object>>>() {}.getType()
                         );
 
-                        int total = searchResult.size();
-                        // 计算搜索结果的总页数（向上取整）
+                        int total = fullSearchResult.size();
+                        // 前端计算总页数（向上取整）
                         totalPages = (total + pageSize - 1) / pageSize;
 
-                        // 更新UI
-                        wordList.clear();
-                        wordList.addAll(searchResult);
-                        wordAdapter.notifyDataSetChanged();
-                        updatePageUI(); // 更新分页样式
+                        // 加载第一页搜索结果
+                        loadCurrentPageSearchResult();
 
+                        // 显示提示
                         if (total == 0) {
                             showToast("未找到包含关键词\"" + keyword + "\"的单词");
                         } else {
-                            showToast("找到" + total + "个匹配单词");
+                            showToast("找到" + total + "个匹配单词，共" + totalPages + "页");
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -406,7 +406,28 @@ public class AdminWordFragment extends Fragment {
         });
     }
 
-    // 删除单词接口（原有逻辑，无改动）
+    // 新增：搜索模式下，加载当前页数据（前端手动分页）
+    private void loadCurrentPageSearchResult() {
+        List<Map<String, Object>> currentPageData = new ArrayList<>();
+        int total = fullSearchResult.size();
+
+        // 计算当前页的起始索引和结束索引
+        int startIndex = (currentPage - 1) * pageSize;
+        int endIndex = Math.min(startIndex + pageSize, total); // 避免索引越界
+
+        // 截取当前页数据
+        if (startIndex < total) {
+            currentPageData = fullSearchResult.subList(startIndex, endIndex);
+        }
+
+        // 更新UI
+        wordList.clear();
+        wordList.addAll(currentPageData);
+        wordAdapter.notifyDataSetChanged();
+        updatePageUI(); // 更新分页样式
+    }
+
+    // 删除单词接口（修改：搜索模式下删除后重新截取当前页数据）
     private void deleteWord(String wordId) {
         Log.d("WordDebug", "删除单词：wordId=" + wordId); // 打印wordId，确认格式正确
         Call<ResponseBody> call = wordService.deleteWord(wordId); // 传递字符串wordId
@@ -425,7 +446,9 @@ public class AdminWordFragment extends Fragment {
                             showToast("删除成功");
                             // 根据当前模式刷新数据
                             if (isSearchMode) {
-                                fetchSearchResult();
+                                // 搜索模式：从完整结果中移除删除的单词，重新加载当前页
+                                removeDeletedWordFromSearchResult(wordId);
+                                loadCurrentPageSearchResult();
                             } else {
                                 fetchWordList();
                             }
@@ -453,6 +476,24 @@ public class AdminWordFragment extends Fragment {
                 Log.e("WordDebug", "删除网络失败：" + t.getMessage(), t);
             }
         });
+    }
+
+    // 新增：从完整搜索结果中移除已删除的单词
+    private void removeDeletedWordFromSearchResult(String deletedWordId) {
+        List<Map<String, Object>> newResult = new ArrayList<>();
+        for (Map<String, Object> word : fullSearchResult) {
+            String wordId = word.get("wordId") != null ? word.get("wordId").toString() : "";
+            if (!wordId.equals(deletedWordId)) {
+                newResult.add(word);
+            }
+        }
+        fullSearchResult = newResult;
+        // 重新计算总页数
+        totalPages = (fullSearchResult.size() + pageSize - 1) / pageSize;
+        // 如果当前页超过总页数，回退到最后一页
+        if (currentPage > totalPages && totalPages > 0) {
+            currentPage = totalPages;
+        }
     }
 
     // 显示删除确认弹窗（原有逻辑，无改动）
