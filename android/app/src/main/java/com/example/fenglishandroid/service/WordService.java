@@ -1,9 +1,13 @@
 package com.example.fenglishandroid.service;
 
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -34,4 +38,13 @@ public interface WordService {
     // 模糊搜索单词接口（匹配后端URL）
     @GET("api/words/name/fuzzy/{wordName}")
     Call<ResponseBody> searchWordByFuzzyName(@Path("wordName") String wordName);
+
+    @PUT("api/words/{wordId}")
+    Call<ResponseBody> updateWord(
+            @Path("wordId") String wordId,
+            @Body RequestBody requestBody
+    );
+
+    @POST("api/words")
+    Call<ResponseBody> addWord(@Body RequestBody requestBody);
 }

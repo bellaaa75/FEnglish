@@ -1,7 +1,10 @@
 package com.example.fenglishandroid.fragment.admin;
 
+import static android.app.Activity.RESULT_OK;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,6 +23,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.fenglishandroid.R;
 import com.example.fenglishandroid.service.RetrofitClient;
 import com.example.fenglishandroid.service.WordService;
+import com.example.fenglishandroid.ui.admin.WordAddActivity;
+import com.example.fenglishandroid.ui.admin.WordEditActivity;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
@@ -36,6 +41,7 @@ public class AdminWordFragment extends Fragment {
     // 控件
     private EditText etSearch;
     private Button btnSearch, btnReset;
+    private Button btnAddWord;
     private RecyclerView rvWordList;
     private ImageView ivPrev, ivNext;
     private TextView tvPage1, tvPage2, tvPage3, tvPage4;
@@ -81,10 +87,13 @@ public class AdminWordFragment extends Fragment {
         return view;
     }
 
+
+
     private void initView(View view) {
         etSearch = view.findViewById(R.id.et_search);
         btnSearch = view.findViewById(R.id.btn_search);
         btnReset = view.findViewById(R.id.btn_reset);
+        btnAddWord = view.findViewById(R.id.btn_add_word);
         rvWordList = view.findViewById(R.id.rv_word_list);
         ivPrev = view.findViewById(R.id.iv_prev);
         ivNext = view.findViewById(R.id.iv_next);
@@ -108,18 +117,25 @@ public class AdminWordFragment extends Fragment {
         wordAdapter = new WordAdapter(wordList, new OnItemClickListener() {
             @Override
             public void onEditClick(Map<String, Object> word) {
-                showToast("编辑单词：" + word.get("wordName"));
+                // 点击编辑，跳转到编辑页面
+                String wordId = word.get("wordId") != null ? word.get("wordId").toString() : "";
+                String wordDataStr = gson.toJson(word); // 将单词数据转为JSON字符串传递
+
+                Intent intent = new Intent(getContext(), WordEditActivity.class);
+                intent.putExtra("wordId", wordId);
+                intent.putExtra("wordData", wordDataStr);
+                startActivityForResult(intent, 100); // 启动编辑页面，等待返回结果
             }
 
             @Override
             public void onDeleteClick(String wordId, String wordName) {
-                // 点击删除时先显示确认弹窗
                 showDeleteConfirmDialog(wordId, wordName);
             }
         });
         rvWordList.setLayoutManager(new LinearLayoutManager(getContext()));
         rvWordList.setAdapter(wordAdapter);
     }
+
 
     private void initListener() {
         // 搜索按钮
@@ -142,6 +158,12 @@ public class AdminWordFragment extends Fragment {
             fullSearchResult.clear(); // 清空完整搜索结果
             currentPage = 1; // 重置为第一页
             fetchWordList(); // 加载全部单词
+        });
+
+
+        btnAddWord.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), WordAddActivity.class);
+            startActivityForResult(intent, 200); // 启动添加页面，请求码200
         });
 
         // 上一页
@@ -608,5 +630,28 @@ public class AdminWordFragment extends Fragment {
         }
         mToast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
         mToast.show();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 100 && resultCode == RESULT_OK) {
+            // 编辑成功，刷新单词列表
+            if (isSearchMode) {
+                fetchSearchResult(); // 搜索模式下刷新搜索结果
+            } else {
+                fetchWordList(); // 非搜索模式下刷新全部单词
+            }
+        }
+
+        if (requestCode == 200 && resultCode == RESULT_OK) {
+            // 新增成功后，重置为第一页并刷新列表
+            currentPage = 1;
+            if (isSearchMode) {
+                fetchSearchResult(); // 搜索模式下刷新搜索结果
+            } else {
+                fetchWordList(); // 非搜索模式下刷新全部单词
+            }
+        }
     }
 }

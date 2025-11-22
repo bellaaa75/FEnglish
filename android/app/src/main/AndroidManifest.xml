@@ -45,6 +45,9 @@
         <activity android:name=".ui.register.RegisterActivity" />
         <activity android:name=".ui.register.AdminRegisterActivity" />
 
+        <activity android:name=".ui.admin.WordEditActivity"/>
+        <activity android:name=".ui.admin.WordAddActivity"/>
+
     </application>
 
 </manifest>

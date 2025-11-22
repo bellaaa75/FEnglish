@@ -6,53 +6,58 @@
     android:padding="16dp">
 
     <!-- 搜索区域：SearchView + 搜索/重置按钮 -->
+
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:spacing="8dp">
+        android:layout_width="378dp"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="16dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
 
-        <SearchView
-            android:id="@+id/search_view"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-        android:queryHint="搜索单词书名称"
-        android:iconifiedByDefault="false"
-        android:padding="8dp"/>
+    <SearchView
+        android:id="@+id/search_view"
+        android:layout_width="0dp"
+    android:layout_height="40dp"
+    android:layout_weight="1"
+    android:iconifiedByDefault="false"
+    android:padding="8dp"
+    android:queryHint="搜索单词书名称" />
 
-        <Button
-            android:id="@+id/btn_search"
-            android:layout_width="60dp"
-            android:layout_height="wrap_content"
-            android:text="搜索"
-            android:paddingHorizontal="12dp"
-            android:backgroundTint="@color/purple_500"
-            android:textSize="14sp"/>
+    <Button
+        android:id="@+id/btn_search"
+        android:layout_width="75dp"
+    android:layout_height="40dp"
+    android:layout_marginStart="8dp"
+    android:paddingHorizontal="16dp"
+    android:text="搜索"
+    android:textSize="14sp"
+    android:textColor="@color/white" />
 
-        <Button
-            android:id="@+id/btn_reset"
-            android:layout_width="60dp"
-            android:layout_height="wrap_content"
-            android:text="重置"
-            android:paddingHorizontal="12dp"
-            android:backgroundTint="@color/gray"
-            android:textSize="14sp"/>
+    <Button
+        android:id="@+id/btn_reset"
+        android:layout_width="69dp"
+    android:layout_height="40dp"
+    android:layout_marginStart="8dp"
+    android:backgroundTint="@color/gray"
+    android:paddingHorizontal="16dp"
+    android:text="重置"
+    android:textSize="14sp"
+    android:textColor="@color/white" />
 
     </LinearLayout>
 
     <!-- 操作按钮 -->
-    <Button
-        android:id="@+id/btn_add"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="新增单词书"
-        android:layout_gravity="end"
-        android:backgroundTint="@color/purple_500"
-        android:layout_marginTop="16dp"/>
 
     <!-- 单词书列表 -->
+
+    <Button
+        android:id="@+id/btn_add"
+        android:layout_width="377dp"
+        android:layout_height="40dp"
+        android:layout_gravity="end"
+
+        android:text="新增单词书" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
@@ -73,8 +78,8 @@
             android:id="@+id/iv_prev"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_media_previous"
-            android:contentDescription="上一页"/>
+            android:contentDescription="上一页"
+            android:src="@android:drawable/ic_media_previous" />
 
         <TextView
             android:id="@+id/tv_page_1"
@@ -112,8 +117,8 @@
             android:id="@+id/iv_next"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_media_next"
-            android:contentDescription="下一页"/>
+            android:contentDescription="下一页"
+            android:src="@android:drawable/ic_media_next" />
 
     </LinearLayout>
 
