@@ -2,12 +2,19 @@ package com.example.fenglishandroid.service;
 
 import com.example.fenglishandroid.model.BaseResponse;
 import com.example.fenglishandroid.model.request.AdminRegisterRequest;
+import com.example.fenglishandroid.model.request.ChangePasswordRequest;
+import com.example.fenglishandroid.model.request.DeleteAccountRequest;
 import com.example.fenglishandroid.model.request.LoginRequest;
 import com.example.fenglishandroid.model.request.OrdinaryUserRegisterRequest;
+import com.example.fenglishandroid.model.request.UpdateUserRequest;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
+import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 
 public interface UserApiService {
     // 普通用户注册
@@ -25,4 +32,23 @@ public interface UserApiService {
     // 管理员登录
     @POST("api/admin/login")
     Call<BaseResponse> loginAdmin(@Body LoginRequest request);
+    // 获取用户信息
+    @GET("api/user/info")
+    Call<BaseResponse> getUserInfo();
+
+    // 更新用户信息
+    @PUT("api/user/update")
+    Call<BaseResponse> updateUser(@Body UpdateUserRequest request);
+
+    // 修改密码
+    @PUT("api/user/change-password")
+    Call<BaseResponse> changePassword(@Body ChangePasswordRequest request);
+
+    // 注销账号
+    @DELETE("api/user/delete")
+    Call<BaseResponse> deleteAccount(@Body DeleteAccountRequest request);
+
+    // 退出登录
+    @POST("api/user/logout")
+    Call<BaseResponse> logout();
 }
