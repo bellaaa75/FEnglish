@@ -1,11 +1,11 @@
 package com.example.fenglishandroid.repository;
 
 import com.example.fenglishandroid.model.Result;
-//import com.example.fenglishandroid.model.VocabularyBookDetailResp;
+import com.example.fenglishandroid.model.VocabularyBookDetailResp;
 import com.example.fenglishandroid.model.VocabularyBookSimpleResp;
 import com.example.fenglishandroid.model.request.PageResult;
-//import com.example.fenglishandroid.model.request.VocabularyBookAddReq;
-//import com.example.fenglishandroid.model.request.VocabularyBookUpdateReq;
+import com.example.fenglishandroid.model.request.VocabularyBookAddReq;
+import com.example.fenglishandroid.model.request.VocabularyBookUpdateReq;
 import com.example.fenglishandroid.service.RetrofitClient;
 import com.example.fenglishandroid.service.VocabularyBookService;
 
@@ -77,9 +77,7 @@ public class VocabularyBookRepository {
         });
     }
 
-    /**
-     * 新增单词书
-
+    //新增单词书
     public void addBook(VocabularyBookAddReq req, final RepositoryCallback<Void> callback) {
         service.addBook(req).enqueue(new Callback<Result<Void>>() {
             @Override
@@ -97,10 +95,8 @@ public class VocabularyBookRepository {
             }
         });
     }
-*/
-    /**
-     * 更新单词书
 
+    //更新单词书
     public void updateBook(String bookId, VocabularyBookUpdateReq req, final RepositoryCallback<Void> callback) {
         service.updateBook(bookId, req).enqueue(new Callback<Result<Void>>() {
             @Override
@@ -118,10 +114,8 @@ public class VocabularyBookRepository {
             }
         });
     }
-   */
-    /**
-     * 获取单词书详情
 
+    //获取单词书详情
     public void getBookDetail(String bookId, final RepositoryCallback<VocabularyBookDetailResp> callback) {
         service.getBookDetail(bookId).enqueue(new Callback<Result<VocabularyBookDetailResp>>() {
             @Override
@@ -140,10 +134,9 @@ public class VocabularyBookRepository {
             }
         });
     }
-     */
+
     /**
      * 向单词书添加单词
- Z
     public void addWordToBook(String bookId, String wordId, final RepositoryCallback<Void> callback) {
         service.addWordToBook(bookId, wordId).enqueue(new Callback<Result<Void>>() {
             @Override
@@ -161,10 +154,9 @@ public class VocabularyBookRepository {
             }
         });
     }
-
-    /**
-     * 从单词书删除单词
      */
+
+    //从单词书删除单词
     public void removeWordFromBook(String bookId, String wordId, final RepositoryCallback<Void> callback) {
         service.removeWordFromBook(bookId, wordId).enqueue(new Callback<Result<Void>>() {
             @Override

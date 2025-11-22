@@ -3,19 +3,14 @@ package com.example.fenglishandroid.service;
 import com.example.fenglishandroid.model.Result;
 import com.example.fenglishandroid.model.VocabularyBookSimpleResp;
 import com.example.fenglishandroid.model.request.PageResult;
-import com.example.fenglishandroid.model.request.VocabularyBookDetailResp;
+import com.example.fenglishandroid.model.VocabularyBookDetailResp;
+import com.example.fenglishandroid.model.request.VocabularyBookAddReq;
+import com.example.fenglishandroid.model.request.VocabularyBookUpdateReq;
 
 import retrofit2.Call;
 import retrofit2.http.*;
 
 public interface VocabularyBookService {
-    // 获取单词书列表
-    @GET("api/vocabulary-books/search")
-    Call<Result<PageResult<VocabularyBookSimpleResp>>> getBookList(
-            @Query("name") String name,
-            @Query("page") int page,
-            @Query("size") int size
-    );
 
     // 搜索单词书
     @GET("api/vocabulary-books/search")
@@ -59,25 +54,9 @@ public interface VocabularyBookService {
     );
 
     // 请求参数类
-    class VocabularyBookAddReq {
-        private String bookId;
-        private String bookName;
-        private String publishTime;
-
-        // getter和setter
-    }
-
-    class VocabularyBookUpdateReq {
-        private String bookName;
-        private String publishTime;
-
-        // getter和setter
-    }
-
     class WordAddReq {
         private String wordId;
 
-        // getter和setter
         public String getWordId() { return wordId; }
         public void setWordId(String wordId) { this.wordId = wordId; }
     }

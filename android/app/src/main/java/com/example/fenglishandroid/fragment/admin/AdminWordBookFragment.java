@@ -21,8 +21,8 @@ import com.example.fenglishandroid.model.Result;
 import com.example.fenglishandroid.model.VocabularyBookSimpleResp;
 import com.example.fenglishandroid.service.RetrofitClient;
 import com.example.fenglishandroid.service.VocabularyBookService;
-import com.example.fenglishandroid.ui.admin.AddBookActivity;
-import com.example.fenglishandroid.ui.admin.EditBookActivity;
+import com.example.fenglishandroid.ui.admin.AddVocabularyBookActivity;
+import com.example.fenglishandroid.ui.admin.EditVocabularyBookActivity;
 import com.google.gson.Gson;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -103,7 +103,7 @@ public class AdminWordBookFragment extends Fragment {
             @Override
             public void onEditClick(VocabularyBookSimpleResp book) {
                 // 跳转到编辑页面
-                Intent intent = new Intent(getContext(), EditBookActivity.class);
+                Intent intent = new Intent(getContext(), EditVocabularyBookActivity.class);
                 intent.putExtra("bookId", book.getBookId());
                 startActivityForResult(intent, 100);
             }
@@ -160,7 +160,7 @@ public class AdminWordBookFragment extends Fragment {
 
         // 新增单词书
         btnAdd.setOnClickListener(v -> {
-            Intent intent = new Intent(getContext(), AddBookActivity.class);
+            Intent intent = new Intent(getContext(), AddVocabularyBookActivity.class);
             startActivityForResult(intent, 100);
         });
 
@@ -353,7 +353,7 @@ public class AdminWordBookFragment extends Fragment {
         }
     }
 
-    // 内部适配器类（合并原VocabularyBookAdapter）
+    // 内部适配器类
     private class BookAdapter extends RecyclerView.Adapter<BookAdapter.BookViewHolder> {
         private List<VocabularyBookSimpleResp> data;
         private OnItemActionListener listener;

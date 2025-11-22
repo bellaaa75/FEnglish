@@ -1,6 +1,4 @@
-package com.example.fenglishandroid.model.request;
-
-import com.example.fenglishandroid.model.WordSimpleResp;
+package com.example.fenglishandroid.model;
 
 import java.util.List;
 
