@@ -55,6 +55,11 @@
             android:name=".ui.admin.EditVocabularyBookActivity"
             android:exported="false" />
 
+        <!-- 注册单词书详情Activity -->
+        <activity
+            android:name=".ui.admin.VocabularyBookDetailActivity"
+            android:parentActivityName=".fragment.admin.AdminWordBookFragment" />
+
         <activity android:name=".ui.admin.WordEditActivity"/>
         <activity android:name=".ui.admin.WordAddActivity"/>
 

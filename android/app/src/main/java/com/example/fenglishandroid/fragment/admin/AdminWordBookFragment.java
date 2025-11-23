@@ -23,6 +23,7 @@ import com.example.fenglishandroid.service.RetrofitClient;
 import com.example.fenglishandroid.service.VocabularyBookService;
 import com.example.fenglishandroid.ui.admin.AddVocabularyBookActivity;
 import com.example.fenglishandroid.ui.admin.EditVocabularyBookActivity;
+import com.example.fenglishandroid.ui.admin.VocabularyBookDetailActivity;
 import com.google.gson.Gson;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -117,6 +118,14 @@ public class AdminWordBookFragment extends Fragment {
                         .setPositiveButton("确定", (dialog, which) -> deleteBook(bookId))
                         .setNegativeButton("取消", null)
                         .show();
+            }
+
+            @Override
+            public void onDetailClick(VocabularyBookSimpleResp book) {
+                // 跳转到详情页
+                Intent intent = new Intent(getContext(), VocabularyBookDetailActivity.class);
+                intent.putExtra("bookId", book.getBookId());
+                startActivity(intent);
             }
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -387,6 +396,9 @@ public class AdminWordBookFragment extends Fragment {
 
             // 删除按钮点击
             holder.btnDelete.setOnClickListener(v -> listener.onDeleteClick(book.getBookId()));
+
+            // 整个item点击事件，用于查看详情
+            holder.itemView.setOnClickListener(v -> listener.onDetailClick(book));
         }
 
         @Override
@@ -432,5 +444,6 @@ public class AdminWordBookFragment extends Fragment {
     public interface OnItemActionListener {
         void onEditClick(VocabularyBookSimpleResp book);
         void onDeleteClick(String bookId);
+        void onDetailClick(VocabularyBookSimpleResp book);
     }
 }

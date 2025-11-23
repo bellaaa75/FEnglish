@@ -2,10 +2,13 @@ package com.example.fenglishandroid.service;
 
 import com.example.fenglishandroid.model.Result;
 import com.example.fenglishandroid.model.VocabularyBookSimpleResp;
+import com.example.fenglishandroid.model.WordSimpleResp;
 import com.example.fenglishandroid.model.request.PageResult;
 import com.example.fenglishandroid.model.VocabularyBookDetailResp;
 import com.example.fenglishandroid.model.request.VocabularyBookAddReq;
 import com.example.fenglishandroid.model.request.VocabularyBookUpdateReq;
+
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.*;
@@ -38,6 +41,10 @@ public interface VocabularyBookService {
             @Path("bookId") String bookId,
             @Body VocabularyBookUpdateReq bookData
     );
+
+    // 在VocabularyBookService中添加
+    @GET("api/vocabulary-books/{bookId}/words")
+    Call<Result<List<WordSimpleResp>>> getWordsInBook(@Path("bookId") String bookId);
 
     // 向单词书添加单词
     @POST("api/vocabulary-books/{bookId}/words")

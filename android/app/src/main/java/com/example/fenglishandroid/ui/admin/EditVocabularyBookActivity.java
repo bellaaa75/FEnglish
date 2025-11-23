@@ -47,6 +47,7 @@ public class EditVocabularyBookActivity extends AppCompatActivity {
         etPublishTime = findViewById(R.id.et_publish_time);
         Button btnCancel = findViewById(R.id.btn_cancel);
         Button btnSave = findViewById(R.id.btn_save);
+
         calendar = Calendar.getInstance();
         viewModel = new ViewModelProvider(this).get(VocabularyBookViewModel.class);
 

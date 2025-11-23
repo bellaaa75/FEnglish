@@ -7,6 +7,7 @@ public class VocabularyBookDetailResp {
     private String bookName;
     private String publishTime;
     private List<WordSimpleResp> wordList;
+    private int wordCount;
 
     // getter和setter
     public String getBookId() { return bookId; }
@@ -17,4 +18,6 @@ public class VocabularyBookDetailResp {
     public void setPublishTime(String publishTime) { this.publishTime = publishTime; }
     public List<WordSimpleResp> getWordList() { return wordList; }
     public void setWordList(List<WordSimpleResp> wordList) { this.wordList = wordList; }
+    public int getWordCount() { return wordCount; }
+    public void setWordCount(int wordCount) { this.wordCount = wordCount; }
 }
