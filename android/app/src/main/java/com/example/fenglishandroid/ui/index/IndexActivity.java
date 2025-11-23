@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.example.fenglishandroid.R;
 import com.example.fenglishandroid.fragment.HomeGridFragment;
+import com.example.fenglishandroid.fragment.LearningPlazaFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class IndexActivity extends AppCompatActivity {
@@ -47,7 +48,7 @@ public class IndexActivity extends AppCompatActivity {
         public Fragment createFragment(int position) {
             switch (position) {
                 case 0:
-                    return new HomeGridFragment(); // 首页/广场
+                    return new LearningPlazaFragment(); // 首页/广场
                 case 1:
                     /*return new BookFragment();*/     // 词书
                 case 2:

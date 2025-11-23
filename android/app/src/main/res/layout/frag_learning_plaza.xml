@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- 搜索区域 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/et_search"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:background="@drawable/shape_edittext"
+            android:drawableLeft="@drawable/search"
+            android:drawablePadding="8dp"
+            android:hint="搜索单词书名称"
+            android:inputType="text"
+            android:paddingHorizontal="12dp"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/btn_search"
+            android:layout_width="75dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:paddingHorizontal="16dp"
+            android:text="搜索"
+            android:textColor="@color/white" />
+
+        <Button
+            android:id="@+id/btn_reset"
+            android:layout_width="69dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:backgroundTint="@color/gray"
+            android:paddingHorizontal="16dp"
+            android:text="重置"
+            android:textColor="@color/white" />
+
+    </LinearLayout>
+
+    <!-- 单词书列表 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_book_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:overScrollMode="never" />
+
+    <!-- 分页控件 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:spacing="8dp">
+
+        <ImageView
+            android:id="@+id/iv_prev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="上一页"
+            android:src="@android:drawable/ic_media_previous" />
+
+        <TextView
+            android:id="@+id/tv_page_1"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:text="1"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/tv_page_2"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/tv_page_3"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/tv_page_4"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:textSize="16sp"/>
+
+        <ImageView
+            android:id="@+id/iv_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="下一页"
+            android:src="@android:drawable/ic_media_next" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -60,6 +60,8 @@
             android:name=".ui.admin.VocabularyBookDetailActivity"
             android:parentActivityName=".fragment.admin.AdminWordBookFragment" />
 
+        <activity android:name=".ui.BookDetailPlazaActivity" />
+
         <activity android:name=".ui.admin.WordEditActivity"/>
         <activity android:name=".ui.admin.WordAddActivity"/>
 

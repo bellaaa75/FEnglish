@@ -9,6 +9,9 @@ public class PageResult<T> {
     private int page;
     private int size;
 
+    public PageResult(List<T> pageWords, int total, int totalPages, int page, int size) {
+    }
+
     // getter和setter
     public List<T> getList() { return list; }
     public void setList(List<T> list) { this.list = list; }

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="?attr/selectableItemBackground">
+
+    <!-- 单词和词性 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:spacing="8dp">
+
+        <TextView
+            android:id="@+id/tv_word_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:text="apple"/>
+
+        <TextView
+            android:id="@+id/tv_part_of_speech"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@color/gray"
+            android:background="@drawable/shape_tag"
+            android:paddingHorizontal="4dp"
+            android:text="n."/>
+
+    </LinearLayout>
+
+    <!-- 单词释义 -->
+    <TextView
+        android:id="@+id/tv_word_explain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="14sp"
+        android:textColor="@color/gray"
+        android:text="n. 苹果；苹果树；苹果公司"/>
+
+    <!-- 操作按钮 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="end"
+        android:spacing="8dp">
+
+        <TextView
+            android:id="@+id/tv_learn"
+            android:layout_width="60dp"
+            android:layout_height="36dp"
+            android:gravity="center"
+            android:text="学习"
+            android:textSize="14sp"
+            android:textColor="@color/black"/>
+
+        <TextView
+            android:id="@+id/tv_collect"
+            android:layout_width="60dp"
+            android:layout_height="36dp"
+            android:gravity="center"
+            android:text="收藏"
+            android:textSize="14sp"
+            android:textColor="@color/black"/>
+
+    </LinearLayout>
+
+</LinearLayout>

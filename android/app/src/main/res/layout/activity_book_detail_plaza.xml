@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <ProgressBar
+        android:id="@+id/loading_progress"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:visibility="gone"/>
+
+    <!-- 标题栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:gravity="center_vertical">
+
+        <Button
+            android:id="@+id/btn_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="返回" />
+
+        <TextView
+            android:id="@+id/tv_book_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="单词书详情"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <!-- 单词书信息 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tv_book_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:text="考研核心词汇"/>
+
+        <TextView
+            android:id="@+id/tv_book_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textSize="14sp"
+            android:textColor="@color/gray"
+            android:text="发布时间：2024-10-01 | 单词数：5000"/>
+
+    </LinearLayout>
+
+    <!-- 单词列表 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_word_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:overScrollMode="never" />
+
+    <!-- 分页控件 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:spacing="8dp">
+
+        <ImageView
+            android:id="@+id/iv_prev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="上一页"
+            android:src="@android:drawable/ic_media_previous" />
+
+        <TextView
+            android:id="@+id/tv_page_1"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:text="1"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/tv_page_2"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/tv_page_3"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/tv_page_4"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:textSize="16sp"/>
+
+        <ImageView
+            android:id="@+id/iv_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="下一页"
+            android:src="@android:drawable/ic_media_next" />
+
+    </LinearLayout>
+
+</LinearLayout>
