@@ -6,42 +6,53 @@
     android:padding="16dp"
     android:gravity="center_vertical">
 
-    <!-- 左侧文本区域 -->
+    <!-- 左侧文本区域 - 使用权重占据剩余空间 -->
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:paddingEnd="8dp">
 
         <TextView
             android:id="@+id/tv_word_name"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:ellipsize="end"
+            android:maxLines="1"/>
+
+        <TextView
+            android:id="@+id/tv_part_of_speech"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="#999999"
+            android:layout_marginTop="2dp"
+            android:ellipsize="end"
+            android:maxLines="1"/>
 
         <TextView
             android:id="@+id/tv_word_explain"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="14sp"
             android:textColor="#666666"
-            android:layout_marginTop="4dp"/>
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:maxLines="2"/>
     </LinearLayout>
 
-    <!-- 中间占位视图：占满剩余空间，实现两端对齐 -->
-    <View
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
-
-    <!-- 右侧删除按钮 -->
-    <Button
-        android:id="@+id/btn_delete"
-        android:layout_width="60dp"
-        android:layout_height="40dp"
-        android:backgroundTint="@color/red"
+    <!-- 右侧删除按钮 - 固定宽度 -->
+    <TextView
+        android:id="@+id/tv_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="删除"
-        android:textColor="@android:color/white"
-        android:textSize="10sp" />
+        android:textColor="@color/red"
+        android:textSize="14sp"
+        android:clickable="true"
+        android:focusable="true"/>
 
 </LinearLayout>
