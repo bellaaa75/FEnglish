@@ -64,7 +64,7 @@
 
         <activity android:name=".ui.admin.WordEditActivity"/>
         <activity android:name=".ui.admin.WordAddActivity"/>
-
+        <activity android:name=".ui.record.LearningTrackActivity"/>
     </application>
 
 </manifest>
