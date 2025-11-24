@@ -240,7 +240,7 @@ public class UserRepository {
     // 保存用户ID到SharedPreferences
     private void saveUserId(String userId) {
         SharedPreferences sp = context.getSharedPreferences("user_info", Context.MODE_PRIVATE);
-        sp.edit().putString("user_id", userId).apply();
+        sp.edit().putString("userId", userId).apply();
     }
 
     // 清除Token
@@ -254,7 +254,7 @@ public class UserRepository {
         SharedPreferences sp = context.getSharedPreferences("user_info", Context.MODE_PRIVATE);
         sp.edit()
                 .remove("token")
-                .remove("user_id")
+                .remove("userId")
                 .apply();
     }
 
@@ -267,7 +267,7 @@ public class UserRepository {
     // 获取当前用户ID
     public String getCurrentUserId() {
         SharedPreferences sp = context.getSharedPreferences("user_info", Context.MODE_PRIVATE);
-        return sp.getString("user_id", null);
+        return sp.getString("userId", null);
     }
 
     // 检查是否已登录
