@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.fenglishandroid.R;
 import com.example.fenglishandroid.model.Result;
 import com.example.fenglishandroid.model.VocabularyBookDetailResp;
+import com.example.fenglishandroid.model.WordListResult;
 import com.example.fenglishandroid.model.WordSimpleResp;
 import com.example.fenglishandroid.model.request.PageResult;
 import com.example.fenglishandroid.service.RetrofitClient;
@@ -36,11 +37,12 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -90,6 +92,16 @@ public class VocabularyBookDetailActivity extends AppCompatActivity {
 
         // 加载单词书详情
         loadBookDetail();
+    }
+
+    // 自定义Toast工具方法（避免多次点击导致的Toast堆积）
+    private Toast mToast;
+    private void showToast(String message) {
+        if (mToast != null) {
+            mToast.cancel();
+        }
+        mToast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
+        mToast.show();
     }
 
     private void initViews() {
@@ -237,99 +249,217 @@ public class VocabularyBookDetailActivity extends AppCompatActivity {
         Button btnSearch = dialogView.findViewById(R.id.btn_search);
         RecyclerView rvCandidateWords = dialogView.findViewById(R.id.rv_candidate_words);
         Button btnConfirmAdd = dialogView.findViewById(R.id.btn_confirm_add);
+        // 新增分页控件
+        Button btnPrevPage = dialogView.findViewById(R.id.btn_prev_page);
+        Button btnNextPage = dialogView.findViewById(R.id.btn_next_page);
 
+        // 候选单词数据与适配器
         List<WordSimpleResp> candidateWords = new ArrayList<>();
         CandidateWordAdapter candidateAdapter = new CandidateWordAdapter(candidateWords);
         rvCandidateWords.setLayoutManager(new LinearLayoutManager(this));
         rvCandidateWords.setAdapter(candidateAdapter);
 
+        // 分页参数（仿照AdminWordFragment）
+        final int[] currentDialogPage = {1};
+        int dialogPageSize = 20;
+        AtomicInteger totalDialogPages = new AtomicInteger(1);
+        final AtomicReference<String>[] currentKeyword = new AtomicReference[]{new AtomicReference<>("")};
+
         AlertDialog dialog = builder.create();
         dialog.show();
 
-        // 加载可选单词
-        loadCandidateWords("", candidateWords, candidateAdapter);
-
-        // 搜索按钮
-        btnSearch.setOnClickListener(v -> {
-            String keyword = etSearch.getText().toString().trim();
-            loadCandidateWords(keyword, candidateWords, candidateAdapter);
+        // 初始加载第一页
+        loadCandidateWords(currentKeyword[0].get(), currentDialogPage[0], dialogPageSize, candidateWords, candidateAdapter, (totalPages) -> {
+            totalDialogPages.set(totalPages);
+            updateDialogPageButtons(btnPrevPage, btnNextPage, currentDialogPage[0], totalDialogPages.get());
         });
 
-        // 确认添加
+        // 搜索按钮逻辑
+        btnSearch.setOnClickListener(v -> {
+            currentKeyword[0].set(etSearch.getText().toString().trim());
+            currentDialogPage[0] = 1; // 搜索后重置为第一页
+            loadCandidateWords(currentKeyword[0].get(), currentDialogPage[0], dialogPageSize, candidateWords, candidateAdapter, (totalPages) -> {
+                totalDialogPages.set(totalPages);
+                updateDialogPageButtons(btnPrevPage, btnNextPage, currentDialogPage[0], totalDialogPages.get());
+            });
+        });
+
+        // 上一页逻辑
+        btnPrevPage.setOnClickListener(v -> {
+            if (currentDialogPage[0] > 1) {
+                currentDialogPage[0]--;
+                loadCandidateWords(currentKeyword[0].get(), currentDialogPage[0], dialogPageSize, candidateWords, candidateAdapter, (totalPages) -> {
+                    totalDialogPages.set(totalPages);
+                    updateDialogPageButtons(btnPrevPage, btnNextPage, currentDialogPage[0], totalDialogPages.get());
+                });
+            }
+        });
+
+        // 下一页逻辑
+        btnNextPage.setOnClickListener(v -> {
+            if (currentDialogPage[0] < totalDialogPages.get()) {
+                currentDialogPage[0]++;
+                loadCandidateWords(currentKeyword[0].get(), currentDialogPage[0], dialogPageSize, candidateWords, candidateAdapter, (totalPages) -> {
+                    totalDialogPages.set(totalPages);
+                    updateDialogPageButtons(btnPrevPage, btnNextPage, currentDialogPage[0], totalDialogPages.get());
+                });
+            }
+        });
+
+        // 确认添加逻辑（保持不变）
         btnConfirmAdd.setOnClickListener(v -> {
             Set<String> selectedWordIds = candidateAdapter.getSelectedWordIds();
             if (selectedWordIds.isEmpty()) {
-                Toast.makeText(this, "请选择要添加的单词", Toast.LENGTH_SHORT).show();
+                showToast("请选择要添加的单词");
                 return;
             }
-
             addWordsToBook(selectedWordIds);
             dialog.dismiss();
         });
     }
 
     // 加载候选单词
-    private void loadCandidateWords(String keyword, List<WordSimpleResp> candidateWords, CandidateWordAdapter adapter) {
+    private void loadCandidateWords(String keyword, int pageNum, int pageSize,
+                                    List<WordSimpleResp> candidateWords,
+                                    CandidateWordAdapter adapter,
+                                    OnTotalPagesListener listener) {
         showLoading();
-        wordService.getWordList(1, 50, keyword).enqueue(new Callback<ResponseBody>() {
+        wordService.getWordList(pageNum, pageSize, keyword).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 hideLoading();
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         String json = response.body().string();
-                        Type type = new TypeToken<Result<PageResult<WordSimpleResp>>>(){}.getType();
-                        Result<PageResult<WordSimpleResp>> result = gson.fromJson(json, type);
+                        Log.d(TAG, "候选单词响应: " + json);
 
-                        if (result != null && result.isSuccess() && result.getData() != null) {
+                        // 关键修改：使用WordListResult解析（匹配后端结构）
+                        Type type = new TypeToken<WordListResult>(){}.getType();
+                        WordListResult result = gson.fromJson(json, type);
+
+                        if (result == null) {
+                            showToast("数据格式错误");
+                            return;
+                        }
+
+                        if (result.isSuccess()) {
+                            // 直接从data获取单词列表（数组）
+                            List<WordSimpleResp> words = result.getData();
                             candidateWords.clear();
-                            candidateWords.addAll(result.getData().getList());
+                            if (words != null) {
+                                candidateWords.addAll(words);
+                            }
                             adapter.notifyDataSetChanged();
+                            // 从result获取总页数
+                            listener.onTotalPages(result.getTotalPages());
                         } else {
-                            Toast.makeText(VocabularyBookDetailActivity.this, "获取单词列表失败", Toast.LENGTH_SHORT).show();
+                            String errorMsg = result.getMessage() != null ? result.getMessage() : "获取失败";
+                            showToast(errorMsg);
+                            listener.onTotalPages(0);
                         }
                     } catch (IOException e) {
-                        Log.e(TAG, "解析单词列表失败", e);
-                        Toast.makeText(VocabularyBookDetailActivity.this, "解析数据失败", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "解析失败", e);
+                        showToast("解析失败");
+                        listener.onTotalPages(0);
                     }
                 } else {
-                    Toast.makeText(VocabularyBookDetailActivity.this, "获取单词列表失败", Toast.LENGTH_SHORT).show();
+                    showToast("请求失败，状态码: " + response.code());
+                    listener.onTotalPages(0);
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 hideLoading();
-                Toast.makeText(VocabularyBookDetailActivity.this, "网络错误：" + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "网络错误", t);
+                showToast("网络错误: " + t.getMessage());
+                listener.onTotalPages(0);
             }
         });
     }
 
+    // 辅助接口：更新总页数
+    private interface OnTotalPagesListener {
+        void onTotalPages(int totalPages);
+    }
+
+    // 更新分页按钮状态
+    private void updateDialogPageButtons(Button btnPrev, Button btnNext, int currentPage, int totalPages) {
+        btnPrev.setEnabled(currentPage > 1);
+        btnNext.setEnabled(currentPage < totalPages);
+    }
+
     // 批量添加单词
-    private void addWordsToBook(Set<String> wordIds) {
-        int[] successCount = {0};
-        int total = wordIds.size();
+    private void addWordsToBook(Set<String> selectedWordIds) {
+        if (selectedWordIds.isEmpty()) return;
+
         showLoading();
 
-        for (String wordId : wordIds) {
-            VocabularyBookService.WordAddReq req = new VocabularyBookService.WordAddReq();
-            req.setWordId(wordId);
+        // 统计成功和失败的数量
+        int total = selectedWordIds.size();
+        final int[] successCount = {0};
+        final int[] failedCount = {0};
+        List<String> failedWordIds = new ArrayList<>();
 
-            bookService.addWordToBook(bookId, req).enqueue(new Callback<Result<Void>>() {
+        // 使用计数信号量确保所有请求完成后再处理结果
+        final CountDownLatch latch = new CountDownLatch(total);
+
+        for (String wordId : selectedWordIds) {
+            // 构造请求参数（使用WordAddReq替代Map）
+            VocabularyBookService.WordAddReq payload = new VocabularyBookService.WordAddReq();
+            payload.setWordId(wordId);
+
+            // 调用单个添加接口
+            Call<Result<Void>> call = bookService.addWordToBook(bookId, payload);
+            call.enqueue(new Callback<Result<Void>>() {
+                // 回调实现保持不变...
                 @Override
                 public void onResponse(Call<Result<Void>> call, Response<Result<Void>> response) {
+                    latch.countDown();
                     if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                         successCount[0]++;
+                    } else {
+                        failedCount[0]++;
+                        failedWordIds.add(wordId);
                     }
-                    checkAddCompletion(successCount[0], total);
+
+                    if (latch.getCount() == 0) {
+                        handleAddResult(successCount[0], failedCount[0], failedWordIds);
+                    }
                 }
 
                 @Override
                 public void onFailure(Call<Result<Void>> call, Throwable t) {
-                    checkAddCompletion(successCount[0], total);
+                    latch.countDown();
+                    failedCount[0]++;
+                    failedWordIds.add(wordId);
+                    Log.e(TAG, "添加单词失败: " + t.getMessage());
+
+                    if (latch.getCount() == 0) {
+                        handleAddResult(successCount[0], failedCount[0], failedWordIds);
+                    }
                 }
             });
         }
+    }
+
+    // 处理添加结果
+    private void handleAddResult(int successCount, int failedCount, List<String> failedWordIds) {
+        hideLoading();
+
+        // 显示结果提示
+        String message;
+        if (failedCount == 0) {
+            message = "全部添加成功，共添加 " + successCount + " 个单词";
+        } else if (successCount == 0) {
+            message = "添加失败，共 " + failedCount + " 个单词未能添加";
+        } else {
+            message = "部分添加成功：" + successCount + " 个成功，" + failedCount + " 个失败（可能已存在）";
+        }
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+
+        // 重新加载单词书详情，刷新列表
+        loadBookDetail();
     }
 
     // 检查添加是否完成
@@ -432,57 +562,61 @@ public class VocabularyBookDetailActivity extends AppCompatActivity {
     }
 
     // 候选单词适配器
-    private class CandidateWordAdapter extends RecyclerView.Adapter<CandidateWordAdapter.CandidateWordViewHolder> {
-        private List<WordSimpleResp> candidateWords;
-        private Map<String, Boolean> selectedStatus = new HashMap<>();
+    public class CandidateWordAdapter extends RecyclerView.Adapter<CandidateWordAdapter.ViewHolder> {
+        private List<WordSimpleResp> mWordList;
+        private Set<String> mSelectedWordIds = new HashSet<>();
 
-        public CandidateWordAdapter(List<WordSimpleResp> candidateWords) {
-            this.candidateWords = candidateWords;
+        public CandidateWordAdapter(List<WordSimpleResp> wordList) {
+            mWordList = wordList;
+        }
+
+        @NonNull
+        @Override
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_candidate_word, parent, false);
+            return new ViewHolder(view);
         }
 
         @Override
-        public CandidateWordViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = getLayoutInflater().inflate(R.layout.item_candidate_word, parent, false);
-            return new CandidateWordViewHolder(view);
-        }
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+            WordSimpleResp word = mWordList.get(position);
+            holder.tvWord.setText(word.getWordName());
+            holder.tvExplain.setText(word.getWordExplain());
 
-        @Override
-        public void onBindViewHolder(CandidateWordViewHolder holder, int position) {
-            WordSimpleResp word = candidateWords.get(position);
-            holder.tvWordName.setText(word.getWordName());
-            holder.tvWordExplain.setText(word.getWordExplain());
+            // 设置勾选状态
+            holder.cbSelect.setChecked(mSelectedWordIds.contains(word.getWordId()));
 
-            Boolean isSelected = selectedStatus.get(word.getWordId());
-            holder.cbSelect.setChecked(isSelected != null && isSelected);
-
-            holder.cbSelect.setOnCheckedChangeListener((buttonView, isChecked) ->
-                    selectedStatus.put(word.getWordId(), isChecked));
+            // 勾选事件处理
+            holder.itemView.setOnClickListener(v -> {
+                if (mSelectedWordIds.contains(word.getWordId())) {
+                    mSelectedWordIds.remove(word.getWordId());
+                } else {
+                    mSelectedWordIds.add(word.getWordId());
+                }
+                notifyItemChanged(position);
+            });
         }
 
         @Override
         public int getItemCount() {
-            return candidateWords.size();
+            return mWordList.size();
         }
 
         public Set<String> getSelectedWordIds() {
-            Set<String> selectedIds = new HashSet<>();
-            for (Map.Entry<String, Boolean> entry : selectedStatus.entrySet()) {
-                if (entry.getValue()) {
-                    selectedIds.add(entry.getKey());
-                }
-            }
-            return selectedIds;
+            return mSelectedWordIds;
         }
 
-        class CandidateWordViewHolder extends RecyclerView.ViewHolder {
-            TextView tvWordName, tvWordExplain;
+        public class ViewHolder extends RecyclerView.ViewHolder {
             CheckBox cbSelect;
+            TextView tvWord;
+            TextView tvExplain;
 
-            public CandidateWordViewHolder(View itemView) {
-                super(itemView);
-                tvWordName = itemView.findViewById(R.id.tv_word_name);
-                tvWordExplain = itemView.findViewById(R.id.tv_word_explain);
-                cbSelect = itemView.findViewById(R.id.cb_select);
+            public ViewHolder(View view) {
+                super(view);
+                cbSelect = view.findViewById(R.id.cb_select);
+                tvWord = view.findViewById(R.id.tv_word);
+                tvExplain = view.findViewById(R.id.tv_explain);
             }
         }
     }
