@@ -1,7 +1,11 @@
 package com.example.fenglishandroid.fragment;
 
 import android.app.AlertDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +28,7 @@ import com.example.fenglishandroid.model.request.User;
 import com.example.fenglishandroid.model.request.ChangePasswordRequest;
 import com.example.fenglishandroid.model.request.DeleteAccountRequest;
 import com.example.fenglishandroid.model.request.UpdateUserRequest;
+import com.example.fenglishandroid.ui.record.LearningTrackActivity;
 import com.example.fenglishandroid.viewModel.UserProfileViewModel;
 
 public class MeFragment extends Fragment {
@@ -41,6 +46,13 @@ public class MeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        Log.d("MeFragmentLifecycle", "Fragment 视图已创建并显示");
+        Log.d("MeFragmentLifecycle", "根视图宽度：" + view.getWidth() + "，高度：" + view.getHeight()); // 应输出非0值
+
+        // 打印根视图信息
+        Log.d("MeFragmentDebug", "根视图类型：" + view.getClass().getName()); // 应输出 ScrollView
+        Log.d("MeFragmentDebug", "学习轨迹控件是否存在：" + (binding.layoutLearningTrack != null)); // 应输出 true
+        Log.d("MeFragmentDebug", "编辑按钮是否存在：" + (binding.btnEditProfile != null)); // 应输出 true
 
         userProfileViewModel = new ViewModelProvider(this).get(UserProfileViewModel.class);
 
@@ -84,7 +96,16 @@ public class MeFragment extends Fragment {
 
         // 学习轨迹
         binding.layoutLearningTrack.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "学习轨迹功能开发中", Toast.LENGTH_SHORT).show();
+            Log.d("LearningTrackDebug", "点击了学习轨迹按钮");
+            Toast.makeText(getContext(), "正在跳转学习轨迹...", Toast.LENGTH_SHORT).show();
+
+            //SharedPreferences sp = getContext().getSharedPreferences("user_info", Context.MODE_PRIVATE);
+            //String userId = sp.getString("userId", ""); // 替换为实际存储用户ID的key
+            String userId = "OU_e91ac005c0";
+
+            Intent intent = new Intent(getContext(), LearningTrackActivity.class);
+            intent.putExtra("userId", userId);
+            startActivity(intent);
         });
 
         // 修改密码

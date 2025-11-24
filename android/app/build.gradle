@@ -67,6 +67,8 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2' // 如果使用Kotlin
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.2' // 如果使用Kotlin
 
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+
     // 或者使用完整的 lifecycle 依赖（推荐）
     def lifecycle_version = "2.6.2"
     implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"

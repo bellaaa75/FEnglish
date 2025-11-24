@@ -84,4 +84,8 @@ public class RetrofitClient {
     public static WordService getWordService() {
         return getInstance().create(WordService.class);
     }
+
+    public static StudyRecordService getStudyRecordService() {
+        return getInstance().create(StudyRecordService.class);
+    }
 }

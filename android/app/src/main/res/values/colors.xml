@@ -18,7 +18,7 @@
     <color name="gray_light">#FFE0E0E0</color>
     <color name="gray_dark">#FF616161</color>
     <!-- Material Design Color Palette -->
-
+    <color name="blue_light">#E6F2FF</color>
 
     <!-- 自定义颜色 -->
     <color name="primary_color">#2196F3</color>
