@@ -245,8 +245,6 @@ public class VocabularyBookDetailActivity extends AppCompatActivity {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_words_to_book, null);
         builder.setView(dialogView);
 
-        EditText etSearch = dialogView.findViewById(R.id.et_search);
-        Button btnSearch = dialogView.findViewById(R.id.btn_search);
         RecyclerView rvCandidateWords = dialogView.findViewById(R.id.rv_candidate_words);
         Button btnConfirmAdd = dialogView.findViewById(R.id.btn_confirm_add);
         // 新增分页控件
@@ -263,34 +261,21 @@ public class VocabularyBookDetailActivity extends AppCompatActivity {
         final int[] currentDialogPage = {1};
         int dialogPageSize = 20;
         AtomicInteger totalDialogPages = new AtomicInteger(1);
-        final AtomicReference<String>[] currentKeyword = new AtomicReference[]{new AtomicReference<>("")};
 
         AlertDialog dialog = builder.create();
         dialog.show();
 
         // 初始加载第一页
-        loadCandidateWords(currentKeyword[0].get(), currentDialogPage[0], dialogPageSize, candidateWords, candidateAdapter, (totalPages) -> {
+        loadCandidateWords("", currentDialogPage[0], dialogPageSize, candidateWords, candidateAdapter, (totalPages) -> {
             totalDialogPages.set(totalPages);
             updateDialogPageButtons(btnPrevPage, btnNextPage, currentDialogPage[0], totalDialogPages.get());
-        });
-
-        // 搜索按钮逻辑
-        btnSearch.setOnClickListener(v -> {
-            String keyword = etSearch.getText().toString().trim();
-            Log.d(TAG, "搜索关键词: " + keyword);
-            currentKeyword[0].set(keyword);
-            currentDialogPage[0] = 1; // 搜索后重置为第一页
-            loadCandidateWords(currentKeyword[0].get(), currentDialogPage[0], dialogPageSize, candidateWords, candidateAdapter, (totalPages) -> {
-                totalDialogPages.set(totalPages);
-                updateDialogPageButtons(btnPrevPage, btnNextPage, currentDialogPage[0], totalDialogPages.get());
-            });
         });
 
         // 上一页逻辑
         btnPrevPage.setOnClickListener(v -> {
             if (currentDialogPage[0] > 1) {
                 currentDialogPage[0]--;
-                loadCandidateWords(currentKeyword[0].get(), currentDialogPage[0], dialogPageSize, candidateWords, candidateAdapter, (totalPages) -> {
+                loadCandidateWords("", currentDialogPage[0], dialogPageSize, candidateWords, candidateAdapter, (totalPages) -> {
                     totalDialogPages.set(totalPages);
                     updateDialogPageButtons(btnPrevPage, btnNextPage, currentDialogPage[0], totalDialogPages.get());
                 });
@@ -301,7 +286,7 @@ public class VocabularyBookDetailActivity extends AppCompatActivity {
         btnNextPage.setOnClickListener(v -> {
             if (currentDialogPage[0] < totalDialogPages.get()) {
                 currentDialogPage[0]++;
-                loadCandidateWords(currentKeyword[0].get(), currentDialogPage[0], dialogPageSize, candidateWords, candidateAdapter, (totalPages) -> {
+                loadCandidateWords("", currentDialogPage[0], dialogPageSize, candidateWords, candidateAdapter, (totalPages) -> {
                     totalDialogPages.set(totalPages);
                     updateDialogPageButtons(btnPrevPage, btnNextPage, currentDialogPage[0], totalDialogPages.get());
                 });

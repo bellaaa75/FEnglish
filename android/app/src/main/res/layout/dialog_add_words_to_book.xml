@@ -13,33 +13,11 @@
         android:textStyle="bold"
         android:layout_marginBottom="16dp"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="16dp">
-
-        <EditText
-            android:id="@+id/et_search"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="搜索单词"
-            android:inputType="text"/>
-
-        <Button
-            android:id="@+id/btn_search"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="搜索"
-            android:layout_marginStart="8dp"/>
-    </LinearLayout>
-
     <!-- 分页按钮 -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_candidate_words"
         android:layout_width="match_parent"
-        android:layout_height="473dp"
+        android:layout_height="504dp"
         android:layout_marginBottom="16dp" />
 
     <LinearLayout
@@ -67,6 +45,6 @@
         android:id="@+id/btn_confirm_add"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="确认添加选中的单词"/>
+        android:text="确认添加选中的单词" />
 
 </LinearLayout>
