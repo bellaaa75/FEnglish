@@ -104,28 +104,56 @@ public class LearningTrackActivity extends AppCompatActivity {
 
                         // 解析后端返回数据
                         Map<String, Object> result = gson.fromJson(json, new TypeToken<Map<String, Object>>() {}.getType());
-                        if ("200".equals(result.get("code").toString())) {
+
+                        // 修复条件判断：使用Integer比较而不是String
+                        Integer code = ((Double) result.get("code")).intValue();
+                        Log.d("LearningTrackDebug", "解析到的code: " + code + ", 类型: " + code.getClass());
+
+                        if (code == 200) {
                             Map<String, Object> data = (Map<String, Object>) result.get("data");
-                            monthlyWordCount = ((Double) data.get("monthlyWordCount")).intValue();
-                            monthlyStudyDays = ((Double) data.get("monthlyStudyDays")).intValue();
-                            dailyWordCounts = gson.fromJson(
-                                    gson.toJson(data.get("dailyWordCounts")),
-                                    new TypeToken<List<Map<String, Object>>>() {}.getType()
-                            );
+
+                            // 安全地获取数据
+                            monthlyWordCount = data.containsKey("monthlyWordCount") ?
+                                    ((Double) data.get("monthlyWordCount")).intValue() : 0;
+                            monthlyStudyDays = data.containsKey("monthlyStudyDays") ?
+                                    ((Double) data.get("monthlyStudyDays")).intValue() : 0;
+
+                            // 安全地获取dailyWordCounts
+                            if (data.containsKey("dailyWordCounts")) {
+                                dailyWordCounts = gson.fromJson(
+                                        gson.toJson(data.get("dailyWordCounts")),
+                                        new TypeToken<List<Map<String, Object>>>() {}.getType()
+                                );
+                            } else {
+                                dailyWordCounts = new ArrayList<>();
+                            }
+
+                            Log.d("LearningTrackDebug", "解析成功 - 月度单词: " + monthlyWordCount +
+                                    ", 学习天数: " + monthlyStudyDays + ", 每日数据条数: " + dailyWordCounts.size());
 
                             // 更新UI
-                            updateUserInfo();
-                            updateCalendarData();
-                            updateLineChart();
+                            runOnUiThread(() -> {
+                                updateUserInfo();
+                                updateCalendarData();
+                                updateLineChart();
+                            });
                         } else {
-                            showToast("获取数据失败：" + result.get("message"));
+                            String message = (String) result.get("message");
+                            showToast("获取数据失败：" + message);
+                            Log.e("LearningTrackDebug", "API返回错误码: " + code + ", 消息: " + message);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
-                        showToast("解析失败");
+                        showToast("解析失败: " + e.getMessage());
+                        Log.e("LearningTrackDebug", "解析异常", e);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        showToast("数据处理异常: " + e.getMessage());
+                        Log.e("LearningTrackDebug", "数据处理异常", e);
                     }
                 } else {
                     showToast("请求失败，状态码：" + response.code());
+                    Log.e("LearningTrackDebug", "HTTP请求失败，状态码: " + response.code());
                 }
             }
 
@@ -170,6 +198,8 @@ public class LearningTrackActivity extends AppCompatActivity {
 
     // 更新日历表格的学习数据
     private void updateCalendarData() {
+        Log.d("CalendarDebug", "开始更新日历数据，dailyWordCounts大小: " + dailyWordCounts.size());
+
         // 将后端返回的每日数据匹配到日历中
         for (Map<String, Object> dailyData : dailyWordCounts) {
             String studyDate = (String) dailyData.get("studyDate");
@@ -177,11 +207,17 @@ public class LearningTrackActivity extends AppCompatActivity {
             int index = calendarDates.indexOf(studyDate);
             if (index != -1) {
                 calendarWordCounts.set(index, wordCount);
+                Log.d("CalendarDebug", "找到匹配日期: " + studyDate + ", 单词数: " + wordCount + ", 位置: " + index);
+            } else {
+                Log.d("CalendarDebug", "未找到日期: " + studyDate);
             }
         }
 
         // 设置日历GridView的适配器
-        gvCalendar.setAdapter(new CalendarAdapter());
+        runOnUiThread(() -> {
+            gvCalendar.setAdapter(new CalendarAdapter());
+            Log.d("CalendarDebug", "日历适配器设置完成");
+        });
     }
 
     // 日历GridView适配器
@@ -217,26 +253,45 @@ public class LearningTrackActivity extends AppCompatActivity {
             if (date.isEmpty()) {
                 tvDate.setText("");
                 tvWordCount.setText("");
-                convertView.setBackgroundColor(getResources().getColor(R.color.gray_light));
+                convertView.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             } else {
-                // 显示日期（仅显示日，如“04”）
+                // 显示日期（仅显示日，如"04"）
                 String day = date.split("-")[2];
                 tvDate.setText(day);
                 // 显示单词数
                 tvWordCount.setText(String.valueOf(wordCount));
-                // 有学习数据的日期设置蓝色背景
+
+                // 根据单词数量设置不同深度的蓝色
                 if (wordCount > 0) {
-                    convertView.setBackgroundColor(getResources().getColor(R.color.blue_light));
+                    int colorRes = getColorForWordCount(wordCount);
+                    convertView.setBackgroundColor(getResources().getColor(colorRes));
                 } else {
-                    convertView.setBackgroundColor(getResources().getColor(R.color.white));
+                    convertView.setBackgroundColor(getResources().getColor(android.R.color.white));
                 }
             }
             return convertView;
+        }
+
+        // 根据单词数量返回对应的颜色资源
+        private int getColorForWordCount(int wordCount) {
+            if (wordCount >= 20) {
+                return R.color.blue_darkest;    // 最深蓝
+            } else if (wordCount >= 15) {
+                return R.color.blue_darker;     // 较深蓝
+            } else if (wordCount >= 10) {
+                return R.color.blue_dark;       // 深蓝
+            } else if (wordCount >= 5) {
+                return R.color.blue_medium;     // 中蓝
+            } else {
+                return R.color.blue_light;      // 浅蓝
+            }
         }
     }
 
     // 更新折线图（近7天学习数据）
     private void updateLineChart() {
+        Log.d("LearningTrackDebug", "开始更新折线图，dailyWordCounts大小: " + dailyWordCounts.size());
+
         // 筛选近7天的数据
         List<Entry> entries = new ArrayList<>();
         List<String> xLabels = new ArrayList<>();
@@ -244,48 +299,85 @@ public class LearningTrackActivity extends AppCompatActivity {
         calendar.add(Calendar.DAY_OF_YEAR, -6); // 7天前
 
         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd", Locale.getDefault());
+        SimpleDateFormat fullSdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
         for (int i = 0; i < 7; i++) {
             Date date = calendar.getTime();
-            String dateStr = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(date);
+            String dateStr = fullSdf.format(date);
             String label = sdf.format(date);
             xLabels.add(label);
 
             // 查找对应日期的单词数
             int wordCount = 0;
             for (Map<String, Object> dailyData : dailyWordCounts) {
-                if (dateStr.equals(dailyData.get("studyDate"))) {
+                String studyDate = (String) dailyData.get("studyDate");
+                if (dateStr.equals(studyDate)) {
                     wordCount = ((Double) dailyData.get("wordCount")).intValue();
                     break;
                 }
             }
             entries.add(new Entry(i, wordCount));
+            Log.d("LineChartDebug", "日期: " + dateStr + ", 单词数: " + wordCount);
             calendar.add(Calendar.DAY_OF_YEAR, 1);
+        }
+
+        // 检查entries是否为空
+        if (entries.isEmpty()) {
+            Log.e("LineChartDebug", "折线图数据为空");
+            return;
         }
 
         // 配置折线图
         LineDataSet dataSet = new LineDataSet(entries, "学习单词数");
         dataSet.setColor(getResources().getColor(R.color.blue));
         dataSet.setValueTextColor(getResources().getColor(R.color.black));
+        dataSet.setValueTextSize(12f);
+        dataSet.setLineWidth(2f);
+        dataSet.setCircleColor(getResources().getColor(R.color.blue));
+        dataSet.setCircleRadius(4f);
+        dataSet.setDrawCircleHole(false);
+
         LineData lineData = new LineData(dataSet);
+        lineData.setValueTextSize(12f);
 
         // 配置X轴
         XAxis xAxis = lineChart.getXAxis();
         xAxis.setValueFormatter(new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
-                return xLabels.get((int) value);
+                int index = (int) value;
+                if (index >= 0 && index < xLabels.size()) {
+                    return xLabels.get(index);
+                }
+                return "";
             }
         });
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setGranularity(1f);
+        xAxis.setLabelCount(xLabels.size());
+
+        // 配置左侧Y轴
+        lineChart.getAxisLeft().setGranularity(1f);
+        lineChart.getAxisRight().setEnabled(false); // 禁用右侧Y轴
 
         // 隐藏描述
         Description description = new Description();
         description.setEnabled(false);
         lineChart.setDescription(description);
 
+        lineChart.getLegend().setEnabled(false);
+
+        // 启用触摸和交互
+        lineChart.setTouchEnabled(true);
+        lineChart.setDragEnabled(true);
+        lineChart.setScaleEnabled(true);
+        lineChart.setPinchZoom(true);
+
         // 设置数据并刷新
         lineChart.setData(lineData);
-        lineChart.invalidate();
+        lineChart.invalidate(); // 强制重绘
+
+        Log.d("LineChartDebug", "折线图数据设置完成，条目数: " + entries.size());
     }
 
     // 自定义Toast

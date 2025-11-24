@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.example.fenglishandroid.R;
 import com.example.fenglishandroid.fragment.LearningPlazaFragment;
 import com.example.fenglishandroid.fragment.MeFragment;
+import com.example.fenglishandroid.service.RetrofitClient;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class IndexActivity extends AppCompatActivity {
@@ -27,7 +28,8 @@ public class IndexActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_index);
+        setContentView(R.layout.activity_index);
+        RetrofitClient.init(this);
 
     /* ===== 状态栏文字黑色（API 21+） ===== */
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
