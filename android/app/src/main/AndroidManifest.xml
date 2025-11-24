@@ -65,6 +65,8 @@
         <activity android:name=".ui.admin.WordEditActivity"/>
         <activity android:name=".ui.admin.WordAddActivity"/>
         <activity android:name=".ui.record.LearningTrackActivity"/>
+        <activity android:name=".ui.WordQuizActivity"/>
+        <activity android:name=".ui.WordDetailActivity"/>
     </application>
 
 </manifest>

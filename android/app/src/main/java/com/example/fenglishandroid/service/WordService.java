@@ -1,5 +1,7 @@
 package com.example.fenglishandroid.service;
 
+import com.example.fenglishandroid.model.WordSimpleResp;
+
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -47,4 +49,7 @@ public interface WordService {
 
     @POST("api/words")
     Call<ResponseBody> addWord(@Body RequestBody requestBody);
+
+    @GET("api/words/{wordId}")
+    Call<WordSimpleResp> getWordDetail(@Path("wordId") String wordId);
 }
