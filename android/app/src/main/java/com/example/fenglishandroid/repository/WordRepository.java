@@ -1,7 +1,5 @@
 package com.example.fenglishandroid.repository;
 
-import androidx.annotation.NonNull;
-
 import com.example.fenglishandroid.model.Result;
 import com.example.fenglishandroid.model.VocabularyBookDetailResp;
 import com.example.fenglishandroid.model.WordSimpleResp;
@@ -52,7 +50,7 @@ public class WordRepository {
                         int toIndex = Math.min(fromIndex + size, total);
 
                         List<WordSimpleResp> pageWords;
-                        if (fromIndex >= total) {
+                        if (fromIndex >= total || fromIndex < 0) {
                             pageWords = new ArrayList<>();
                         } else {
                             pageWords = allWords.subList(fromIndex, toIndex);
@@ -87,7 +85,5 @@ public class WordRepository {
     public interface RepositoryCallback<T> {
         void onSuccess(T data);
         void onFailure(Throwable throwable);
-
-        void onFailure(@NonNull Call<Result<PageResult<WordSimpleResp>>> call, @NonNull Throwable t);
     }
 }

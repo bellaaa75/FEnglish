@@ -1,5 +1,6 @@
 package com.example.fenglishandroid.model.request;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PageResult<T> {
@@ -9,7 +10,12 @@ public class PageResult<T> {
     private int page;
     private int size;
 
-    public PageResult(List<T> pageWords, int total, int totalPages, int page, int size) {
+    public PageResult(List<T> list, long total, int pages, int page, int size) {
+        this.list = list != null ? list : new ArrayList<>(); // 确保list不为null
+        this.total = total;
+        this.pages = pages;
+        this.page = page;
+        this.size = size;
     }
 
     // getter和setter

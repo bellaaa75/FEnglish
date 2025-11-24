@@ -35,7 +35,7 @@ public class BookDetailPlazaActivity extends AppCompatActivity {
     private ProgressBar mLoadingProgress;
     // 控件
     private Button btnBack;
-    private TextView tvBookTitle, tvBookName, tvBookInfo, tvPageInfo;
+    private TextView tvBookTitle, tvBookName, tvBookInfo;
     private RecyclerView rvWordList;
     private ImageView ivPrev, ivNext;
     private TextView tvPage1, tvPage2, tvPage3, tvPage4;
@@ -95,7 +95,6 @@ public class BookDetailPlazaActivity extends AppCompatActivity {
         tvBookTitle = findViewById(R.id.tv_book_title);
         tvBookName = findViewById(R.id.tv_book_name);
         tvBookInfo = findViewById(R.id.tv_book_info);
-        tvPageInfo = findViewById(R.id.tv_page_info); // 新增分页信息文本
         rvWordList = findViewById(R.id.rv_word_list);
         tvPage1 = findViewById(R.id.tv_page_1);
         tvPage2 = findViewById(R.id.tv_page_2);
@@ -175,15 +174,24 @@ public class BookDetailPlazaActivity extends AppCompatActivity {
             @Override
             public void onChanged(Result<PageResult<WordSimpleResp>> result) {
                 hideLoading();
+                Log.d(TAG, "观察到的结果: " + (result != null));
+
                 if (result != null && result.isSuccess() && result.getData() != null) {
                     PageResult<WordSimpleResp> pageResult = result.getData();
-                    wordList.clear();
-                    wordList.addAll(pageResult.getList());
+
+                    // 添加空值检查
+                    if (pageResult.getList() == null) {
+                        Log.e(TAG, "单词列表为null，使用空列表");
+                        wordList.clear();
+                    } else {
+                        wordList.clear();
+                        wordList.addAll(pageResult.getList());
+                    }
+
                     totalPages = pageResult.getPages();
                     totalWords = Math.toIntExact(pageResult.getTotal());
                     wordAdapter.notifyDataSetChanged();
                     updatePageUI();
-                    updatePageInfo();
 
                     // 更新单词书信息
                     tvBookInfo.setText("单词总数：" + totalWords);
@@ -226,8 +234,7 @@ public class BookDetailPlazaActivity extends AppCompatActivity {
 
                 // 高亮当前页
                 if (pageNum == currentPage) {
-                    pageTvList.get(i).setBackgroundResource(R.drawable.shape_page_selected);
-                    pageTvList.get(i).setTextColor(getResources().getColor(R.color.white));
+                    pageTvList.get(i).setTextColor(getResources().getColor(R.color.gray_dark));
                 }
             } else {
                 pageTvList.get(i).setVisibility(View.GONE);
@@ -237,12 +244,6 @@ public class BookDetailPlazaActivity extends AppCompatActivity {
         // 更新分页按钮状态
         ivPrev.setEnabled(currentPage > 1);
         ivNext.setEnabled(currentPage < totalPages);
-    }
-
-    // 更新分页信息
-    private void updatePageInfo() {
-        tvPageInfo.setText(String.format("第 %d/%d 页  共 %d 个单词",
-                currentPage, totalPages, totalWords));
     }
 
     // 重置分页按钮样式

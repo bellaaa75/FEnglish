@@ -39,18 +39,20 @@ public class WordViewModel extends AndroidViewModel {
             @Override
             public void onSuccess(PageResult<WordSimpleResp> data) {
                 Result<PageResult<WordSimpleResp>> result = new Result<>();
-                result.isSuccess();
+                result.setCode(200);
+                result.setSuccess(true);
                 result.setData(data);
                 wordPageResult.postValue(result);
             }
 
             @Override
             public void onFailure(Throwable throwable) {
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<Result<PageResult<WordSimpleResp>>> call, @NonNull Throwable t) {
-                errorLiveData.postValue("网络错误：" + t.getMessage());
+                // 构建错误Result对象
+                Result<PageResult<WordSimpleResp>> result = new Result<>();
+                result.setCode(500);
+                result.setSuccess(false);
+                result.setMessage(throwable.getMessage());
+                wordPageResult.postValue(result);
             }
         });
     }

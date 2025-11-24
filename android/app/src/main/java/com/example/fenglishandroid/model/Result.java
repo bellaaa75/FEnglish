@@ -12,6 +12,7 @@ public class Result<T> {
 
     @SerializedName("data")
     private T data;
+    private boolean success;
 
     public int getCode() {
         return code;
@@ -37,9 +38,11 @@ public class Result<T> {
         this.data = data;
     }
 
-    // 增加一个便捷方法，判断请求是否成功
     public boolean isSuccess() {
         // 假设后端约定 200 为成功
         return code == 200;
+    }
+    public void setSuccess(boolean success) {
+        this.success = success;
     }
 }
