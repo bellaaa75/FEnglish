@@ -14,10 +14,17 @@ public class WordViewModel extends AndroidViewModel {
     private final WordRepository wordRepository;
     private final MutableLiveData<Result<PageResult<WordSimpleResp>>> wordPageResult = new MutableLiveData<>();
     private final MutableLiveData<String> errorLiveData = new MutableLiveData<>();
+    // 添加共享的 CollectViewModel 引用
+    private CollectViewModel sharedCollectViewModel;
+    private final MutableLiveData<Boolean> collectResult = new MutableLiveData<>();
 
     public WordViewModel(@NonNull Application application) {
         super(application);
         wordRepository = new WordRepository();
+    }
+
+    public void setSharedCollectViewModel(CollectViewModel viewModel) {
+        this.sharedCollectViewModel = viewModel;
     }
 
     public MutableLiveData<Result<PageResult<WordSimpleResp>>> getWordPageResult() {
@@ -26,6 +33,10 @@ public class WordViewModel extends AndroidViewModel {
 
     public MutableLiveData<String> getErrorLiveData() {
         return errorLiveData;
+    }
+
+    public MutableLiveData<Boolean> getCollectResult() {
+        return collectResult;
     }
 
     /**
@@ -55,5 +66,17 @@ public class WordViewModel extends AndroidViewModel {
                 wordPageResult.postValue(result);
             }
         });
+    }
+    /**
+     * 收藏单词
+     * @param wordId 单词ID
+     */
+    public void collectWord(String wordId) {
+        if (sharedCollectViewModel != null) {
+            sharedCollectViewModel.collectWord(wordId);
+            collectResult.postValue(true);
+        } else {
+            errorLiveData.postValue("收藏功能未初始化");
+        }
     }
 }

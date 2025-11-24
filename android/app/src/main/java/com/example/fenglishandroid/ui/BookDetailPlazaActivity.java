@@ -29,6 +29,13 @@ import com.example.fenglishandroid.viewModel.WordViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
+// 在现有的import语句后添加
+import com.example.fenglishandroid.viewModel.CollectViewModel;
+import com.example.fenglishandroid.model.CollectWordDTO;
+import com.example.fenglishandroid.model.WordSection;
+import java.util.HashSet;
+import java.util.Set;
+
 
 public class BookDetailPlazaActivity extends AppCompatActivity {
     private static final String TAG = "BookDetailPlaza";
@@ -40,6 +47,9 @@ public class BookDetailPlazaActivity extends AppCompatActivity {
     private ImageView ivPrev, ivNext;
     private TextView tvPage1, tvPage2, tvPage3, tvPage4;
     private ProgressBar progressBar;
+
+    private CollectViewModel sharedCollectViewModel;
+//    private Set<String> collectedWordIds = new HashSet<>(); // 存储已收藏的单词ID
 
     // 数据和适配器
     private List<WordSimpleResp> wordList = new ArrayList<>();
@@ -61,6 +71,8 @@ public class BookDetailPlazaActivity extends AppCompatActivity {
     private WordViewModel wordViewModel;
     private WordService wordService;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,15 +91,23 @@ public class BookDetailPlazaActivity extends AppCompatActivity {
 
         // 初始化ViewModel和服务
         wordViewModel = new ViewModelProvider(this).get(WordViewModel.class);
+        sharedCollectViewModel = new ViewModelProvider(this).get(CollectViewModel.class);
         wordService = RetrofitClient.getWordService();
+
+        // 设置共享的 CollectViewModel 到 WordViewModel
+        wordViewModel.setSharedCollectViewModel(sharedCollectViewModel);
 
         initViews();
         initPageTvList();
         initAdapter();
         initListener();
         observeData(); // 观察数据变化
+        observeCollectionStatus(); // 新增：观察收藏状态变化
         fetchWordList(); // 加载单词列表
         updateBookInfo(); // 更新单词书信息
+
+        // 初始加载收藏列表
+        sharedCollectViewModel.loadWordCollects(0, 50); // 加载足够多的收藏数据
     }
 
     private void initViews() {
@@ -122,7 +142,34 @@ public class BookDetailPlazaActivity extends AppCompatActivity {
             }
             @Override
             public void onCollectClick(WordSimpleResp word) {
+                // 处理收藏点击 - 使用统一的收藏状态
+                boolean isCurrentlyCollected = sharedCollectViewModel.isWordCollected(word.getWordId());
 
+                if (!isCurrentlyCollected) {
+                    // 收藏单词
+                    sharedCollectViewModel.collectWord(word.getWordId());
+
+                    // 立即更新UI状态（乐观更新）
+                    word.setCollected(true);
+                    int position = wordList.indexOf(word);
+                    if (position != -1) {
+                        wordAdapter.notifyItemChanged(position);
+                    }
+
+                    Toast.makeText(BookDetailPlazaActivity.this, "已收藏单词: " + word.getWordName(), Toast.LENGTH_SHORT).show();
+                } else {
+                    // 取消收藏
+                    sharedCollectViewModel.unCollectWord(word.getWordId());
+
+                    // 立即更新UI状态
+                    word.setCollected(false);
+                    int position = wordList.indexOf(word);
+                    if (position != -1) {
+                        wordAdapter.notifyItemChanged(position);
+                    }
+
+                    Toast.makeText(BookDetailPlazaActivity.this, "已取消收藏: " + word.getWordName(), Toast.LENGTH_SHORT).show();
+                }
             }
         });
         rvWordList.setLayoutManager(new LinearLayoutManager(this));
@@ -169,12 +216,13 @@ public class BookDetailPlazaActivity extends AppCompatActivity {
     }
 
     // 观察ViewModel数据变化
+    // 观察ViewModel数据变化
     private void observeData() {
         wordViewModel.getWordPageResult().observe(this, new Observer<Result<PageResult<WordSimpleResp>>>() {
             @Override
             public void onChanged(Result<PageResult<WordSimpleResp>> result) {
                 hideLoading();
-                Log.d(TAG, "观察到的结果: " + (result != null));
+                Log.d(TAG, "观察到的单词列表结果: " + (result != null));
 
                 if (result != null && result.isSuccess() && result.getData() != null) {
                     PageResult<WordSimpleResp> pageResult = result.getData();
@@ -188,16 +236,24 @@ public class BookDetailPlazaActivity extends AppCompatActivity {
                         wordList.addAll(pageResult.getList());
                     }
 
+                    // 使用统一的 ViewModel 状态设置单词的收藏状态
+                    for (WordSimpleResp word : wordList) {
+                        word.setCollected(sharedCollectViewModel.isWordCollected(word.getWordId()));
+                    }
+
                     totalPages = pageResult.getPages();
                     totalWords = Math.toIntExact(pageResult.getTotal());
                     wordAdapter.notifyDataSetChanged();
                     updatePageUI();
 
                     // 更新单词书信息
-                    tvBookInfo.setText("单词总数：" + totalWords);
+                    tvBookInfo.setText("单词总数：" + totalWords + " | 当前页：" + currentPage + "/" + totalPages);
+
+                    Log.d(TAG, "加载单词完成，总数: " + wordList.size() + ", 收藏状态已同步");
                 } else {
                     String errorMsg = result != null ? result.getMessage() : "加载失败";
                     Toast.makeText(BookDetailPlazaActivity.this, "加载失败：" + errorMsg, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "加载单词失败: " + errorMsg);
                 }
             }
         });
@@ -205,6 +261,53 @@ public class BookDetailPlazaActivity extends AppCompatActivity {
         wordViewModel.getErrorLiveData().observe(this, errorMsg -> {
             hideLoading();
             Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "WordViewModel错误: " + errorMsg);
+        });
+    }
+
+    // 新增方法：观察收藏状态变化
+    // 观察收藏状态变化
+    private void observeCollectionStatus() {
+        // 监听单词收藏列表变化
+        sharedCollectViewModel.getWordSections().observe(this, sections -> {
+            Log.d(TAG, "收到收藏列表更新，段数: " + (sections == null ? 0 : sections.size()));
+
+            if (sections != null) {
+                // 更新 ViewModel 中的收藏状态
+                Set<String> collectedIds = new HashSet<>();
+                for (WordSection section : sections) {
+                    if (section.words != null) {
+                        for (CollectWordDTO word : section.words) {
+                            collectedIds.add(word.getTargetId());
+                        }
+                    }
+                }
+                sharedCollectViewModel.updateWordCollectionStatus(collectedIds);
+
+                // 更新当前显示的单词列表的收藏状态
+                for (WordSimpleResp word : wordList) {
+                    word.setCollected(sharedCollectViewModel.isWordCollected(word.getWordId()));
+                }
+
+                // 刷新适配器
+                if (wordAdapter != null) {
+                    wordAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+
+        // 监听收藏错误信息
+        sharedCollectViewModel.getWordError().observe(this, errorMsg -> {
+            if (errorMsg != null && !errorMsg.isEmpty()) {
+                Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // 监听收藏操作结果
+        sharedCollectViewModel.getCollectResult().observe(this, success -> {
+            if (success != null && success) {
+                Log.d(TAG, "收藏操作成功");
+            }
         });
     }
 
@@ -318,6 +421,7 @@ public class BookDetailPlazaActivity extends AppCompatActivity {
             return new ViewHolder(view);
         }
 
+        // 在 WordPlazaAdapter 的 onBindViewHolder 中修改收藏按钮逻辑
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             WordSimpleResp word = mWordList.get(position);
@@ -331,6 +435,16 @@ public class BookDetailPlazaActivity extends AppCompatActivity {
             }
 
             holder.tvWordExplain.setText(word.getWordExplain());
+
+            // 设置收藏按钮状态 - 根据单词的实际收藏状态
+            boolean isCollected = word.isCollected();
+            holder.tvCollect.setText(isCollected ? "已收藏" : "收藏");
+            holder.tvCollect.setTextColor(isCollected ?
+                    holder.itemView.getContext().getResources().getColor(R.color.gray) :
+                    holder.itemView.getContext().getResources().getColor(R.color.purple_500));
+
+            // 收藏按钮始终可点击，支持收藏和取消收藏
+            holder.tvCollect.setEnabled(true);
 
             // 学习按钮点击
             holder.tvLearn.setOnClickListener(v -> {

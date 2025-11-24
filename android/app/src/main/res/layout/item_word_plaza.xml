@@ -64,11 +64,14 @@
         <TextView
             android:id="@+id/tv_collect"
             android:layout_width="60dp"
-            android:layout_height="36dp"
+            android:layout_height="48dp"
             android:gravity="center"
             android:text="收藏"
             android:textSize="14sp"
-            android:textColor="@color/black"/>
+            android:textColor="@color/black"
+            android:clickable="true"
+            android:focusable="true"
+            android:enabled="true"/>
 
     </LinearLayout>
 

@@ -28,6 +28,7 @@ android {
     // 启用数据绑定
     buildFeatures {
         dataBinding true
+        viewBinding true
     }
 
     compileOptions {

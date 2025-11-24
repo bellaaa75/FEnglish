@@ -6,15 +6,19 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.fenglishandroid.R;
+import com.example.fenglishandroid.fragment.CollectBookFragment;
+import com.example.fenglishandroid.fragment.CollectWordFragment;
 import com.example.fenglishandroid.fragment.LearningPlazaFragment;
 import com.example.fenglishandroid.fragment.MeFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -48,9 +52,9 @@ public class IndexActivity extends AppCompatActivity {
                 case 0:
                     return new LearningPlazaFragment(); // 首页/广场
                 case 1:
-                    /*return new BookFragment();*/     // 词书
+                    return new CollectBookFragment();    // 词书
                 case 2:
-                    /*return new FavoriteFragment();*/ // 收藏
+                    return new CollectWordFragment(); // 收藏
                 case 3:
                     return new MeFragment();       // 我的
                 default:

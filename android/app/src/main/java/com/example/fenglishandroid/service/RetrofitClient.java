@@ -12,13 +12,14 @@ import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+
 public class RetrofitClient {
     private static final String BASE_URL = "http://10.0.2.2:8080/"; // 替换为实际后端地址
     private static Retrofit retrofit;
 
     private static Context mContext;
 
-    // 初始化时传入上下文，用于获取SharedPreferences中的Token
+    // 初始化时传入上下文，用于获取SharedPreferences中的Token和UserId
     public static void init(Context context) {
         mContext = context.getApplicationContext();
         Log.d("RetrofitClient", "RetrofitClient initialized with context");
@@ -38,17 +39,19 @@ public class RetrofitClient {
                     .addInterceptor(chain -> {
                         Log.d("RetrofitClient", "Making request to: " + chain.request().url());
                         String token = getSavedToken();
+                        String userId = getSavedUserId(); // 获取保存的 userId
                         Request original = chain.request();
 
+                        Request.Builder builder = original.newBuilder();
                         if (token != null && !token.isEmpty()) {
-                            Request request = original.newBuilder()
-                                    .header("Authorization", "Bearer " + token)
-                                    .build();
+                            builder.header("Authorization", "Bearer " + token);
                             Log.d("RetrofitClient", "Added Authorization header");
-                            return chain.proceed(request);
                         }
-                        Log.d("RetrofitClient", "No token found, proceeding without Authorization");
-                        return chain.proceed(original);
+                        if (userId != null && !userId.isEmpty()) {
+                            builder.header("userId", userId); // 添加 userId 请求头
+                            Log.d("RetrofitClient", "Added userId header: " + userId);
+                        }
+                        return chain.proceed(builder.build());
                     })
                     .addInterceptor(logging) // 添加日志
                     .build();
@@ -63,7 +66,6 @@ public class RetrofitClient {
         return retrofit;
     }
 
-    // 获取用户相关API服务
     // 获取保存的Token
     private static String getSavedToken() {
         if (mContext == null) {
@@ -71,6 +73,15 @@ public class RetrofitClient {
         }
         SharedPreferences sp = mContext.getSharedPreferences("user_info", Context.MODE_PRIVATE);
         return sp.getString("token", null);
+    }
+
+    // 获取保存的UserId
+    private static String getSavedUserId() {
+        if (mContext == null) {
+            return null;
+        }
+        SharedPreferences sp = mContext.getSharedPreferences("user_info", Context.MODE_PRIVATE);
+        return sp.getString("userId", null); // 确保保存了 userId
     }
 
     public static UserApiService getUserApi() {
@@ -87,5 +98,9 @@ public class RetrofitClient {
 
     public static StudyRecordService getStudyRecordService() {
         return getInstance().create(StudyRecordService.class);
+    }
+
+    public static CollectApiService getCollectApi() {
+        return getInstance().create(CollectApiService.class);
     }
 }

@@ -5,6 +5,7 @@ public class VocabularyBookSimpleResp {
     private String bookName;
     private String publishTime;
     private int wordCount;
+    private boolean collected;
 
     // getter和setter
     public String getBookId() { return bookId; }
@@ -15,4 +16,7 @@ public class VocabularyBookSimpleResp {
     public void setPublishTime(String publishTime) { this.publishTime = publishTime; }
     public int getWordCount() { return wordCount; }
     public void setWordCount(int wordCount) { this.wordCount = wordCount; }
+
+    public boolean isCollected() { return collected; }
+    public void setCollected(boolean collected) { this.collected = collected; }
 }

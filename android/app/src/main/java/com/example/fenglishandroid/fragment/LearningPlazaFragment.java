@@ -1,6 +1,7 @@
 package com.example.fenglishandroid.fragment;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,19 +15,26 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fenglishandroid.R;
+import com.example.fenglishandroid.model.CollectBookDTO;
 import com.example.fenglishandroid.model.Result;
 import com.example.fenglishandroid.model.VocabularyBookSimpleResp;
 import com.example.fenglishandroid.model.request.PageResult;
 import com.example.fenglishandroid.service.RetrofitClient;
 import com.example.fenglishandroid.service.VocabularyBookService;
 import com.example.fenglishandroid.ui.BookDetailPlazaActivity;
+import com.example.fenglishandroid.utils.CollectionStatusManager;
+import com.example.fenglishandroid.viewModel.CollectViewModel;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -49,6 +57,8 @@ public class LearningPlazaFragment extends Fragment {
     private int pageSize = 10;
     private int totalPages = 1;
     private String keyword = "";
+    /* 用来保存已收藏的 bookId，退出页面即释放，无需持久化 */
+    private Set<String> collectedIds = new HashSet<>();
 
     // 分页控件集合
     private List<TextView> pageTvList = new ArrayList<>();
@@ -57,20 +67,38 @@ public class LearningPlazaFragment extends Fragment {
     // 网络服务
     private VocabularyBookService bookService;
 
+    private CollectViewModel sharedCollectViewModel;
+    /* ===== 接口定义 ===== */
+    public interface OnItemClickListener {
+        void onItemClick(VocabularyBookSimpleResp book);
+        void onCollectClick(VocabularyBookSimpleResp book);
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        // 加载布局
         View view = inflater.inflate(R.layout.frag_learning_plaza, container, false);
+        return view;
+    }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        sharedCollectViewModel = new ViewModelProvider(requireActivity()).get(CollectViewModel.class);
         // 初始化网络服务
         bookService = RetrofitClient.getVocabularyBookService();
 
+        // 初始化视图
         initView(view);
         initPageTvList();
         initAdapter();
         initListener();
-        fetchBookList(); // 加载单词书列表
-        return view;
+
+        // 加载单词书列表和收藏状态
+        fetchBookList();
+        observeCollectionStatus();
     }
 
     private void initView(View view) {
@@ -94,11 +122,26 @@ public class LearningPlazaFragment extends Fragment {
         pageTvList.add(tvPage4);
     }
 
+    private void observeCollectionStatus() {
+        // 监听收藏列表变化，实时更新学习广场的收藏状态
+        sharedCollectViewModel.getBookCollects().observe(getViewLifecycleOwner(), bookList -> {
+            if (bookList != null) {
+                collectedIds.clear();
+                for (CollectBookDTO book : bookList) {
+                    collectedIds.add(book.getTargetId());
+                }
+                // 立即刷新适配器
+                if (bookAdapter != null) {
+                    bookAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+    }
+
     private void initAdapter() {
-        bookAdapter = new BookPlazaAdapter(bookList, new OnItemClickListener() {
+        bookAdapter = new BookPlazaAdapter(bookList, new LearningPlazaFragment.OnItemClickListener() {
             @Override
             public void onItemClick(VocabularyBookSimpleResp book) {
-                // 跳转到单词书详情页面
                 Intent intent = new Intent(getContext(), BookDetailPlazaActivity.class);
                 intent.putExtra("bookId", book.getBookId());
                 intent.putExtra("bookName", book.getBookName());
@@ -107,23 +150,27 @@ public class LearningPlazaFragment extends Fragment {
 
             @Override
             public void onCollectClick(VocabularyBookSimpleResp book) {
-                // 仅显示按钮，暂不实现功能
-                Toast.makeText(getContext(), "收藏功能待实现", Toast.LENGTH_SHORT).show();
+                String bookId = book.getBookId();
+                if (collectedIds.contains(bookId)) {
+                    // 取消收藏
+                    sharedCollectViewModel.unCollectBook(bookId);
+                } else {
+                    // 收藏
+                    sharedCollectViewModel.collectBook(bookId);
+                }
             }
-        });
+        }, collectedIds);
         rvBookList.setLayoutManager(new LinearLayoutManager(getContext()));
         rvBookList.setAdapter(bookAdapter);
     }
 
     private void initListener() {
-        // 搜索按钮
         btnSearch.setOnClickListener(v -> {
             keyword = etSearch.getText().toString().trim();
             currentPage = 1;
             fetchBookList();
         });
 
-        // 重置按钮
         btnReset.setOnClickListener(v -> {
             etSearch.setText("");
             keyword = "";
@@ -131,7 +178,6 @@ public class LearningPlazaFragment extends Fragment {
             fetchBookList();
         });
 
-        // 上一页
         ivPrev.setOnClickListener(v -> {
             if (currentPage > 1) {
                 currentPage--;
@@ -142,7 +188,6 @@ public class LearningPlazaFragment extends Fragment {
             }
         });
 
-        // 下一页
         ivNext.setOnClickListener(v -> {
             if (currentPage < totalPages) {
                 currentPage++;
@@ -153,7 +198,6 @@ public class LearningPlazaFragment extends Fragment {
             }
         });
 
-        // 分页数字点击
         for (int i = 0; i < pageTvList.size(); i++) {
             int finalI = i;
             pageTvList.get(i).setOnClickListener(v -> {
@@ -169,10 +213,8 @@ public class LearningPlazaFragment extends Fragment {
         }
     }
 
-    // 加载单词书列表
     private void fetchBookList() {
         Call<Result<PageResult<VocabularyBookSimpleResp>>> call = bookService.searchBooks(keyword, currentPage, pageSize);
-
         call.enqueue(new Callback<Result<PageResult<VocabularyBookSimpleResp>>>() {
             @Override
             public void onResponse(@NonNull Call<Result<PageResult<VocabularyBookSimpleResp>>> call, @NonNull Response<Result<PageResult<VocabularyBookSimpleResp>>> response) {
@@ -182,8 +224,11 @@ public class LearningPlazaFragment extends Fragment {
                         PageResult<VocabularyBookSimpleResp> pageResult = result.getData();
                         bookList.clear();
                         bookList.addAll(pageResult.getList());
-                        totalPages = pageResult.getPages();
+                        for (VocabularyBookSimpleResp b : bookList) {
+                            b.setCollected(collectedIds.contains(b.getBookId()));
+                        }
                         bookAdapter.notifyDataSetChanged();
+                        totalPages = pageResult.getPages();
                         updatePageUI();
                     } else {
                         Toast.makeText(getContext(), "加载失败：" + result.getMessage(), Toast.LENGTH_SHORT).show();
@@ -200,7 +245,6 @@ public class LearningPlazaFragment extends Fragment {
         });
     }
 
-    // 处理错误响应码
     private void handleErrorResponse(int code) {
         if (code == 401) {
             Toast.makeText(getContext(), "Token无效/未登录，请重新登录", Toast.LENGTH_SHORT).show();
@@ -213,18 +257,14 @@ public class LearningPlazaFragment extends Fragment {
         }
     }
 
-    // 更新分页UI
     private void updatePageUI() {
         resetPageTvStyle();
         int[] displayPages = calculateDisplayPages();
-
         for (int i = 0; i < pageTvList.size(); i++) {
             int pageNum = displayPages[i];
             if (pageNum > 0 && pageNum <= totalPages) {
                 pageTvList.get(i).setText(String.valueOf(pageNum));
                 pageTvList.get(i).setVisibility(View.VISIBLE);
-
-                // 高亮当前页
                 if (pageNum == currentPage) {
                     pageTvList.get(i).setBackgroundResource(R.drawable.shape_page_selected);
                     pageTvList.get(i).setTextColor(getResources().getColor(R.color.white));
@@ -235,14 +275,12 @@ public class LearningPlazaFragment extends Fragment {
         }
     }
 
-    // 重置分页按钮样式
     private void resetPageTvStyle() {
         for (TextView tv : pageTvList) {
             tv.setTextColor(getResources().getColor(R.color.black));
         }
     }
 
-    // 计算要显示的页码
     private int[] calculateDisplayPages() {
         int[] pages = new int[PAGE_BUTTON_COUNT];
         if (totalPages <= PAGE_BUTTON_COUNT) {
@@ -273,73 +311,5 @@ public class LearningPlazaFragment extends Fragment {
         return pages;
     }
 
-    // 单词书适配器
-    public class BookPlazaAdapter extends RecyclerView.Adapter<BookPlazaAdapter.ViewHolder> {
-        private List<VocabularyBookSimpleResp> mBookList;
-        private LearningPlazaFragment.OnItemClickListener mListener;
 
-        public BookPlazaAdapter(List<VocabularyBookSimpleResp> bookList, LearningPlazaFragment.OnItemClickListener listener) {
-            mBookList = bookList;
-            mListener = listener;
-        }
-
-        @NonNull
-        @Override
-        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_book_plaza, parent, false);
-            return new ViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            VocabularyBookSimpleResp book = mBookList.get(position);
-            holder.tvBookId.setText("ID: " + book.getBookId());
-            holder.tvBookName.setText(book.getBookName());
-            holder.tvPublishTime.setText(book.getPublishTime());
-            holder.tvWordCount.setText(String.valueOf(book.getWordCount()));
-
-            // 点击整个项进入详情
-            holder.itemView.setOnClickListener(v -> {
-                if (mListener != null) {
-                    mListener.onItemClick(book);
-                }
-            });
-
-            // 收藏按钮点击
-            holder.btnCollect.setOnClickListener(v -> {
-                if (mListener != null) {
-                    mListener.onCollectClick(book);
-                }
-            });
-        }
-
-        @Override
-        public int getItemCount() {
-            return mBookList.size();
-        }
-
-        public class ViewHolder extends RecyclerView.ViewHolder {
-            TextView tvBookId;
-            TextView tvBookName;
-            TextView tvPublishTime;
-            TextView tvWordCount;
-            Button btnCollect;
-
-            public ViewHolder(View view) {
-                super(view);
-                tvBookId = view.findViewById(R.id.tv_book_id);
-                tvBookName = view.findViewById(R.id.tv_book_name);
-                tvPublishTime = view.findViewById(R.id.tv_publish_time);
-                tvWordCount = view.findViewById(R.id.tv_word_count);
-                btnCollect = view.findViewById(R.id.btn_collect);
-            }
-        }
-    }
-
-    // 点击事件接口
-    public interface OnItemClickListener {
-        void onItemClick(VocabularyBookSimpleResp book);
-        void onCollectClick(VocabularyBookSimpleResp book);
-    }
 }
