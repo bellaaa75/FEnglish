@@ -276,7 +276,9 @@ public class VocabularyBookDetailActivity extends AppCompatActivity {
 
         // 搜索按钮逻辑
         btnSearch.setOnClickListener(v -> {
-            currentKeyword[0].set(etSearch.getText().toString().trim());
+            String keyword = etSearch.getText().toString().trim();
+            Log.d(TAG, "搜索关键词: " + keyword);
+            currentKeyword[0].set(keyword);
             currentDialogPage[0] = 1; // 搜索后重置为第一页
             loadCandidateWords(currentKeyword[0].get(), currentDialogPage[0], dialogPageSize, candidateWords, candidateAdapter, (totalPages) -> {
                 totalDialogPages.set(totalPages);
@@ -306,12 +308,17 @@ public class VocabularyBookDetailActivity extends AppCompatActivity {
             }
         });
 
-        // 确认添加逻辑（保持不变）
+        // 确认添加逻辑
         btnConfirmAdd.setOnClickListener(v -> {
             Set<String> selectedWordIds = candidateAdapter.getSelectedWordIds();
+            Log.d(TAG, "确认添加，选中的单词数量: " + selectedWordIds.size());
             if (selectedWordIds.isEmpty()) {
                 showToast("请选择要添加的单词");
                 return;
+            }
+            // 打印选中的单词ID
+            for (String wordId : selectedWordIds) {
+                Log.d(TAG, "选中的单词ID: " + wordId);
             }
             addWordsToBook(selectedWordIds);
             dialog.dismiss();
@@ -563,6 +570,7 @@ public class VocabularyBookDetailActivity extends AppCompatActivity {
 
     // 候选单词适配器
     public class CandidateWordAdapter extends RecyclerView.Adapter<CandidateWordAdapter.ViewHolder> {
+        private static final String TAG = "CandidateWordAdapter";
         private List<WordSimpleResp> mWordList;
         private Set<String> mSelectedWordIds = new HashSet<>();
 
@@ -587,12 +595,29 @@ public class VocabularyBookDetailActivity extends AppCompatActivity {
             // 设置勾选状态
             holder.cbSelect.setChecked(mSelectedWordIds.contains(word.getWordId()));
 
+            // 为CheckBox单独设置点击事件（关键修改）
+            holder.cbSelect.setOnClickListener(v -> {
+                boolean isChecked = holder.cbSelect.isChecked();
+                if (isChecked) {
+                    mSelectedWordIds.add(word.getWordId());
+                    Log.d(TAG, "勾选单词: " + word.getWordName() + " (id: " + word.getWordId() + ")");
+                } else {
+                    mSelectedWordIds.remove(word.getWordId());
+                    Log.d(TAG, "取消勾选单词: " + word.getWordName() + " (id: " + word.getWordId() + ")");
+                }
+                notifyItemChanged(position);
+            });
+
             // 勾选事件处理
             holder.itemView.setOnClickListener(v -> {
-                if (mSelectedWordIds.contains(word.getWordId())) {
-                    mSelectedWordIds.remove(word.getWordId());
-                } else {
+                boolean isChecked = !holder.cbSelect.isChecked();
+                holder.cbSelect.setChecked(isChecked);
+                if (isChecked) {
                     mSelectedWordIds.add(word.getWordId());
+                    Log.d(TAG, "点击条目勾选: " + word.getWordName() + " (id: " + word.getWordId() + ")");
+                } else {
+                    mSelectedWordIds.remove(word.getWordId());
+                    Log.d(TAG, "点击条目取消勾选: " + word.getWordName() + " (id: " + word.getWordId() + ")");
                 }
                 notifyItemChanged(position);
             });
