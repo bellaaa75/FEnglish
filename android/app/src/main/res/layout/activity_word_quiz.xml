@@ -34,7 +34,7 @@
     <TextView
         android:id="@+id/tv_quiz_option1"
         android:layout_width="match_parent"
-        android:layout_height="131dp"
+        android:layout_height="156dp"
         android:layout_marginTop="60dp"
         android:background="@drawable/bg_option_normal"
         android:gravity="center"
@@ -44,7 +44,7 @@
     <TextView
         android:id="@+id/tv_quiz_option2"
         android:layout_width="match_parent"
-        android:layout_height="130dp"
+        android:layout_height="144dp"
         android:layout_marginTop="20dp"
         android:background="@drawable/bg_option_normal"
         android:gravity="center"
@@ -55,7 +55,7 @@
     <TextView
         android:id="@+id/tv_quiz_option3"
         android:layout_width="match_parent"
-        android:layout_height="127dp"
+        android:layout_height="148dp"
         android:layout_marginTop="20dp"
         android:background="@drawable/bg_option_normal"
         android:gravity="center"
