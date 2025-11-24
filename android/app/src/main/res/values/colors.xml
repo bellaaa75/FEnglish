@@ -18,7 +18,12 @@
     <color name="gray_light">#FFE0E0E0</color>
     <color name="gray_dark">#FF616161</color>
     <!-- Material Design Color Palette -->
+
     <color name="blue_light">#E6F2FF</color>
+    <color name="blue_medium">#FF90CAF9</color>     <!-- 浅 -->
+    <color name="blue_dark">#FF42A5F5</color>       <!-- 中 -->
+    <color name="blue_darker">#FF1E88E5</color>     <!-- 深 -->
+    <color name="blue_darkest">#FF1565C0</color>    <!-- 最深 -->
 
     <!-- 自定义颜色 -->
     <color name="primary_color">#2196F3</color>

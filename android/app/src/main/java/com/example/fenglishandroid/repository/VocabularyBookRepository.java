@@ -135,10 +135,13 @@ public class VocabularyBookRepository {
         });
     }
 
-    /**
-     * 向单词书添加单词
+    // 向单词书添加单词
     public void addWordToBook(String bookId, String wordId, final RepositoryCallback<Void> callback) {
-        service.addWordToBook(bookId, wordId).enqueue(new Callback<Result<Void>>() {
+        // 构造请求参数对象
+        VocabularyBookService.WordAddReq payload = new VocabularyBookService.WordAddReq();
+        payload.setWordId(wordId);
+
+        service.addWordToBook(bookId, payload).enqueue(new Callback<Result<Void>>() {
             @Override
             public void onResponse(Call<Result<Void>> call, Response<Result<Void>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
@@ -154,7 +157,6 @@ public class VocabularyBookRepository {
             }
         });
     }
-     */
 
     //从单词书删除单词
     public void removeWordFromBook(String bookId, String wordId, final RepositoryCallback<Void> callback) {

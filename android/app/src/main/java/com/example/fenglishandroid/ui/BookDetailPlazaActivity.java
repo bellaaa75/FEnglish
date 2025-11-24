@@ -138,8 +138,12 @@ public class BookDetailPlazaActivity extends AppCompatActivity {
         wordAdapter = new WordPlazaAdapter(wordList, new WordPlazaAdapter.OnButtonClickListener() {
             @Override
             public void onLearnClick(WordSimpleResp word) {
-
+                // 仅修改此处：学习按钮跳转至单词选择题界面
+                Intent intent = new Intent(BookDetailPlazaActivity.this, WordQuizActivity.class);
+                intent.putExtra("wordId", word.getWordId()); // 传递单词ID
+                startActivity(intent);
             }
+
             @Override
             public void onCollectClick(WordSimpleResp word) {
                 // 处理收藏点击 - 使用统一的收藏状态
@@ -426,6 +430,7 @@ public class BookDetailPlazaActivity extends AppCompatActivity {
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             WordSimpleResp word = mWordList.get(position);
             holder.tvWordName.setText(word.getWordName());
+
 
             // 处理词性显示
             if (word.getPartOfSpeech() != null && !word.getPartOfSpeech().isEmpty()) {

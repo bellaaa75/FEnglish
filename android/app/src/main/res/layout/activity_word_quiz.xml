@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 修复：替换 ConstraintLayout 为 LinearLayout，避免依赖缺失 -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:padding="16dp"
+    android:orientation="vertical">
+
+    <!-- 返回按钮 -->
+    <ImageView
+        android:id="@+id/iv_quiz_back"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_arrow_left"
+        android:contentDescription="返回"/>
+
+    <!-- 单词名称 -->
+    <TextView
+        android:id="@+id/tv_quiz_word"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="80dp"/>
+
+    <!-- 选项1 -->
+
+    <!-- 选项2 -->
+
+    <TextView
+        android:id="@+id/tv_quiz_option1"
+        android:layout_width="match_parent"
+        android:layout_height="131dp"
+        android:layout_marginTop="60dp"
+        android:background="@drawable/bg_option_normal"
+        android:gravity="center"
+        android:textColor="@color/black"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/tv_quiz_option2"
+        android:layout_width="match_parent"
+        android:layout_height="130dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/bg_option_normal"
+        android:gravity="center"
+        android:textColor="@color/black"
+        android:textSize="18sp" />
+
+    <!-- 选项3 -->
+    <TextView
+        android:id="@+id/tv_quiz_option3"
+        android:layout_width="match_parent"
+        android:layout_height="127dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/bg_option_normal"
+        android:gravity="center"
+        android:textColor="@color/black"
+        android:textSize="18sp" />
+
+    <!-- 直接查看释义按钮：修复 bg_button 报错，用系统样式或自定义 -->
+    <Button
+        android:id="@+id/btn_quiz_view_explain"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_gravity="bottom"
+        android:layout_marginTop="60dp"
+        android:background="@drawable/bg_button"
+        android:text="直接查看释义"
+        android:textColor="@color/white"
+        android:textSize="16sp" />
+
+</LinearLayout>

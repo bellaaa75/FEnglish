@@ -31,6 +31,8 @@ import com.example.fenglishandroid.model.request.UpdateUserRequest;
 import com.example.fenglishandroid.ui.record.LearningTrackActivity;
 import com.example.fenglishandroid.viewModel.UserProfileViewModel;
 
+import java.util.Map;
+
 public class MeFragment extends Fragment {
 
     private FragmentMeBinding binding;
@@ -97,11 +99,22 @@ public class MeFragment extends Fragment {
         // 学习轨迹
         binding.layoutLearningTrack.setOnClickListener(v -> {
             Log.d("LearningTrackDebug", "点击了学习轨迹按钮");
-            Toast.makeText(getContext(), "正在跳转学习轨迹...", Toast.LENGTH_SHORT).show();
 
-            SharedPreferences sp = getContext().getSharedPreferences("user_info", Context.MODE_PRIVATE);
-            String userId = sp.getString("userId", ""); // 替换为实际存储用户ID的key
-            //String userId = "OU_e91ac005c0";
+            SharedPreferences sp = requireContext().getSharedPreferences("user_info", Context.MODE_PRIVATE);
+
+            // 调试：打印所有存储的键值对
+            Map<String, ?> allEntries = sp.getAll();
+            for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
+                Log.d("SharedPreferencesDebug", "Key: " + entry.getKey() + ", Value: " + entry.getValue());
+            }
+
+            String userId = sp.getString("user_id", "");
+            Log.d("LearningTrackDebug", "从SharedPreferences获取的userId: '" + userId + "'");
+
+            if (userId.isEmpty()) {
+                Toast.makeText(getContext(), "用户信息获取失败，请重新登录", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             Intent intent = new Intent(getContext(), LearningTrackActivity.class);
             intent.putExtra("userId", userId);
