@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.example.fenglishandroid.R;
 import com.example.fenglishandroid.fragment.LearningPlazaFragment;
+import com.example.fenglishandroid.fragment.MeFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class IndexActivity extends AppCompatActivity {
@@ -148,11 +149,5 @@ private void iterateSetTypeface(ViewGroup parent, Typeface tf) {
         }
     }*/
 
-// 我的Fragment
-public static class MeFragment extends Fragment {
-    public MeFragment() {
-        super(R.layout.fragment_me); // 请创建对应的布局文件
-    }
-}
 }
 

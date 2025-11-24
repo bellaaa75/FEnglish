@@ -99,9 +99,9 @@ public class MeFragment extends Fragment {
             Log.d("LearningTrackDebug", "点击了学习轨迹按钮");
             Toast.makeText(getContext(), "正在跳转学习轨迹...", Toast.LENGTH_SHORT).show();
 
-            //SharedPreferences sp = getContext().getSharedPreferences("user_info", Context.MODE_PRIVATE);
-            //String userId = sp.getString("userId", ""); // 替换为实际存储用户ID的key
-            String userId = "OU_e91ac005c0";
+            SharedPreferences sp = getContext().getSharedPreferences("user_info", Context.MODE_PRIVATE);
+            String userId = sp.getString("userId", ""); // 替换为实际存储用户ID的key
+            //String userId = "OU_e91ac005c0";
 
             Intent intent = new Intent(getContext(), LearningTrackActivity.class);
             intent.putExtra("userId", userId);
