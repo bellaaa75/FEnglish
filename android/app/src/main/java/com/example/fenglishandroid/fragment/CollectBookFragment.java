@@ -1,5 +1,6 @@
 package com.example.fenglishandroid.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.*;
@@ -15,6 +16,7 @@ import com.example.fenglishandroid.R;
 import com.example.fenglishandroid.adapter.CollectBookAdapter;
 import com.example.fenglishandroid.databinding.FragmentCollectBookBinding; // ✅ 改用已有 Binding
 import com.example.fenglishandroid.model.CollectBookDTO;
+import com.example.fenglishandroid.ui.BookDetailPlazaActivity;
 import com.example.fenglishandroid.viewModel.CollectViewModel;
 
 import java.util.ArrayList;
@@ -90,6 +92,35 @@ public class CollectBookFragment extends Fragment implements CollectBookAdapter.
     @Override
     public void onUnCollect(CollectBookDTO b) {
         sharedCollectViewModel.unCollectBook(b.getTargetId());
+    }
+
+    /* 新增：单词书点击回调 */
+    @Override
+    public void onBookClick(CollectBookDTO b) {
+        // 跳转到单词书详情页面
+        navigateToBookDetail(b.getTargetId(), b.getBookName());
+    }
+
+    /**
+     * 跳转到单词书详情页面
+     * @param bookId 单词书ID
+     * @param bookName 单词书名称
+     */
+    private void navigateToBookDetail(String bookId, String bookName) {
+        try {
+            Intent intent = new Intent(getActivity(), BookDetailPlazaActivity.class);
+            intent.putExtra("bookId", bookId);
+            intent.putExtra("bookName", bookName);
+            startActivity(intent);
+
+//            // 添加过渡动画（可选）
+//            if (getActivity() != null) {
+////                getActivity().overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+//            }
+        } catch (Exception e) {
+            Log.e("CollectBookFragment", "跳转单词书详情失败", e);
+            Toast.makeText(getContext(), "无法打开单词书详情", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

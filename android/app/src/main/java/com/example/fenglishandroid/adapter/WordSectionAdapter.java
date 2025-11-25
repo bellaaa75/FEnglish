@@ -18,8 +18,11 @@ public class WordSectionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     private final List<Object> flatList = new ArrayList<>(); // 只存两种对象：String（日期）+ CollectWordDTO
     private final Callback cb;
 
+
+
     public interface Callback {
         void onUnCollect(CollectWordDTO w);
+        void onWordClick(CollectWordDTO w); // 新增单词点击回调
     }
 
     public WordSectionAdapter(Callback cb) { this.cb = cb; }
@@ -79,6 +82,14 @@ public class WordSectionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             h.tvWord.setText(w.getWordName());
             h.tvMean.setText(w.getWordExplain());
             h.btnCancel.setOnClickListener(v -> cb.onUnCollect(w));
+
+
+            // 添加单词名称点击监听
+            h.tvWord.setOnClickListener(v -> {
+                if (cb != null) {
+                    cb.onWordClick(w); // 需要新增这个回调方法
+                }
+            });
         }
     }
 
@@ -97,11 +108,15 @@ public class WordSectionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     static class WordHolder extends RecyclerView.ViewHolder {
         TextView tvWord, tvMean;
         Button btnCancel;
+        View wordItemView; // 添加单词项整体视图引用
+
         WordHolder(View itemView) {
             super(itemView);
             tvWord    = itemView.findViewById(R.id.item_word);
             tvMean    = itemView.findViewById(R.id.item_mean);
             btnCancel = itemView.findViewById(R.id.item_cancel);
+            wordItemView = itemView.findViewById(R.id.word_item_layout); // 假设有这个布局，如果没有需要创建
         }
     }
+
 }

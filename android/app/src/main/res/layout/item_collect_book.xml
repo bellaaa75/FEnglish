@@ -16,27 +16,34 @@
         android:layout_height="wrap_content"
         android:gravity="start" />
 
-    <!-- 书名+取消收藏按钮：单独一行，左对齐 -->
+    <!-- 书名+取消收藏按钮：书名左对齐，按钮右对齐 -->
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="start">
+        android:gravity="center_vertical">
 
+        <!-- 书名占据剩余空间，左对齐 -->
         <TextView
             android:id="@+id/item_book_name"
-            android:textSize="18sp"
-            android:textStyle="bold"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="start" />
+            android:text="Book Name"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/blue"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:gravity="start"/>
 
+        <!-- 取消收藏按钮右对齐 -->
         <Button
             android:id="@+id/item_cancel"
             android:text="取消收藏"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"/>
+            android:layout_marginStart="16dp"/>
     </LinearLayout>
 </LinearLayout>
