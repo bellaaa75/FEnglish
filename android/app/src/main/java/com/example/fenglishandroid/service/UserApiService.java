@@ -12,6 +12,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.HTTP;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
@@ -37,18 +38,15 @@ public interface UserApiService {
     Call<BaseResponse> getUserInfo();
 
     // 更新用户信息
-    @PUT("api/user/update")
+    @PUT("api/user/info")
     Call<BaseResponse> updateUser(@Body UpdateUserRequest request);
 
     // 修改密码
-    @PUT("api/user/change-password")
+    @PUT("api/user/password")
     Call<BaseResponse> changePassword(@Body ChangePasswordRequest request);
 
     // 注销账号
-    @DELETE("api/user/delete")
+    @HTTP(method = "DELETE", path = "api/user/account", hasBody = true)
     Call<BaseResponse> deleteAccount(@Body DeleteAccountRequest request);
 
-    // 退出登录
-    @POST("api/user/logout")
-    Call<BaseResponse> logout();
 }

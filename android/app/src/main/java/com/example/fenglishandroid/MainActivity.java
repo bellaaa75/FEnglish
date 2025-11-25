@@ -53,9 +53,11 @@ public class MainActivity extends AppCompatActivity {
         // 延迟跳转，显示启动画面
         new Handler().postDelayed(() -> {
             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            // 清除启动页所在的任务栈，避免返回启动页
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
-            finish(); // 关闭MainActivity
-        }, 1000); // 1秒延迟
+            finish(); // 确保MainActivity被销毁
+        }, 1000);
     }
 
     private void clearToken() {

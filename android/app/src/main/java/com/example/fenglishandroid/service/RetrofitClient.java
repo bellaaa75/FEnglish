@@ -27,6 +27,9 @@ public class RetrofitClient {
 
     public static Retrofit getInstance() {
         if (retrofit == null) {
+            if (mContext == null) {
+                throw new IllegalStateException("RetrofitClient must be initialized with init() first");
+            }
             // 添加日志拦截器
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
             logging.setLevel(HttpLoggingInterceptor.Level.BODY);

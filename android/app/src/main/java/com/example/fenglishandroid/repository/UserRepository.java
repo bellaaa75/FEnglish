@@ -2,6 +2,7 @@ package com.example.fenglishandroid.repository;
 
 import android.content.SharedPreferences;
 import android.content.Context;
+import android.util.Log;
 
 import com.example.fenglishandroid.model.BaseResponse;
 import com.example.fenglishandroid.model.request.AdminRegisterRequest;
@@ -71,18 +72,29 @@ public class UserRepository {
         apiService.loginOrdinary(request).enqueue(new Callback<BaseResponse>() {
             @Override
             public void onResponse(Call<BaseResponse> call, Response<BaseResponse> response) {
+                // 确保请求没有被取消
+                if (call.isCanceled()) {
+                    return;
+                }
                 if (response.isSuccessful() && response.body() != null) {
-                    saveToken(response.body().getToken());
-                    saveUserId(response.body().getUserId());
-                    listener.onSuccess(response.body());
+                    Log.d("UserRepository", "服务器响应 - success: " + response.body().isSuccess());
+                    if(response.body().isSuccess()){
+                        saveToken(response.body().getToken());
+                        saveUserId(response.body().getUserId());
+                        listener.onSuccess(response.body());
+                    }else{
+                        listener.onFailure(response.body().getMessage());
+                    }
                 } else {
-                    listener.onFailure("登录失败：" + response.message());
+                    listener.onFailure(response.message());
                 }
             }
 
             @Override
             public void onFailure(Call<BaseResponse> call, Throwable t) {
-                listener.onFailure("网络错误：" + t.getMessage());
+                if (!call.isCanceled()) {
+                    listener.onFailure("网络错误：" + t.getMessage());
+                }
             }
         });
     }
@@ -120,7 +132,7 @@ public class UserRepository {
                         clearToken();
                         listener.onFailure("登录已过期，请重新登录");
                     } else {
-                        listener.onFailure("获取用户信息失败：" + response.message());
+                        listener.onFailure(response.message());
                     }
                 }
             }
@@ -168,7 +180,7 @@ public class UserRepository {
                         clearToken();
                         listener.onFailure("登录已过期，请重新登录");
                     } else {
-                        listener.onFailure("修改密码失败：" + response.message());
+                        listener.onFailure(response.message());
                     }
                 }
             }
@@ -196,7 +208,7 @@ public class UserRepository {
                         clearToken();
                         listener.onFailure("登录已过期，请重新登录");
                     } else {
-                        listener.onFailure("注销账号失败：" + response.message());
+                        listener.onFailure(response.message());
                     }
                 }
             }
@@ -209,26 +221,8 @@ public class UserRepository {
     }
 
     // 退出登录
-    public void logout(final OnResultListener listener) {
-        apiService.logout().enqueue(new Callback<BaseResponse>() {
-            @Override
-            public void onResponse(Call<BaseResponse> call, Response<BaseResponse> response) {
-                // 无论服务器响应如何，都清除本地数据
-                clearUserData();
-                if (response.isSuccessful() && response.body() != null) {
-                    listener.onSuccess(response.body());
-                } else {
-                    listener.onSuccess(new BaseResponse()); // 即使失败也返回成功，因为本地数据已清除
-                }
-            }
-
-            @Override
-            public void onFailure(Call<BaseResponse> call, Throwable t) {
-                // 即使网络失败，也清除本地数据
-                clearUserData();
-                listener.onSuccess(new BaseResponse());
-            }
-        });
+    public void logout() {
+        clearUserData();
     }
 
     // 保存Token到SharedPreferences

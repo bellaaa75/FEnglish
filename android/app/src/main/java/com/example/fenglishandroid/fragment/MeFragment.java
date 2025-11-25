@@ -28,6 +28,7 @@ import com.example.fenglishandroid.model.request.User;
 import com.example.fenglishandroid.model.request.ChangePasswordRequest;
 import com.example.fenglishandroid.model.request.DeleteAccountRequest;
 import com.example.fenglishandroid.model.request.UpdateUserRequest;
+import com.example.fenglishandroid.ui.login.LoginActivity;
 import com.example.fenglishandroid.ui.record.LearningTrackActivity;
 import com.example.fenglishandroid.viewModel.UserProfileViewModel;
 
@@ -108,7 +109,7 @@ public class MeFragment extends Fragment {
                 Log.d("SharedPreferencesDebug", "Key: " + entry.getKey() + ", Value: " + entry.getValue());
             }
 
-            String userId = sp.getString("user_id", "");
+            String userId = sp.getString("userId", "");
             Log.d("LearningTrackDebug", "从SharedPreferences获取的userId: '" + userId + "'");
 
             if (userId.isEmpty()) {
@@ -131,19 +132,20 @@ public class MeFragment extends Fragment {
         binding.layoutLogout.setOnClickListener(v -> showLogoutDialog());
     }
 
-    // 删除 updateUserInfoDisplay 方法，因为数据绑定会自动处理
 
     private void showEditProfileDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("编辑个人信息");
 
         View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_edit_profile, null);
         setupEditDialogViews(dialogView);
 
         builder.setView(dialogView);
-        builder.setPositiveButton("保存", (dialog, which) -> saveUserInfo(dialogView));
-        builder.setNegativeButton("取消", null);
-        builder.show();
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        // 设置保存按钮点击事件
+        setupSaveButton(dialogView, dialog);
     }
 
     private void setupEditDialogViews(View dialogView) {
@@ -164,12 +166,21 @@ public class MeFragment extends Fragment {
         etGender.setOnClickListener(v -> showGenderSelectionDialog(etGender));
     }
 
+    private void setupSaveButton(View dialogView, AlertDialog dialog) {
+        Button btnSave = dialogView.findViewById(R.id.btn_save_profile);
+        btnSave.setOnClickListener(v -> {
+            saveUserInfo(dialogView);
+            dialog.dismiss(); // 保存后关闭对话框
+        });
+    }
+
     private void showGenderSelectionDialog(TextView genderView) {
-        String[] genders = {"男", "女", "其他"};
-        new AlertDialog.Builder(getContext())
-                .setTitle("选择性别")
-                .setItems(genders, (dialog, which) -> genderView.setText(genders[which]))
-                .show();
+        String[] genders = {"男", "女", "保密"};
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("选择性别")
+                .setItems(genders, (dialog, which) -> genderView.setText(genders[which]));
+        builder.setNegativeButton("取消", null);
+        builder.show();
     }
 
     private void saveUserInfo(View dialogView) {
@@ -189,7 +200,6 @@ public class MeFragment extends Fragment {
 
     private void showChangePasswordDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle(""); // 清空默认标题，使用布局中的标题
 
         View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_change_password, null);
 
@@ -238,20 +248,21 @@ public class MeFragment extends Fragment {
         dialog.setCanceledOnTouchOutside(true);
     }
 
-    // 删除不需要的方法
-    // private void setupPasswordDialogViews(View dialogView) {}
-    // private void changePassword(View dialogView) {}
-    // private void setupDeleteAccountDialogViews(View dialogView) {}
-    // private void deleteAccount(View dialogView) {}
-
     private void showDeleteAccountDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("注销账号");
 
+        // 1. 加载自定义布局
         View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_delete_account, null);
-
         builder.setView(dialogView);
-        builder.setPositiveButton("确认注销", (dialog, which) -> {
+
+        // 2. 创建对话框并立即显示
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        // 3. 从已显示的对话框中找到确认按钮，并设置点击事件
+        Button confirmButton = dialogView.findViewById(R.id.btn_confirm_delete);
+        confirmButton.setOnClickListener(v -> {
+            // 在按钮的点击事件中处理逻辑
             EditText etPassword = dialogView.findViewById(R.id.et_password);
             String password = etPassword.getText().toString().trim();
 
@@ -261,13 +272,18 @@ public class MeFragment extends Fragment {
             }
 
             DeleteAccountRequest request = new DeleteAccountRequest();
-            request.setUsePasswordVerification(true);
             request.setPassword(password);
 
+            // 调用 ViewModel 的方法执行注销
             userProfileViewModel.deleteAccount(request);
+
+            // 4. 直接使用已创建的 dialog 对象关闭对话框
+            dialog.dismiss();
         });
-        builder.setNegativeButton("取消", null);
-        builder.show();
+
+        // 可选：设置对话框的其他属性
+        dialog.setCancelable(true);
+        dialog.setCanceledOnTouchOutside(true);
     }
 
     private void showLogoutDialog() {
@@ -280,7 +296,14 @@ public class MeFragment extends Fragment {
     }
 
     private void navigateToLogin() {
-        Toast.makeText(getContext(), "跳转到登录页面", Toast.LENGTH_SHORT).show();
+        if (getActivity() == null) return;
+
+        Intent intent = new Intent(getActivity(), LoginActivity.class);
+        // 关键：清除当前任务栈中所有Activity，只保留登录页
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        // 关闭当前Fragment所在的Activity（通常是首页）
+        getActivity().finish();
     }
 
     @Override
