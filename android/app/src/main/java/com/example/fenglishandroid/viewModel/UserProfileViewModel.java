@@ -43,21 +43,11 @@ public class UserProfileViewModel extends AndroidViewModel {
             fetchUserInfo();
         } else {
             // 如果没有登录，加载模拟数据（仅用于演示）
-            loadMockUserData();
+
         }
     }
 
-    private void loadMockUserData() {
-        User mockUser = new User(
-                "123456",
-                "张三",
-                "女",
-                "12345678900",
-                "123456@qq.com",
-                "2024年11月"
-        );
-        userLiveData.setValue(mockUser);
-    }
+
 
     // 获取用户信息（从服务器）
     public void fetchUserInfo() {
@@ -228,6 +218,7 @@ public class UserProfileViewModel extends AndroidViewModel {
         // 这里需要根据实际的API响应结构来解析
         return new User(
                 (String) response.getUserInfo().get("userId"),
+                (String) response.getUserInfo().get("userName"),
                 (String) response.getUserInfo().get("userName"),
                 (String) response.getUserInfo().get("gender"),
                 (String) response.getUserInfo().get("phoneNumber"),

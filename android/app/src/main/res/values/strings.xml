@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">FenglishAndroid</string>
+    <string name="user_id_format">ID:%s</string>
 </resources>

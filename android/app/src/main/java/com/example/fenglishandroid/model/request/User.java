@@ -4,6 +4,8 @@ package com.example.fenglishandroid.model.request;
 public class User {
     private String userId;
     private String userName;
+
+    private String userType;
     private String gender;
     private String phoneNumber;
     private String userMailbox;
@@ -11,9 +13,10 @@ public class User {
 
     public User() {}
 
-    public User(String userId, String userName, String gender, String phoneNumber, String userMailbox, String registerTime) {
+    public User(String userId, String userName, String userType, String gender, String phoneNumber, String userMailbox, String registerTime) {
         this.userId = userId;
         this.userName = userName;
+        this.userType = userType;
         this.gender = gender;
         this.phoneNumber = phoneNumber;
         this.userMailbox = userMailbox;
@@ -25,6 +28,11 @@ public class User {
     public void setUserId(String userId) { this.userId = userId; }
     public String getUserName() { return userName; }
     public void setUserName(String userName) { this.userName = userName; }
+
+    public String getUserType() { return userType; }
+
+    public void setUserType(String userType) { this.userType = userType; }
+
     public String getGender() { return gender; }
     public void setGender(String gender) { this.gender = gender; }
     public String getPhoneNumber() { return phoneNumber; }

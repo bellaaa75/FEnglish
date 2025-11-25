@@ -106,4 +106,8 @@ public class RetrofitClient {
     public static CollectApiService getCollectApi() {
         return getInstance().create(CollectApiService.class);
     }
+
+    public static AdminService getAdminService() {
+        return getInstance().create(AdminService.class);
+    }
 }
