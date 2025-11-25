@@ -43,10 +43,10 @@ public class AdminIndexActivity extends AppCompatActivity {
     private void initFragment() {
         fragmentList = new ArrayList<>();
         // 顺序：用户账号管理（默认）→ 单词书管理 → 单词管理-管理员个人账号管理
-        fragmentList.add(new AdminAccountFragment());
+        fragmentList.add(new AdminSettingFragment());
         fragmentList.add(new AdminWordBookFragment());
         fragmentList.add(new AdminWordFragment());
-        fragmentList.add(new AdminSettingFragment());
+        fragmentList.add(new AdminAccountFragment());
     }
 
     private void bindViewPagerAndNav() {
