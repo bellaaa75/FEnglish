@@ -36,9 +36,12 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -130,6 +133,19 @@ public class VocabularyBookDetailActivity extends AppCompatActivity {
         btnNextPage.setOnClickListener(v -> goToNextPage());
     }
 
+    // 格式化发布时间（复用已有逻辑）
+    private String formatPublishTime(String time) {
+        if (time == null || time.isEmpty()) return "";
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+            SimpleDateFormat targetSdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+            return targetSdf.format(sdf.parse(time));
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return time; // 解析失败时返回原始字符串
+        }
+    }
+
     // 加载单词书详情
     private void loadBookDetail() {
         showLoading();
@@ -139,7 +155,7 @@ public class VocabularyBookDetailActivity extends AppCompatActivity {
                 hideLoading();
                 if (book != null) {
                     tvBookName.setText(book.getBookName());
-                    tvPublishTime.setText(book.getPublishTime());
+                    tvPublishTime.setText(formatPublishTime(book.getPublishTime()));
 
                     // 处理单词列表
                     allWords.clear();

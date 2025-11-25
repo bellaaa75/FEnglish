@@ -54,7 +54,7 @@ public class LearningPlazaFragment extends Fragment {
 
     // 分页参数
     private int currentPage = 1;
-    private int pageSize = 10;
+    private int pageSize = 4;
     private int totalPages = 1;
     private String keyword = "";
     /* 用来保存已收藏的 bookId，退出页面即释放，无需持久化 */
@@ -266,8 +266,7 @@ public class LearningPlazaFragment extends Fragment {
                 pageTvList.get(i).setText(String.valueOf(pageNum));
                 pageTvList.get(i).setVisibility(View.VISIBLE);
                 if (pageNum == currentPage) {
-                    pageTvList.get(i).setBackgroundResource(R.drawable.shape_page_selected);
-                    pageTvList.get(i).setTextColor(getResources().getColor(R.color.white));
+                    pageTvList.get(i).setTextColor(getResources().getColor(R.color.gray));
                 }
             } else {
                 pageTvList.get(i).setVisibility(View.GONE);
