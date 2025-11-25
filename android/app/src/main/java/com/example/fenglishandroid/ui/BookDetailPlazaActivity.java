@@ -2,6 +2,7 @@ package com.example.fenglishandroid.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -89,9 +90,13 @@ public class BookDetailPlazaActivity extends AppCompatActivity {
             return;
         }
 
-        // 初始化ViewModel和服务
+        // 关键修复：使用 Activity 范围的 ViewModel，确保与 Fragment 使用同一个实例
         wordViewModel = new ViewModelProvider(this).get(WordViewModel.class);
         sharedCollectViewModel = new ViewModelProvider(this).get(CollectViewModel.class);
+
+        Log.d("BookDetailPlaza", "📋 CollectViewModel实例: " + sharedCollectViewModel.toString());
+        Log.d("BookDetailPlaza", "📋 CollectViewModel hashCode: " + sharedCollectViewModel.hashCode());
+
         wordService = RetrofitClient.getWordService();
 
         // 设置共享的 CollectViewModel 到 WordViewModel
@@ -161,6 +166,10 @@ public class BookDetailPlazaActivity extends AppCompatActivity {
                     }
 
                     Toast.makeText(BookDetailPlazaActivity.this, "已收藏单词: " + word.getWordName(), Toast.LENGTH_SHORT).show();
+
+                    // 确保触发全局更新
+                    triggerGlobalRefresh();
+
                 } else {
                     // 取消收藏
                     sharedCollectViewModel.unCollectWord(word.getWordId());
@@ -173,7 +182,23 @@ public class BookDetailPlazaActivity extends AppCompatActivity {
                     }
 
                     Toast.makeText(BookDetailPlazaActivity.this, "已取消收藏: " + word.getWordName(), Toast.LENGTH_SHORT).show();
+
+                    // 确保触发全局更新
+                    triggerGlobalRefresh();
                 }
+            }
+
+            // 新增方法：触发全局刷新
+            private void triggerGlobalRefresh() {
+                Log.d("BookDetailPlaza", "触发全局刷新");
+                // 延迟确保后端操作完成
+                new android.os.Handler().postDelayed(() -> {
+                    sharedCollectViewModel.loadWordCollects(0, 20);
+                    // 额外触发一次，确保 Fragment 收到更新
+                    new android.os.Handler().postDelayed(() -> {
+                        sharedCollectViewModel.loadWordCollects(0, 20);
+                    }, 500);
+                }, 300);
             }
         });
         rvWordList.setLayoutManager(new LinearLayoutManager(this));

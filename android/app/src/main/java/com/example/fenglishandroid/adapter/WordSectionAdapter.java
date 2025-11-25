@@ -1,5 +1,6 @@
 package com.example.fenglishandroid.adapter;
 
+import android.util.Log;
 import android.view.*;
 import android.widget.*;
 import androidx.annotation.NonNull;
@@ -24,14 +25,30 @@ public class WordSectionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public WordSectionAdapter(Callback cb) { this.cb = cb; }
 
     /** 把 WordSection 列表拍平成 [date,word,word,date,word...] */
+//    public void setSections(List<WordSection> sections) {
+//        flatList.clear();
+//        for (WordSection sec : sections) {
+//            flatList.add(sec.date);      // 先放日期
+//            flatList.addAll(sec.words);  // 再放当天全部单词
+//        }
+//        notifyDataSetChanged();
+//    }
+
+    /** 清空并设置新数据 */
     public void setSections(List<WordSection> sections) {
         flatList.clear();
-        for (WordSection sec : sections) {
-            flatList.add(sec.date);      // 先放日期
-            flatList.addAll(sec.words);  // 再放当天全部单词
+        if (sections != null) {
+            for (WordSection sec : sections) {
+                flatList.add(sec.date);      // 先放日期
+                if (sec.words != null) {
+                    flatList.addAll(sec.words);  // 再放当天全部单词
+                }
+            }
         }
         notifyDataSetChanged();
+        Log.d("WordSectionAdapter", "数据已更新，总项数: " + flatList.size());
     }
+
 
     @Override
     public int getItemViewType(int position) {

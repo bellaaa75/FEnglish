@@ -115,6 +115,7 @@ public class CollectRepository {
 
                             // 分组处理
                             List<WordSection> sections = groupToSections(dtoList);
+                            Log.d("CollectRepository", "分组后的段数: " + sections.size());
                             sectionLive.postValue(sections);
                         } else {
                             Log.d("CollectRepository", "❌ 单词未进入成功分支");

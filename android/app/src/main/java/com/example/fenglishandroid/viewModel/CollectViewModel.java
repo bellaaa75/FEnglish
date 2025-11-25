@@ -79,6 +79,8 @@ public class CollectViewModel extends ViewModel {
                     Log.d("CollectViewModel", "收藏单词成功: " + wordId);
                     collectedWordIds.add(wordId);
                     collectResult.postValue(true);
+                    // 确保重新加载单词收藏列表
+                    Log.d("CollectViewModel", "🔄 收藏成功后重新加载列表");
                     loadWordCollects(0, 20); // 这里已经刷新了列表
                     if (collectionStatusListener != null) {
                         collectionStatusListener.onCollectionStatusChanged(wordId, true);
