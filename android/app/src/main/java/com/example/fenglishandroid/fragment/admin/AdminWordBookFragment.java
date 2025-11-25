@@ -50,7 +50,7 @@ public class AdminWordBookFragment extends Fragment {
 
     // 分页参数
     private int currentPage = 1;
-    private int pageSize = 5;
+    private int pageSize = 4;
     private int totalPages = 1;
     private String keyword = "";
 

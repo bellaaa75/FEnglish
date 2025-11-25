@@ -77,20 +77,19 @@
 
         <Button
             android:id="@+id/btn_edit"
-            android:layout_width="60dp"
+            android:layout_width="75dp"
             android:layout_height="40dp"
         android:text="编辑"
-        android:textSize="10sp"
+        android:textSize="14sp"
         android:paddingHorizontal="10dp"
-        android:backgroundTint="@color/purple_500"
         android:textColor="#FFFFFF"/>
 
         <Button
             android:id="@+id/btn_delete"
-            android:layout_width="60dp"
+            android:layout_width="75dp"
             android:layout_height="40dp"
         android:text="删除"
-        android:textSize="10sp"
+        android:textSize="14sp"
         android:paddingHorizontal="10dp"
         android:backgroundTint="@color/red"
         android:textColor="#FFFFFF"/>

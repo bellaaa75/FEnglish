@@ -245,7 +245,6 @@ public class BookDetailPlazaActivity extends AppCompatActivity {
     }
 
     // 观察ViewModel数据变化
-    // 观察ViewModel数据变化
     private void observeData() {
         wordViewModel.getWordPageResult().observe(this, new Observer<Result<PageResult<WordSimpleResp>>>() {
             @Override
@@ -294,7 +293,6 @@ public class BookDetailPlazaActivity extends AppCompatActivity {
         });
     }
 
-    // 新增方法：观察收藏状态变化
     // 观察收藏状态变化
     private void observeCollectionStatus() {
         // 监听单词收藏列表变化
@@ -366,7 +364,7 @@ public class BookDetailPlazaActivity extends AppCompatActivity {
 
                 // 高亮当前页
                 if (pageNum == currentPage) {
-                    pageTvList.get(i).setTextColor(getResources().getColor(R.color.gray_dark));
+                    pageTvList.get(i).setTextColor(getResources().getColor(R.color.gray));
                 }
             } else {
                 pageTvList.get(i).setVisibility(View.GONE);
