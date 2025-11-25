@@ -31,7 +31,7 @@
     <TextView
         android:id="@+id/tv_quiz_option1"
         android:layout_width="match_parent"
-        android:layout_height="146dp"
+        android:layout_height="111dp"
         android:layout_marginTop="60dp"
         android:background="@drawable/bg_option_normal"
         android:ellipsize="end"
@@ -47,10 +47,12 @@
 
 
     <!-- 选项2：与选项1完全一致 -->
+
+    <!-- 选项3：与选项1完全一致 -->
     <TextView
         android:id="@+id/tv_quiz_option2"
         android:layout_width="match_parent"
-        android:layout_height="138dp"
+        android:layout_height="110dp"
         android:layout_marginTop="20dp"
         android:background="@drawable/bg_option_normal"
         android:ellipsize="end"
@@ -64,11 +66,10 @@
         android:textColor="@color/black"
         android:textSize="18sp" />
 
-    <!-- 选项3：与选项1完全一致 -->
     <TextView
         android:id="@+id/tv_quiz_option3"
         android:layout_width="match_parent"
-        android:layout_height="144dp"
+        android:layout_height="101dp"
         android:layout_marginTop="20dp"
         android:background="@drawable/bg_option_normal"
         android:ellipsize="end"

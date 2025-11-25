@@ -29,9 +29,9 @@
             android:id="@+id/tv_detail_word"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/black"
             android:textSize="28sp"
-            android:textStyle="bold"
-        android:textColor="@color/black"/>
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tv_detail_part_of_speech"
