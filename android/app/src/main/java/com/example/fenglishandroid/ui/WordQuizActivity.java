@@ -166,9 +166,10 @@ public class WordQuizActivity extends AppCompatActivity {
 
         if (selectedExplain.equals(correctExplain)) {
             optionView.setBackgroundResource(R.drawable.bg_option_correct);
-            new Handler().postDelayed(this::jumpToDetail, 2000);
+            new Handler().postDelayed(this::jumpToDetail, 1000);
         } else {
             optionView.setBackgroundResource(R.drawable.bg_option_wrong);
+            new Handler().postDelayed(this::jumpToDetail, 1000);
             jumpToDetail();
         }
     }
