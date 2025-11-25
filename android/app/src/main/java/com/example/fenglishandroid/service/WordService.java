@@ -1,6 +1,9 @@
 package com.example.fenglishandroid.service;
 
+import com.example.fenglishandroid.model.BaseResponse;
+import com.example.fenglishandroid.model.LearningStateResp;
 import com.example.fenglishandroid.model.WordSimpleResp;
+import com.example.fenglishandroid.model.request.StudyRecordRequest;
 
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -52,4 +55,47 @@ public interface WordService {
 
     @GET("api/words/{wordId}")
     Call<WordSimpleResp> getWordDetail(@Path("wordId") String wordId);
+
+
+    // ====================== 新增：学习状态相关接口（仅新增，不影响原有）======================
+    /**
+     * 查询用户对某个单词的学习状态
+     * @param userId 用户ID
+     * @param wordId 单词ID
+     * @return BaseResponse<LearningStateResp> 学习状态信息（使用你已有的BaseResponse）
+     */
+    @GET("api/learning-states")
+    Call<BaseResponse<LearningStateResp>> getLearningState(
+            @Query("userId") String userId,
+            @Query("wordId") String wordId
+    );
+
+    /**
+     * 创建学习状态（未查询到时调用，默认标记为"已学"）
+     * @param userId 用户ID
+     * @param wordId 单词ID
+     * @return BaseResponse<Boolean> 是否创建成功（使用你已有的BaseResponse）
+     */
+    @POST("api/learning-states")
+    Call<BaseResponse<Boolean>> createLearningState(
+            @Query("userId") String userId,
+            @Query("wordId") String wordId
+    );
+
+    /**
+     * 修改学习状态（查询到"未学"时调用，改为"已学"）
+     * @param userId 用户ID
+     * @param wordId 单词ID
+     * @param state 目标状态（固定传"已学"）
+     * @return BaseResponse<Boolean> 是否修改成功（使用你已有的BaseResponse）
+     */
+    @PUT("api/learning-states")
+    Call<BaseResponse<Boolean>> updateLearningState(
+            @Query("userId") String userId,
+            @Query("wordId") String wordId,
+            @Query("state") String state
+    );
+
+    @POST("api/study-records")
+    Call<BaseResponse<Boolean>> addStudyRecord(@Body StudyRecordRequest request);
 }

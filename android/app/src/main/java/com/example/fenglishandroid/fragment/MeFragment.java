@@ -108,7 +108,7 @@ public class MeFragment extends Fragment {
                 Log.d("SharedPreferencesDebug", "Key: " + entry.getKey() + ", Value: " + entry.getValue());
             }
 
-            String userId = sp.getString("user_id", "");
+            String userId = sp.getString("userId", "");
             Log.d("LearningTrackDebug", "从SharedPreferences获取的userId: '" + userId + "'");
 
             if (userId.isEmpty()) {
