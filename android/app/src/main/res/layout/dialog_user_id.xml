@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <!-- 成功图标 -->
+    <ImageView
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="20dp"
+        android:src="@android:drawable/ic_dialog_info"
+        android:tint="#4CAF50" />
+
+    <!-- 成功标题 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="管理员注册成功"
+        android:textSize="20sp"
+        android:textColor="#333333"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="16dp" />
+
+    <!-- 用户ID提示 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="您的用户ID："
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:layout_marginBottom="8dp" />
+
+    <!-- 用户ID显示区域 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#F8F9FA"
+        android:padding="16dp"
+        android:layout_marginBottom="20dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tv_user_id"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="AD_e04607eb90"
+            android:textSize="16sp"
+            android:textColor="#2196F3"
+            android:textStyle="bold"
+            android:fontFamily="monospace"
+            android:selectAllOnFocus="true"
+            android:textIsSelectable="true" />
+
+
+    </LinearLayout>
+
+    <!-- 警告信息 -->
+    <TextView
+        android:id="@+id/tv_warning"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="请妥善保存此用户ID，这是您登录的唯一凭证！"
+        android:textSize="13sp"
+        android:textColor="#FF9800"
+        android:lineSpacingExtra="2dp"
+        android:padding="12dp"
+        android:background="#FFF3E0"
+        android:drawablePadding="8dp"
+        android:drawableStart="@android:drawable/ic_dialog_alert" />
+
+</LinearLayout>

@@ -1,12 +1,17 @@
 package com.example.fenglishandroid.ui.register;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -43,10 +48,12 @@ public class AdminRegisterActivity extends AppCompatActivity {
 
         userViewModel.getRegisterLiveData().observe(this, response -> {
             if (response.isSuccess()) {
-                Toast.makeText(this, "管理员注册成功！", Toast.LENGTH_SHORT).show();
+                // 显示用户ID弹窗
+                showUserIdDialog(response.getUserId());
+                /*Toast.makeText(this, "管理员注册成功！", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(this, AdminLoginActivity.class);
                 startActivity(intent);
-                finish();
+                finish();*/
             } else {
                 Toast.makeText(this, response.getMessage(), Toast.LENGTH_SHORT).show();
             }
@@ -87,4 +94,39 @@ public class AdminRegisterActivity extends AppCompatActivity {
 
         userViewModel.registerAdmin(request);
     }
+
+    private void showUserIdDialog(String userId) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("管理员注册成功");
+
+        // 自定义布局
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_user_id, null);
+        TextView tvUserId = dialogView.findViewById(R.id.tv_user_id);
+        TextView tvWarning = dialogView.findViewById(R.id.tv_warning);
+
+        // 设置用户ID和警告信息
+        tvUserId.setText(userId);
+        tvWarning.setText("请妥善保存此用户ID，这是您登录的唯一凭证！");
+
+        builder.setView(dialogView);
+        builder.setPositiveButton("我已保存", (dialog, which) -> {
+            // 跳转到管理员登录页面
+            Intent intent = new Intent(this, AdminLoginActivity.class);
+            startActivity(intent);
+            finish();
+        });
+
+        // 设置弹窗不可取消（避免用户误触）
+        builder.setCancelable(false);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        // 可选：自定义按钮样式
+        Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        if (positiveButton != null) {
+            positiveButton.setTextColor(getResources().getColor(R.color.primary_color, getTheme()));
+        }
+    }
+
 }

@@ -105,11 +105,15 @@ public class UserRepository {
             @Override
             public void onResponse(Call<BaseResponse> call, Response<BaseResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    saveToken(response.body().getToken());
-                    saveUserId(response.body().getUserId());
-                    listener.onSuccess(response.body());
+                    if(response.body().isSuccess()) {
+                        saveToken(response.body().getToken());
+                        saveUserId(response.body().getUserId());
+                        listener.onSuccess(response.body());
+                    }else{
+                        listener.onFailure(response.body().getMessage());
+                    }
                 } else {
-                    listener.onFailure("登录失败：" + response.message());
+                    listener.onFailure(response.message());
                 }
             }
 
