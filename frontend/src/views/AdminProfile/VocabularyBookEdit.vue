@@ -98,9 +98,10 @@ const handleSubmit = async () => {
     await bookFormRef.value.validate()
     
     // 调用更新接口（传递bookId和表单数据）
+    const submitTime = bookForm.publishTime ? bookForm.publishTime.replace(' ', 'T') : null;
     await vocabularyBookService.updateBook(route.params.bookId, {
       bookName: bookForm.bookName,
-      publishTime: bookForm.publishTime || null
+      publishTime: submitTime
     })
     
     ElMessage.success('修改成功')
