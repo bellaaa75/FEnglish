@@ -1,5 +1,6 @@
 package com.example.fenglishandroid.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.*;
@@ -16,6 +17,7 @@ import com.example.fenglishandroid.adapter.WordSectionAdapter;   // ① 换新 A
 import com.example.fenglishandroid.databinding.FragmentCollectWordBinding;
 import com.example.fenglishandroid.model.CollectWordDTO;
 import com.example.fenglishandroid.model.WordSection;           // ② 新数据模型
+import com.example.fenglishandroid.ui.WordDetailActivity;
 import com.example.fenglishandroid.viewModel.CollectViewModel;
 
 import java.util.ArrayList;
@@ -127,6 +129,35 @@ public class CollectWordFragment extends Fragment implements WordSectionAdapter.
     @Override
     public void onUnCollect(CollectWordDTO w) {
         vm.unCollectWord(w.getTargetId());   // 交给 ViewModel 处理网络 & 重新拉列表
+    }
+
+    /* 新增：单词点击回调 */
+    @Override
+    public void onWordClick(CollectWordDTO w) {
+        // 跳转到单词详情页面
+        navigateToWordDetail(w.getTargetId(), w.getWordName());
+    }
+
+    /**
+     * 跳转到单词详情页面
+     * @param wordId 单词ID
+     * @param wordName 单词名称（用于显示）
+     */
+    private void navigateToWordDetail(String wordId, String wordName) {
+        try {
+            Intent intent = new Intent(getActivity(), WordDetailActivity.class);
+            intent.putExtra("wordId", wordId);
+            intent.putExtra("wordName", wordName); // 可选，用于显示加载状态
+            startActivity(intent);
+
+//            // 添加过渡动画（可选）
+//            if (getActivity() != null) {
+//                getActivity().overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+//            }
+        } catch (Exception e) {
+            Log.e("CollectWordFragment", "跳转单词详情失败", e);
+            Toast.makeText(getContext(), "无法打开单词详情", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

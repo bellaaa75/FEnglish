@@ -42,7 +42,7 @@ public class WordQuizActivity extends AppCompatActivity {
 
     // 控件（LinearLayout布局适配）
     private ImageView iv_quiz_back;
-    private TextView tv_quiz_word, tv_quiz_option1, tv_quiz_option2, tv_quiz_option3,tv_quiz_mastery;
+    private TextView tv_quiz_word, tv_quiz_option1, tv_quiz_option2, tv_quiz_option3, tv_quiz_mastery;
     private Button btn_quiz_view_explain;
 
     // 数据
@@ -55,9 +55,15 @@ public class WordQuizActivity extends AppCompatActivity {
     private Random random = new Random();
     private boolean isOptionClicked = false;
     private final Gson gson = new Gson();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            Log.e(TAG, "全局未捕获异常（导致闪退）", throwable);
+            Toast.makeText(WordQuizActivity.this, "程序异常，请重试", Toast.LENGTH_SHORT).show();
+            finish();
+        });
         setContentView(R.layout.activity_word_quiz); // 对应修改后的LinearLayout布局
         if (getSupportActionBar() != null) getSupportActionBar().hide();
 
@@ -80,8 +86,9 @@ public class WordQuizActivity extends AppCompatActivity {
             return;
         }
 
-        loadCurrentWordDetail();
-        loadDistractorOptions();
+        //loadCurrentWordDetail();
+        //loadDistractorOptions();
+        loadCurrentWordDetailWithDistractor();
         bindEvents();
 
         queryAndHandleLearningState();
@@ -99,10 +106,18 @@ public class WordQuizActivity extends AppCompatActivity {
 
     private void bindEvents() {
         iv_quiz_back.setOnClickListener(v -> finish());
-        tv_quiz_option1.setOnClickListener(v -> { if (!isOptionClicked) checkOption(tv_quiz_option1); });
-        tv_quiz_option2.setOnClickListener(v -> { if (!isOptionClicked) checkOption(tv_quiz_option2); });
-        tv_quiz_option3.setOnClickListener(v -> { if (!isOptionClicked) checkOption(tv_quiz_option3); });
-        btn_quiz_view_explain.setOnClickListener(v -> { if (!isOptionClicked) jumpToDetail(); });
+        tv_quiz_option1.setOnClickListener(v -> {
+            if (!isOptionClicked) checkOption(tv_quiz_option1);
+        });
+        tv_quiz_option2.setOnClickListener(v -> {
+            if (!isOptionClicked) checkOption(tv_quiz_option2);
+        });
+        tv_quiz_option3.setOnClickListener(v -> {
+            if (!isOptionClicked) checkOption(tv_quiz_option3);
+        });
+        btn_quiz_view_explain.setOnClickListener(v -> {
+            if (!isOptionClicked) jumpToDetail();
+        });
         tv_quiz_mastery.setOnClickListener(v -> {
             Log.d(TAG, "勾选框被点击，isOptionClicked=" + isOptionClicked);
             if (!isOptionClicked) { // 未选择选项时可操作
@@ -180,7 +195,8 @@ public class WordQuizActivity extends AppCompatActivity {
                                 if (usedWordIds.contains(word.getWordId())) continue;
                                 // 过滤条件3：排除解释相同/相似的单词（按wordExplain，避免内容重复）
                                 String wordExplain = word.getWordExplain() != null ? word.getWordExplain().trim() : "";
-                                if (wordExplain.isEmpty() || usedExplains.contains(wordExplain)) continue;
+                                if (wordExplain.isEmpty() || usedExplains.contains(wordExplain))
+                                    continue;
 
                                 // 符合条件：添加到干扰项列表，并标记为已使用
                                 distractors.add(word);
@@ -252,6 +268,7 @@ public class WordQuizActivity extends AppCompatActivity {
 
 
     // ====================== 新增：用户ID相关方法（独立实现，不修改原有代码）======================
+
     /**
      * 从SharedPreferences获取当前登录用户ID（假设登录时已存储，不修改原有登录逻辑）
      * 若你的项目用其他方式存储用户ID（如ViewModel/全局变量），仅修改此方法即可
@@ -488,6 +505,41 @@ public class WordQuizActivity extends AppCompatActivity {
                 isMastered = !isMastered;
                 tv_quiz_mastery.setText(isMastered ? "√ 熟练掌握" : "□ 熟练掌握");
                 Toast.makeText(WordQuizActivity.this, "网络错误，更新失败", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void loadCurrentWordDetailWithDistractor() {
+        Call<WordSimpleResp> call = wordService.getWordDetail(currentWordId);
+        call.enqueue(new Callback<WordSimpleResp>() {
+            @Override
+            public void onResponse(Call<WordSimpleResp> call, Response<WordSimpleResp> response) {
+                try {
+                    if (response.code() == 404) {
+                        Toast.makeText(WordQuizActivity.this, "该单词不存在", Toast.LENGTH_SHORT).show();
+                        finish();
+                        return;
+                    }
+                    if (response.isSuccessful() && response.body() != null) {
+                        currentWord = response.body();
+                        tv_quiz_word.setText(currentWord.getWordName());
+                        String correctExplain = currentWord.getWordExplain() != null ? currentWord.getWordExplain() : "无释义";
+                        options.add(correctExplain);
+                        Log.d(TAG, "单词详情加载成功，开始加载干扰项");
+                        loadDistractorOptions(); // 单词详情成功后，再加载干扰项
+                    } else {
+                        Toast.makeText(WordQuizActivity.this, "加载单词失败", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "加载单词详情异常", e);
+                    Toast.makeText(WordQuizActivity.this, "加载失败，请重试", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<WordSimpleResp> call, Throwable t) {
+                Log.e(TAG, "单词详情网络错误", t);
+                Toast.makeText(WordQuizActivity.this, "网络错误：" + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -24,6 +24,7 @@ public class CollectBookAdapter extends RecyclerView.Adapter<CollectBookAdapter.
 
     public interface Callback {
         void onUnCollect(CollectBookDTO b);
+        void onBookClick(CollectBookDTO b); // 新增单词书点击回调
     }
 
     public CollectBookAdapter(Callback cb) { this.cb = cb; }
@@ -57,6 +58,13 @@ public class CollectBookAdapter extends RecyclerView.Adapter<CollectBookAdapter.
         }
 
         h.btnCancel.setOnClickListener(v -> cb.onUnCollect(b));
+
+        // 单词书名称点击 - 跳转到详情
+        h.tvName.setOnClickListener(v -> {
+            if (cb != null) {
+                cb.onBookClick(b);
+            }
+        });
     }
 
     @Override
@@ -69,7 +77,6 @@ public class CollectBookAdapter extends RecyclerView.Adapter<CollectBookAdapter.
         Holder(@NonNull View itemView) {
             super(itemView);
             tvName = itemView.findViewById(R.id.item_book_name);
-
             tvTimeHeader = itemView.findViewById(R.id.item_book_time_header);
             btnCancel = itemView.findViewById(R.id.item_cancel);
         }

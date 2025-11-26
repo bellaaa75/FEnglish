@@ -205,7 +205,7 @@
             <EditText
                 android:id="@+id/et_word_explain"
                 android:layout_width="match_parent"
-                android:layout_height="133dp"
+                android:layout_height="130dp"
                 android:gravity="top"
                 android:hint="请输入"
                 android:inputType="textMultiLine"
@@ -222,7 +222,7 @@
             <EditText
                 android:id="@+id/et_example_sentence"
                 android:layout_width="match_parent"
-                android:layout_height="151dp"
+                android:layout_height="139dp"
                 android:gravity="top"
                 android:hint="请输入"
                 android:inputType="textMultiLine"
