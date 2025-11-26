@@ -1,191 +1,191 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@color/white">
+    android:fillViewport="true">
 
-    <!-- 返回按钮 -->
-    <ImageView
-        android:id="@+id/iv_back"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_arrow_left"
-        android:contentDescription="返回"
-        android:clickable="true"
-        android:focusable="true"
-        android:layout_marginBottom="20dp"/>
-
-    <!-- 用户信息区域 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginBottom="20dp">
+        android:padding="16dp"
+        android:background="@color/white">
 
-        <TextView
-            android:id="@+id/tv_user_id"
+        <ImageView
+            android:id="@+id/iv_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="用户ID："
-            android:textSize="16sp"
-            android:textColor="@color/black"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp"/>
+            android:src="@drawable/ic_arrow_left"
+            android:contentDescription="返回"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginBottom="20dp"/>
 
-        <TextView
-            android:id="@+id/tv_monthly_word"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="本月学习单词数：0"
-            android:textSize="16sp"
-            android:textColor="@color/black"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp"/>
-
-        <TextView
-            android:id="@+id/tv_monthly_days"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="本月打卡天数：0"
-            android:textSize="16sp"
-            android:textColor="@color/black"
-            android:textStyle="bold"/>
-    </LinearLayout>
-
-    <!-- 本月每日学习单词数（日历表格） -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginBottom="20dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="本月每日学习单词数"
-            android:textSize="16sp"
-            android:textColor="@color/black"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp"/>
-
-        <!-- 星期几标题行 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="7">
+            android:orientation="vertical"
+            android:layout_marginBottom="20dp">
 
             <TextView
-                android:layout_width="0dp"
+                android:id="@+id/tv_user_id"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="日"
-                android:gravity="center"
-                android:textSize="12sp"
+                android:text="用户ID："
+                android:textSize="16sp"
                 android:textColor="@color/black"
                 android:textStyle="bold"
-                android:padding="4dp"/>
+                android:layout_marginBottom="8dp"/>
 
             <TextView
-                android:layout_width="0dp"
+                android:id="@+id/tv_monthly_word"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="一"
-                android:gravity="center"
-                android:textSize="12sp"
+                android:text="本月学习单词数：0"
+                android:textSize="16sp"
                 android:textColor="@color/black"
                 android:textStyle="bold"
-                android:padding="4dp"/>
+                android:layout_marginBottom="8dp"/>
 
             <TextView
-                android:layout_width="0dp"
+                android:id="@+id/tv_monthly_days"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="二"
-                android:gravity="center"
-                android:textSize="12sp"
+                android:text="本月打卡天数：0"
+                android:textSize="16sp"
                 android:textColor="@color/black"
-                android:textStyle="bold"
-                android:padding="4dp"/>
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="三"
-                android:gravity="center"
-                android:textSize="12sp"
-                android:textColor="@color/black"
-                android:textStyle="bold"
-                android:padding="4dp"/>
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="四"
-                android:gravity="center"
-                android:textSize="12sp"
-                android:textColor="@color/black"
-                android:textStyle="bold"
-                android:padding="4dp"/>
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="五"
-                android:gravity="center"
-                android:textSize="12sp"
-                android:textColor="@color/black"
-                android:textStyle="bold"
-                android:padding="4dp"/>
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="六"
-                android:gravity="center"
-                android:textSize="12sp"
-                android:textColor="@color/black"
-                android:textStyle="bold"
-                android:padding="4dp"/>
+                android:textStyle="bold"/>
         </LinearLayout>
 
-        <GridView
-            android:id="@+id/gv_calendar"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:numColumns="7"
-            android:verticalSpacing="0dp"
-            android:horizontalSpacing="0dp"
-            android:stretchMode="columnWidth"
-            android:listSelector="@android:color/transparent"/>
-    </LinearLayout>
+            android:orientation="vertical"
+            android:layout_marginBottom="20dp">
 
-    <!-- 近7天学习单词数（折线图） -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="本月每日学习单词数"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="累计学习词数（仅展示近7天）"
-            android:textSize="16sp"
-            android:textColor="@color/black"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="7">
 
-        <com.github.mikephil.charting.charts.LineChart
-            android:id="@+id/line_chart"
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="日"
+                    android:gravity="center"
+                    android:textSize="12sp"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:padding="4dp"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="一"
+                    android:gravity="center"
+                    android:textSize="12sp"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:padding="4dp"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="二"
+                    android:gravity="center"
+                    android:textSize="12sp"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:padding="4dp"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="三"
+                    android:gravity="center"
+                    android:textSize="12sp"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:padding="4dp"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="四"
+                    android:gravity="center"
+                    android:textSize="12sp"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:padding="4dp"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="五"
+                    android:gravity="center"
+                    android:textSize="12sp"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:padding="4dp"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="六"
+                    android:gravity="center"
+                    android:textSize="12sp"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:padding="4dp"/>
+            </LinearLayout>
+
+            <GridView
+                android:id="@+id/gv_calendar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:horizontalSpacing="0dp"
+                android:listSelector="@android:color/transparent"
+                android:numColumns="7"
+                android:stretchMode="columnWidth"
+                android:verticalSpacing="0dp" />
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="200dp"/>
-    </LinearLayout>
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-</LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="累计学习词数（仅展示近7天）"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"/>
+
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/line_chart"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"/>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

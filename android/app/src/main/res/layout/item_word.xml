@@ -1,84 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- 外层用 ConstraintLayout，精准控制组件约束，适配大屏 -->
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="12dp"
-    android:gravity="center_vertical"
+    android:padding="16dp"
     android:background="@drawable/shape_item_border"
-    android:layout_marginBottom="8dp">
+    android:layout_marginBottom="12dp"
+    android:minHeight="100dp">
 
-    <!-- 单词信息（占满剩余宽度，避免重叠） -->
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:paddingRight="16dp"> <!-- 与操作按钮留间距 -->
 
-        <!-- 单词名称 -->
-        <TextView
-            android:id="@+id/tv_word_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="apple"
-            android:textSize="18sp"
-            android:textColor="@color/black"
-            android:textStyle="bold"/>
+<androidx.constraintlayout.widget.ConstraintLayout
+android:id="@+id/cl_word_info"
+android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toStartOf="@id/tv_edit"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintBottom_toBottomOf="parent">
 
-        <!-- 词性+释义 横向布局（不固定宽度，自适应内容） -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
 
-            <!-- 词性（灰色背景，原灰色区域） -->
-            <TextView
-                android:id="@+id/tv_part_of_speech"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="2dp"
-            android:text="n."
-            android:textColor="@color/black"
-            android:textSize="12sp"
-            android:background="@color/gray_light"/> <!-- 灰色背景，保持原样式 -->
+<TextView
+android:id="@+id/tv_word_name"
+android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="supercalifragilisticexpialidocious"
+    android:textSize="20sp"
+    android:textColor="@color/black"
+    android:textStyle="bold"
+    android:maxLines="2"
+    android:ellipsize="end"
+    android:lineSpacingExtra="4dp"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"/>
 
-            <!-- 释义（与词性留间距） -->
-            <TextView
-                android:id="@+id/tv_word_explain"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="苹果"
-                android:textColor="@color/gray_dark"
-                android:textSize="14sp"/>
 
-        </LinearLayout>
-    </LinearLayout>
+<TextView
+android:id="@+id/tv_part_of_speech"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:paddingHorizontal="10dp"
+android:paddingVertical="3dp"
+android:text="adj."
+android:textColor="@color/black"
+android:textSize="13sp"
+    android:background="@color/gray_light"
+    android:layout_marginTop="8dp"
+    app:layout_constraintTop_toBottomOf="@id/tv_word_name"
+    app:layout_constraintStart_toStartOf="parent"/>
 
-    <!-- 操作按钮 -->
+
+    <TextView
+        android:id="@+id/tv_word_explain"
+        android:layout_width="189dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="10dp"
+        android:ellipsize="end"
+        android:lineSpacingExtra="3dp"
+        android:maxLines="2"
+        android:text="形容极其美妙的、令人难以置信的（测试超长释义：用于电影《欢乐满人间》中的虚构词汇，后来被收录进词典，成为英语中最长的单词之一）"
+        android:textColor="@color/gray_dark"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="@id/tv_part_of_speech"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tv_part_of_speech"
+        app:layout_constraintTop_toTopOf="@id/tv_part_of_speech" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
     <TextView
         android:id="@+id/tv_edit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="编辑"
-        android:textColor="@color/purple_500"
-        android:textSize="14sp"
+        android:layout_marginEnd="4dp"
         android:clickable="true"
         android:focusable="true"
-        android:layout_marginEnd="16dp"/>
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="6dp"
+        android:text="编辑"
+        android:textColor="@color/purple_500"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/tv_delete"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tv_delete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="6dp"
         android:text="删除"
         android:textColor="@color/red"
-        android:textSize="14sp"
-        android:clickable="true"
-        android:focusable="true"/>
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
