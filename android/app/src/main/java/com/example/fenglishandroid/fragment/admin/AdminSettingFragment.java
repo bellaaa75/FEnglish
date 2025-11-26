@@ -263,7 +263,7 @@ public class AdminSettingFragment extends Fragment {
     private void updateFooter(Long totalCount) {
         if (totalCount != null && totalCount > 0) {
             tvFooter.setText("共找到 " + totalCount + " 个用户");
-            tvFooter.setVisibility(View.VISIBLE);
+            //tvFooter.setVisibility(View.VISIBLE);
         } else {
             tvFooter.setVisibility(View.GONE);
         }
